@@ -1,8 +1,16 @@
 "use client";
 
-import { useActionState } from "react";
+import dynamic from "next/dynamic";
+import { useActionState, useState } from "react";
 import { calcNatalChart, ChartState, NatalChartResult } from "@/app/actions/charts";
+import { City } from "@/app/actions/atlas";
 import { ChartWheel } from "@/app/_components/chart-wheel/ChartWheel";
+import { CityAutocomplete } from "@/app/_components/CityAutocomplete";
+
+const CoordMap = dynamic(() => import("@/app/_components/CoordMap").then(m => m.CoordMap), {
+  ssr: false,
+  loading: () => <div className="w-full h-64 rounded-xl bg-stone-100 animate-pulse" />,
+});
 
 const HOUSE_SYSTEMS = [
   { value: "placidus", label: "Placidus" },
@@ -15,11 +23,35 @@ const initialState: ChartState = { status: "idle" };
 
 export function ChartForm() {
   const [state, action, pending] = useActionState(calcNatalChart, initialState);
+  const [lat, setLat] = useState(50.45);
+  const [lon, setLon] = useState(30.52);
+  const [timezone, setTimezone] = useState("Europe/Kyiv");
+
+  const handleCitySelect = (city: City) => {
+    setLat(parseFloat(city.lat.toFixed(4)));
+    setLon(parseFloat(city.lon.toFixed(4)));
+    setTimezone(city.timezone);
+  };
+
+  const handleMapChange = (newLat: number, newLon: number) => {
+    setLat(newLat);
+    setLon(newLon);
+  };
 
   return (
     <div className="space-y-8">
-      <form action={action} className="bg-white rounded-xl border border-stone-200 p-6 space-y-4">
+      <form action={action} className="bg-white rounded-xl border border-stone-200 p-6 space-y-5">
         <h2 className="text-sm font-semibold text-stone-700 uppercase tracking-wider">Natal Chart</h2>
+
+        {/* City search */}
+        <div>
+          <label className="block text-xs font-medium text-stone-500 mb-1">City</label>
+          <CityAutocomplete onSelect={handleCitySelect} placeholder="Search city (e.g. Kyiv, London, New York)…" />
+          <p className="text-xs text-stone-400 mt-1">Select a city to auto-fill coordinates and timezone</p>
+        </div>
+
+        {/* Map */}
+        <CoordMap lat={lat} lon={lon} onChange={handleMapChange} />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="sm:col-span-2">
@@ -43,9 +75,9 @@ export function ChartForm() {
               step="0.0001"
               min="-90"
               max="90"
-              defaultValue="50.45"
+              value={lat}
+              onChange={e => setLat(parseFloat(e.target.value) || 0)}
               required
-              placeholder="e.g. 50.45"
               className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400"
             />
           </div>
@@ -58,9 +90,9 @@ export function ChartForm() {
               step="0.0001"
               min="-180"
               max="180"
-              defaultValue="30.52"
+              value={lon}
+              onChange={e => setLon(parseFloat(e.target.value) || 0)}
               required
-              placeholder="e.g. 30.52"
               className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400"
             />
           </div>
@@ -76,6 +108,18 @@ export function ChartForm() {
                 <option key={hs.value} value={hs.value}>{hs.label}</option>
               ))}
             </select>
+          </div>
+
+          <div className="sm:col-span-2">
+            <label className="block text-xs font-medium text-stone-500 mb-1">Timezone</label>
+            <input
+              type="text"
+              name="timezone"
+              value={timezone}
+              onChange={e => setTimezone(e.target.value)}
+              placeholder="e.g. Europe/Kyiv"
+              className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400"
+            />
           </div>
         </div>
 
