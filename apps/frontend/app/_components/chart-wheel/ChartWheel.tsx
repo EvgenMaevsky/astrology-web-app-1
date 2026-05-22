@@ -77,7 +77,7 @@ function ZodiacRing({ asc }: { asc: number }) {
           textAnchor="middle"
           dominantBaseline="central"
           fontFamily="serif"
-          fontSize={16}
+          fontSize={17}
           fill={ELEMENT_COLORS[elemIdx]}
         >
           {SIGN_GLYPHS[i]}
@@ -266,7 +266,7 @@ export function ChartWheel({ data }: { data: ChartData }) {
   return (
     <div className="relative w-full max-w-2xl mx-auto select-none">
       <svg
-        viewBox="0 0 600 600"
+        viewBox="-32 -32 664 664"
         className="w-full h-full"
         style={{ fontFamily: "serif" }}
       >

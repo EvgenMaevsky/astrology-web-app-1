@@ -14,20 +14,20 @@ export const PLANET_GLYPHS: Record<string, string> = {
   mc:      "MC",
 };
 
-// Zodiac signs U+2648–U+2653
+// Zodiac signs U+2648–U+2653 + U+FE0E (text variation selector, prevents emoji rendering)
 export const SIGN_GLYPHS: string[] = [
-  "♈", // Aries
-  "♉", // Taurus
-  "♊", // Gemini
-  "♋", // Cancer
-  "♌", // Leo
-  "♍", // Virgo
-  "♎", // Libra
-  "♏", // Scorpio
-  "♐", // Sagittarius
-  "♑", // Capricorn
-  "♒", // Aquarius
-  "♓", // Pisces
+  "♈︎", // Aries
+  "♉︎", // Taurus
+  "♊︎", // Gemini
+  "♋︎", // Cancer
+  "♌︎", // Leo
+  "♍︎", // Virgo
+  "♎︎", // Libra
+  "♏︎", // Scorpio
+  "♐︎", // Sagittarius
+  "♑︎", // Capricorn
+  "♒︎", // Aquarius
+  "♓︎", // Pisces
 ];
 
 export const ASPECT_GLYPHS: Record<string, string> = {
