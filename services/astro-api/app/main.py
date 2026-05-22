@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.database import Base, engine
 from app.routers.auth import router as auth_router
+from app.routers.charts import router as charts_router
 from app.routers.settings import router as settings_router
 
 
@@ -33,6 +34,7 @@ app.add_middleware(
 
 app.include_router(auth_router)
 app.include_router(settings_router)
+app.include_router(charts_router)
 
 
 @app.get("/health")
