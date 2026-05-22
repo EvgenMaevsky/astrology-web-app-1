@@ -33,6 +33,7 @@ export interface NatalChartResult {
 export type ChartState =
   | { status: "idle" }
   | { status: "error"; error: string }
+  | { status: "plan_limit"; message: string; required: string }
   | { status: "ok"; data: NatalChartResult };
 
 export async function calcNatalChart(
@@ -70,7 +71,11 @@ export async function calcNatalChart(
 
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
-    return { status: "error", error: body?.detail ?? `Server error ${res.status}` };
+    const detail = body?.detail;
+    if (res.status === 403 && detail?.code === "plan_limit") {
+      return { status: "plan_limit", message: detail.message, required: detail.required };
+    }
+    return { status: "error", error: (typeof detail === "string" ? detail : detail?.message) ?? `Server error ${res.status}` };
   }
 
   const data: NatalChartResult = await res.json();

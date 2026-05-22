@@ -7,6 +7,7 @@ import { City } from "@/app/actions/atlas";
 import { Person } from "@/app/actions/persons";
 import { ChartWheel } from "@/app/_components/chart-wheel/ChartWheel";
 import { CityAutocomplete } from "@/app/_components/CityAutocomplete";
+import { UpgradePrompt } from "@/app/_components/UpgradePrompt";
 
 const CoordMap = dynamic(() => import("@/app/_components/CoordMap").then(m => m.CoordMap), {
   ssr: false,
@@ -167,6 +168,9 @@ export function ChartForm({ persons = [], selectedPerson = null }: Props) {
 
         {state.status === "error" && (
           <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{state.error}</p>
+        )}
+        {state.status === "plan_limit" && (
+          <UpgradePrompt message={state.message} required={state.required} />
         )}
 
         <button

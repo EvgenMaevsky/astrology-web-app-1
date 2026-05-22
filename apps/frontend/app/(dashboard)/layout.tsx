@@ -20,6 +20,8 @@ const NAV = [
   { href: "/persons", label: "Persons" },
   { href: "/charts", label: "Charts" },
   { href: "/reports", label: "Reports" },
+  { href: "/pricing", label: "Pricing" },
+  { href: "/billing", label: "Billing" },
 ];
 
 export default async function DashboardLayout({

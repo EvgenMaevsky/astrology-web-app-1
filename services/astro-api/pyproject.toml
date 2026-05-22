@@ -21,6 +21,7 @@ dependencies = [
   "aiosqlite>=0.20,<1.0",
   "astropy>=7.0,<8.0",
   "jplephem>=2.21,<3.0",
+  "stripe>=10.0,<16.0",
 ]
 
 [project.optional-dependencies]
