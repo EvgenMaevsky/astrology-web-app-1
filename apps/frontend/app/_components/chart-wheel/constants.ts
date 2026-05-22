@@ -1,46 +1,47 @@
-// ZastroCC Private Use Area codepoints (U+F0xx)
+// Standard Unicode astrological symbols — no custom font required
 export const PLANET_GLYPHS: Record<string, string> = {
-  sun:     "",
-  moon:    "",
-  mercury: "",
-  venus:   "",
-  mars:    "",
-  jupiter: "",
-  saturn:  "",
-  uranus:  "",
-  neptune: "",
-  pluto:   "",
-  asc:     "",
-  mc:      "",
+  sun:     "☉",  // U+2609
+  moon:    "☽",  // U+263D
+  mercury: "☿",  // U+263F
+  venus:   "♀",  // U+2640
+  mars:    "♂",  // U+2642
+  jupiter: "♃",  // U+2643
+  saturn:  "♄",  // U+2644
+  uranus:  "♅",  // U+2645
+  neptune: "♆",  // U+2646
+  pluto:   "♇",  // U+2647
+  asc:     "AC",
+  mc:      "MC",
 };
 
+// Zodiac signs U+2648–U+2653
 export const SIGN_GLYPHS: string[] = [
-  "", // Aries
-  "", // Taurus
-  "", // Gemini
-  "", // Cancer
-  "", // Leo
-  "", // Virgo
-  "", // Libra
-  "", // Scorpio
-  "", // Sagittarius
-  "", // Capricorn
-  "", // Aquarius
-  "", // Pisces
+  "♈", // Aries
+  "♉", // Taurus
+  "♊", // Gemini
+  "♋", // Cancer
+  "♌", // Leo
+  "♍", // Virgo
+  "♎", // Libra
+  "♏", // Scorpio
+  "♐", // Sagittarius
+  "♑", // Capricorn
+  "♒", // Aquarius
+  "♓", // Pisces
 ];
 
 export const ASPECT_GLYPHS: Record<string, string> = {
-  conjunction:  "",
-  opposition:   "",
-  trine:        "",
-  square:       "",
-  sextile:      "",
-  semisquare:   "",
-  semisextile:  "",
-  quincunx:     "",
-  quintile:     "",
-  biquintile:   "",
-  sesquisquare: "",
+  conjunction:  "☌",  // U+260C
+  opposition:   "☍",  // U+260D
+  trine:        "△",  // U+25B3
+  square:       "□",  // U+25A1
+  sextile:      "⚹",  // U+26B9
+  semisextile:  "⚺",  // U+26BA
+  semisquare:   "∠",  // U+2220
+  sesquisquare: "⚼",  // U+26BC
+  quincunx:     "⚻",  // U+26BB
+  quintile:     "Q",
+  biquintile:   "bQ",
 };
 
 // Element colors for zodiac rings

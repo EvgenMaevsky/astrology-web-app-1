@@ -76,8 +76,8 @@ function ZodiacRing({ asc }: { asc: number }) {
           y={midPt.y}
           textAnchor="middle"
           dominantBaseline="central"
-          fontFamily="ZastroCC"
-          fontSize={15}
+          fontFamily="serif"
+          fontSize={16}
           fill={ELEMENT_COLORS[elemIdx]}
         >
           {SIGN_GLYPHS[i]}
@@ -217,7 +217,7 @@ function PlanetLayer({
             <text
               x={pt.x} y={pt.y}
               textAnchor="middle" dominantBaseline="central"
-              fontFamily="ZastroCC" fontSize={18}
+              fontFamily="serif" fontSize={16}
               fill={p.retrograde ? "#c0392b" : "#1a1a2e"}
             >
               {glyph}
@@ -268,7 +268,7 @@ export function ChartWheel({ data }: { data: ChartData }) {
       <svg
         viewBox="0 0 600 600"
         className="w-full h-full"
-        style={{ fontFamily: "ZastroCC" }}
+        style={{ fontFamily: "serif" }}
       >
         <defs>
           <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
