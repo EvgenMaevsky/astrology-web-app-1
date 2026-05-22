@@ -159,6 +159,133 @@ class EphemerisEngine:
             },
         }
 
+    def calc_transit(
+        self,
+        natal_dt: datetime,
+        natal_lat: float,
+        natal_lon: float,
+        transit_dt: datetime,
+        transit_lat: float,
+        transit_lon: float,
+        house_system: str = "placidus",
+        bodies: list[str] | None = None,
+    ) -> dict:
+        """
+        Overlay current (transit) planets on the natal chart.
+
+        Returns:
+          natal:    natal chart data (planets, houses, angles)
+          transit:  transit planet positions
+          aspects:  transit-to-natal aspects (tighter orbs: 3° max)
+        """
+        natal = self.calc_natal(natal_dt, natal_lat, natal_lon, house_system, bodies)
+        transit = self.calc_natal(transit_dt, transit_lat, transit_lon, house_system, bodies)
+        aspects = self.calc_cross_aspects(
+            transit["planets"], natal["planets"],
+            label1="transit", label2="natal",
+            orbs={k: min(v, 3.0) for k, v in ASPECT_DEFS.items()},
+        )
+        return {"natal": natal, "transit": transit["planets"], "aspects": aspects}
+
+    def calc_solar_return(
+        self,
+        birth_dt: datetime,
+        year: int,
+        lat: float,
+        lon: float,
+        house_system: str = "placidus",
+    ) -> dict:
+        """
+        Find the Solar Return moment for a given year and compute its chart.
+
+        The Solar Return occurs when transiting Sun reaches the exact natal Sun longitude.
+        Uses Newton's method (converges in < 10 iterations).
+        """
+        natal = self.calc_natal(birth_dt, lat, lon, house_system)
+        natal_sun_lon = natal["planets"]["sun"]["longitude"]
+
+        loc = EarthLocation(lat=lat * u.deg, lon=lon * u.deg)
+
+        # Seed: same calendar day in the target year
+        try:
+            seed_dt = birth_dt.replace(year=year, tzinfo=timezone.utc)
+        except ValueError:
+            seed_dt = birth_dt.replace(year=year, day=28, tzinfo=timezone.utc)
+        t = _dt_to_astropy_time(seed_dt)
+
+        for _ in range(30):
+            pos = _get_ecliptic_pos("sun", t, loc)
+            diff = (natal_sun_lon - pos["longitude"] + 180) % 360 - 180
+            if abs(diff) < 1e-5:
+                break
+            t = Time(t.jd + diff / 360.0, format="jd", scale="utc")
+
+        sr_dt = t.to_datetime(timezone=timezone.utc)
+        sr_chart = self.calc_natal(sr_dt, lat, lon, house_system)
+        return {
+            "return_dt": sr_dt.isoformat(),
+            "natal_sun": round(natal_sun_lon, 6),
+            **sr_chart,
+        }
+
+    def calc_synastry(
+        self,
+        dt1: datetime, lat1: float, lon1: float,
+        dt2: datetime, lat2: float, lon2: float,
+        house_system: str = "placidus",
+        bodies: list[str] | None = None,
+    ) -> dict:
+        """
+        Compute synastry: two natal charts + inter-aspects between them.
+
+        Returns:
+          person1:       full natal chart for person 1
+          person2:       full natal chart for person 2
+          inter_aspects: aspects between person1 planets and person2 planets
+        """
+        c1 = self.calc_natal(dt1, lat1, lon1, house_system, bodies)
+        c2 = self.calc_natal(dt2, lat2, lon2, house_system, bodies)
+        inter = self.calc_cross_aspects(
+            c1["planets"], c2["planets"],
+            label1="person1", label2="person2",
+        )
+        return {"person1": c1, "person2": c2, "inter_aspects": inter}
+
+    def calc_cross_aspects(
+        self,
+        planets_a: dict[str, dict],
+        planets_b: dict[str, dict],
+        label1: str = "a",
+        label2: str = "b",
+        orbs: dict[str, float] | None = None,
+    ) -> list[dict]:
+        """Find aspects between two independent sets of planets."""
+        results: list[dict] = []
+        for name_a, p_a in planets_a.items():
+            for name_b, p_b in planets_b.items():
+                lon_a = p_a["longitude"]
+                lon_b = p_b["longitude"]
+                diff = abs(lon_a - lon_b) % 360
+                if diff > 180:
+                    diff = 360 - diff
+
+                for asp_name, (asp_angle, default_orb) in ASPECT_DEFS.items():
+                    orb = (orbs or {}).get(asp_name, default_orb)
+                    deviation = abs(diff - asp_angle)
+                    if deviation <= orb:
+                        speed_a = p_a.get("speed", 0)
+                        speed_b = p_b.get("speed", 0)
+                        approaching = (speed_a - speed_b) * (lon_a - lon_b) < 0
+                        results.append({
+                            label1: name_a,
+                            label2: name_b,
+                            "aspect": asp_name,
+                            "angle": round(asp_angle, 2),
+                            "orb": round(deviation, 4),
+                            "applying": approaching,
+                        })
+        return results
+
     def calc_aspects(
         self,
         planets: dict[str, dict],
