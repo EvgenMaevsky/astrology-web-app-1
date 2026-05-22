@@ -1,0 +1,517 @@
+[
+  {
+    "name": "Pars of Fortune",
+    "formula": "H1+[Lun-Sun]",
+    "abbreviation": "for"
+  },
+  {
+    "name": "Point Invisible",
+    "formula": "H1+[Sun-Lun]",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of the Friends",
+    "formula": "H1+Sun+Sun-Lun-Lun",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of a Deceit",
+    "formula": "H1+Lun+Lun-Sun-Sun",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Captivity",
+    "formula": "H1+Lun-Sun+[H1-Sat]",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of a Victory",
+    "formula": "H1-Sun+Lun+[Jup-H1]",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Bravery",
+    "formula": "H1-Sun+Lun+[H1-Mar]",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Life",
+    "formula": "H1+[Sat-Jup]",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Reason",
+    "formula": "H1+[Mar-Mer]",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Riches",
+    "formula": "H1+H2-D2",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of the Debt",
+    "formula": "H1+Mer-Sat",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of a Word",
+    "formula": "H1+[Ven-Mer]",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of the Parents",
+    "formula": "H1+[Sat-Sun]",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of the Grandfathers",
+    "formula": "H1+[Sat-D2]",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Goods 1",
+    "formula": "H1+[Lun-Sat]",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Goods 2",
+    "formula": "H1+[Mar-Sat]",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Riches",
+    "formula": "H1+[Jup-Mer]",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Trade",
+    "formula": "H10+[Lun-Sun]",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Death 1",
+    "formula": "H1+H8-Lun",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of a Marriage",
+    "formula": "H1+H7-Ven",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Danger and violence",
+    "formula": "H1+[Mer-Sat]",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of End",
+    "formula": "H1+Sun-Jup",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Progress",
+    "formula": "H1+Sun-Sat",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of a High estimation",
+    "formula": "H1+Ven-Sun",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Murder 1",
+    "formula": "H1+H12-Nep",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Murder 2",
+    "formula": "Mar+Nep-Ura",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Heavy loss",
+    "formula": "H12+D12-Nep",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of the Brothers and sisters",
+    "formula": "H1+[Jup-Sat]",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Accident",
+    "formula": "H1+Ura-Sun",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Accident and exile",
+    "formula": "H1+Ura-Sat",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Changes",
+    "formula": "H1+Ura-Plu",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Commerce and communications",
+    "formula": "H1+Mer-Sun",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Cooperation",
+    "formula": "H7+Lun-Sun",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Cuts and operations",
+    "formula": "H1+Sat-Mar",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Damages",
+    "formula": "H1+Nep-Mar",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Danger, violence, duties",
+    "formula": "H1+Mer-Sat",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of the Daughters",
+    "formula": "H1+Ven-Lun",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Disasters",
+    "formula": "H1+H8-Lun",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of a Deceit",
+    "formula": "H1+Ven-Nep",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Frustration",
+    "formula": "H1+Mar-Nep",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Disagreements, judicial processes",
+    "formula": "H1+[Jup-Mar]",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Disputes",
+    "formula": "H1+Mer-Mar",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point Burning and afflictions",
+    "formula": "H1+Mar-Sat",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of False love",
+    "formula": "H1+Nep-Ven",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Glory and wisdom",
+    "formula": "H1+[Jup-Sun]",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Fatality",
+    "formula": "H1+Sat-Sun",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of the Father",
+    "formula": "H1+[Sun-Sat]",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Children of a female",
+    "formula": "H1+Ven-Lun",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of a Presence(finding) lost",
+    "formula": "Lun+H4-D1",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Swindle",
+    "formula": "H1+Nep-Mer",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of the Friends",
+    "formula": "H1+Lun-Ura",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Gossips",
+    "formula": "H1+Mer-Nep",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Hight Education",
+    "formula": "H1+H9-Mer",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Individuality",
+    "formula": "H1+Sun-Ura",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of the Inheritance",
+    "formula": "H1+Lun-Sat",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Damage to business",
+    "formula": "H1-D1+H1+[Lun-Sun]",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Insincerity",
+    "formula": "H1+Lun-Nep",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point a Killing planet Anareta",
+    "formula": "H1+[Lun-D1]",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Judicial process",
+    "formula": "H1+Mer-Mar",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of the Lost animal",
+    "formula": "H1+Mar-Sun",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Love and marriage",
+    "formula": "H1+Jup-Ven",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of good Luck",
+    "formula": "H1+Lun-Jup",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Children of a male",
+    "formula": "H1+[Jup-Lun]",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Marrige",
+    "formula": "H1+Ven-Sat",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of a Marriage and partners",
+    "formula": "H1+H7-Ven",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Mind and captivity",
+    "formula": "H1+H3-Mer",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of the Mother",
+    "formula": "H1+[Lun-Ven]",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of the Mother and family",
+    "formula": "H1+Jup-Ven",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Obstacles and care",
+    "formula": "H1+Nep-Sat",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Occultism",
+    "formula": "H1+Nep-Ura",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Passion",
+    "formula": "H1+Mar-Sun",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Danger",
+    "formula": "H1+[D8-Sat]",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Popularity",
+    "formula": "H1+Ven-Plu",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of a Trade",
+    "formula": "H1+Lun-Sat",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of the Property movable",
+    "formula": "H1+[H2-D2]",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Radical change",
+    "formula": "H1+Plu-Ura",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of the real Estate",
+    "formula": "H1+[Lun-Sat]",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Reprisal",
+    "formula": "H1+Sat-Plu",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Punishment",
+    "formula": "H1+[Sun-Mar]",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Dismissal",
+    "formula": "Sat+Jup-Sun",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Ritual ceremonies",
+    "formula": "H9+H3-Ven",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Secret enemies",
+    "formula": "H1+H12-D12",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Sex and love",
+    "formula": "H1+Ven-Sun",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Illness",
+    "formula": "H1+Mar-Sat",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Slander",
+    "formula": "H1+Sat-Nep",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Slyness",
+    "formula": "H1+Nep-Plu",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of the Sons",
+    "formula": "H1+Jup-Lun",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Gamble 1",
+    "formula": "H1+[H5-Jup]",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Gamble 2",
+    "formula": "H1+Jup-Nep",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Sudden progress",
+    "formula": "H1+H1-Sat+[Lun-Sun]",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Sudden good luck",
+    "formula": "H1+Jup-Ura",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Sudden parting",
+    "formula": "H1+Sat-Ura",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Surgical operations, police, army",
+    "formula": "H1+Sat-Mar",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of a Surprise",
+    "formula": "H1+Mar-Ura",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Time for actions",
+    "formula": "H1+Jup-Sun",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Tragedy, fate, fatality",
+    "formula": "H1+Sat-Sun",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Travels by air",
+    "formula": "H1+H9-Ura",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Travels by the ground",
+    "formula": "H1+H9-D9",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Travels on water",
+    "formula": "H1+105.0-Sat",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Treasure",
+    "formula": "H1+Ven-Mer",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Deceit",
+    "formula": "H1+Mar-Lun",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Unusual events",
+    "formula": "H1+Ura-Lun",
+    "abbreviation": ""
+  },
+  {
+    "name": "Point of Weddings",
+    "formula": "H9+H3-Ven",
+    "abbreviation": ""
+  }
+]

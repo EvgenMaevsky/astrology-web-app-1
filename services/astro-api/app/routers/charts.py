@@ -1,7 +1,9 @@
 from fastapi import APIRouter, Depends
 
 from app.dependencies.auth import get_current_user
+from app.ephemeris.arabic_parts import compute_arabic_parts
 from app.ephemeris.engine import EphemerisEngine
+from app.ephemeris.terms import add_terms_to_planets
 from app.models.user import User
 from app.schemas.chart import NatalChartRequest, NatalChartResponse
 
@@ -22,11 +24,18 @@ async def natal_chart(
         house_system=body.house_system,
         bodies=body.bodies,
     )
-    aspects = _engine.calc_aspects(data["planets"])
+    planets = data["planets"]
+    houses = data["houses"]
+
+    add_terms_to_planets(planets)
+    aspects = _engine.calc_aspects(planets)
+    arabic_parts = compute_arabic_parts(planets, houses)
+
     return NatalChartResponse(
-        planets=data["planets"],
-        houses=data["houses"],
+        planets=planets,
+        houses=houses,
         angles=data["angles"],
         aspects=aspects,
+        arabic_parts=arabic_parts,
         meta=data["meta"],
     )

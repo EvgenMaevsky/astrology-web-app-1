@@ -141,19 +141,27 @@ export function ChartForm() {
           <ChartWheel data={state.data} />
           <PlanetTable planets={state.data.planets} />
           <AspectTable aspects={state.data.aspects} />
+          <ArabicPartsTable parts={state.data.arabic_parts} />
         </div>
       )}
     </div>
   );
 }
 
+function fmtDeg(sign_degree: number): string {
+  const d = Math.floor(sign_degree);
+  const m = Math.floor((sign_degree % 1) * 60);
+  return `${d}°${String(m).padStart(2, "0")}′`;
+}
+
 function PlanetTable({ planets }: { planets: NatalChartResult["planets"] }) {
   const rows = Object.entries(planets).map(([name, p]) => ({
     name: name.charAt(0).toUpperCase() + name.slice(1),
     sign: p.sign,
-    degree: `${Math.floor(p.sign_degree)}°${String(Math.floor((p.sign_degree % 1) * 60)).padStart(2, "0")}′`,
+    degree: fmtDeg(p.sign_degree),
     house: p.house,
     retrograde: p.retrograde,
+    term: p.term_ruler ? p.term_ruler.charAt(0).toUpperCase() + p.term_ruler.slice(1) : "—",
   }));
 
   return (
@@ -165,6 +173,7 @@ function PlanetTable({ planets }: { planets: NatalChartResult["planets"] }) {
             <th className="text-left px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">Sign</th>
             <th className="text-left px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">Degree</th>
             <th className="text-left px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">House</th>
+            <th className="text-left px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">Term</th>
           </tr>
         </thead>
         <tbody>
@@ -176,6 +185,36 @@ function PlanetTable({ planets }: { planets: NatalChartResult["planets"] }) {
               <td className="px-4 py-2 text-stone-600">{r.sign}</td>
               <td className="px-4 py-2 text-stone-600 font-mono text-xs">{r.degree}</td>
               <td className="px-4 py-2 text-stone-500">{r.house}</td>
+              <td className="px-4 py-2 text-stone-400 text-xs">{r.term}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function ArabicPartsTable({ parts }: { parts: NatalChartResult["arabic_parts"] }) {
+  if (!parts?.length) return null;
+  return (
+    <div className="bg-white rounded-xl border border-stone-200 overflow-hidden">
+      <div className="px-4 py-3 border-b border-stone-100 bg-stone-50">
+        <h3 className="text-xs font-semibold text-stone-500 uppercase tracking-wider">Arabic Parts</h3>
+      </div>
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="border-b border-stone-100">
+            <th className="text-left px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">Part</th>
+            <th className="text-left px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">Sign</th>
+            <th className="text-left px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">Degree</th>
+          </tr>
+        </thead>
+        <tbody>
+          {parts.map((p) => (
+            <tr key={p.name} className="border-b border-stone-50 hover:bg-stone-50">
+              <td className="px-4 py-1.5 text-stone-700">{p.name}</td>
+              <td className="px-4 py-1.5 text-stone-600">{p.sign}</td>
+              <td className="px-4 py-1.5 text-stone-600 font-mono text-xs">{fmtDeg(p.sign_degree)}</td>
             </tr>
           ))}
         </tbody>

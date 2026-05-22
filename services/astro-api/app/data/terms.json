@@ -1,0 +1,800 @@
+{
+  "ptolemy": [
+    [
+      {
+        "end": 6.0,
+        "planet": "jupiter"
+      },
+      {
+        "end": 14.0,
+        "planet": "venus"
+      },
+      {
+        "end": 21.0,
+        "planet": "mercury"
+      },
+      {
+        "end": 26.0,
+        "planet": "mars"
+      },
+      {
+        "end": 30.0,
+        "planet": "saturn"
+      }
+    ],
+    [
+      {
+        "end": 8.0,
+        "planet": "venus"
+      },
+      {
+        "end": 15.0,
+        "planet": "mercury"
+      },
+      {
+        "end": 22.0,
+        "planet": "jupiter"
+      },
+      {
+        "end": 26.0,
+        "planet": "saturn"
+      },
+      {
+        "end": 30.0,
+        "planet": "mars"
+      }
+    ],
+    [
+      {
+        "end": 7.0,
+        "planet": "mercury"
+      },
+      {
+        "end": 13.0,
+        "planet": "jupiter"
+      },
+      {
+        "end": 20.0,
+        "planet": "venus"
+      },
+      {
+        "end": 26.0,
+        "planet": "mars"
+      },
+      {
+        "end": 30.0,
+        "planet": "saturn"
+      }
+    ],
+    [
+      {
+        "end": 6.0,
+        "planet": "mars"
+      },
+      {
+        "end": 13.0,
+        "planet": "jupiter"
+      },
+      {
+        "end": 20.0,
+        "planet": "mercury"
+      },
+      {
+        "end": 27.0,
+        "planet": "venus"
+      },
+      {
+        "end": 30.0,
+        "planet": "saturn"
+      }
+    ],
+    [
+      {
+        "end": 6.0,
+        "planet": "saturn"
+      },
+      {
+        "end": 13.0,
+        "planet": "mercury"
+      },
+      {
+        "end": 19.0,
+        "planet": "venus"
+      },
+      {
+        "end": 25.0,
+        "planet": "jupiter"
+      },
+      {
+        "end": 30.0,
+        "planet": "mars"
+      }
+    ],
+    [
+      {
+        "end": 7.0,
+        "planet": "mercury"
+      },
+      {
+        "end": 13.0,
+        "planet": "venus"
+      },
+      {
+        "end": 18.0,
+        "planet": "jupiter"
+      },
+      {
+        "end": 24.0,
+        "planet": "saturn"
+      },
+      {
+        "end": 30.0,
+        "planet": "mars"
+      }
+    ],
+    [
+      {
+        "end": 6.0,
+        "planet": "saturn"
+      },
+      {
+        "end": 11.0,
+        "planet": "venus"
+      },
+      {
+        "end": 19.0,
+        "planet": "jupiter"
+      },
+      {
+        "end": 24.0,
+        "planet": "mercury"
+      },
+      {
+        "end": 30.0,
+        "planet": "mars"
+      }
+    ],
+    [
+      {
+        "end": 6.0,
+        "planet": "mars"
+      },
+      {
+        "end": 14.0,
+        "planet": "jupiter"
+      },
+      {
+        "end": 21.0,
+        "planet": "venus"
+      },
+      {
+        "end": 27.0,
+        "planet": "mercury"
+      },
+      {
+        "end": 30.0,
+        "planet": "saturn"
+      }
+    ],
+    [
+      {
+        "end": 8.0,
+        "planet": "jupiter"
+      },
+      {
+        "end": 14.0,
+        "planet": "venus"
+      },
+      {
+        "end": 19.0,
+        "planet": "mercury"
+      },
+      {
+        "end": 25.0,
+        "planet": "saturn"
+      },
+      {
+        "end": 30.0,
+        "planet": "mars"
+      }
+    ],
+    [
+      {
+        "end": 6.0,
+        "planet": "venus"
+      },
+      {
+        "end": 12.0,
+        "planet": "mercury"
+      },
+      {
+        "end": 19.0,
+        "planet": "jupiter"
+      },
+      {
+        "end": 25.0,
+        "planet": "mars"
+      },
+      {
+        "end": 30.0,
+        "planet": "saturn"
+      }
+    ],
+    [
+      {
+        "end": 6.0,
+        "planet": "saturn"
+      },
+      {
+        "end": 12.0,
+        "planet": "mercury"
+      },
+      {
+        "end": 20.0,
+        "planet": "venus"
+      },
+      {
+        "end": 25.0,
+        "planet": "jupiter"
+      },
+      {
+        "end": 30.0,
+        "planet": "mars"
+      }
+    ],
+    [
+      {
+        "end": 8.0,
+        "planet": "venus"
+      },
+      {
+        "end": 14.0,
+        "planet": "jupiter"
+      },
+      {
+        "end": 20.0,
+        "planet": "mercury"
+      },
+      {
+        "end": 26.0,
+        "planet": "mars"
+      },
+      {
+        "end": 30.0,
+        "planet": "saturn"
+      }
+    ]
+  ],
+  "egyptians": [
+    [
+      {
+        "end": 6.0,
+        "planet": "jupiter"
+      },
+      {
+        "end": 12.0,
+        "planet": "venus"
+      },
+      {
+        "end": 20.0,
+        "planet": "mercury"
+      },
+      {
+        "end": 25.0,
+        "planet": "mars"
+      },
+      {
+        "end": 30.0,
+        "planet": "saturn"
+      }
+    ],
+    [
+      {
+        "end": 8.0,
+        "planet": "venus"
+      },
+      {
+        "end": 14.0,
+        "planet": "mercury"
+      },
+      {
+        "end": 22.0,
+        "planet": "jupiter"
+      },
+      {
+        "end": 27.0,
+        "planet": "saturn"
+      },
+      {
+        "end": 30.0,
+        "planet": "mars"
+      }
+    ],
+    [
+      {
+        "end": 6.0,
+        "planet": "mercury"
+      },
+      {
+        "end": 12.0,
+        "planet": "jupiter"
+      },
+      {
+        "end": 17.0,
+        "planet": "venus"
+      },
+      {
+        "end": 24.0,
+        "planet": "mars"
+      },
+      {
+        "end": 30.0,
+        "planet": "saturn"
+      }
+    ],
+    [
+      {
+        "end": 7.0,
+        "planet": "mars"
+      },
+      {
+        "end": 13.0,
+        "planet": "venus"
+      },
+      {
+        "end": 19.0,
+        "planet": "mercury"
+      },
+      {
+        "end": 26.0,
+        "planet": "jupiter"
+      },
+      {
+        "end": 30.0,
+        "planet": "saturn"
+      }
+    ],
+    [
+      {
+        "end": 6.0,
+        "planet": "jupiter"
+      },
+      {
+        "end": 11.0,
+        "planet": "venus"
+      },
+      {
+        "end": 18.0,
+        "planet": "saturn"
+      },
+      {
+        "end": 24.0,
+        "planet": "mercury"
+      },
+      {
+        "end": 30.0,
+        "planet": "mars"
+      }
+    ],
+    [
+      {
+        "end": 7.0,
+        "planet": "mercury"
+      },
+      {
+        "end": 17.0,
+        "planet": "venus"
+      },
+      {
+        "end": 21.0,
+        "planet": "jupiter"
+      },
+      {
+        "end": 28.0,
+        "planet": "mars"
+      },
+      {
+        "end": 30.0,
+        "planet": "saturn"
+      }
+    ],
+    [
+      {
+        "end": 6.0,
+        "planet": "saturn"
+      },
+      {
+        "end": 14.0,
+        "planet": "mercury"
+      },
+      {
+        "end": 21.0,
+        "planet": "jupiter"
+      },
+      {
+        "end": 28.0,
+        "planet": "venus"
+      },
+      {
+        "end": 30.0,
+        "planet": "mars"
+      }
+    ],
+    [
+      {
+        "end": 7.0,
+        "planet": "mars"
+      },
+      {
+        "end": 11.0,
+        "planet": "venus"
+      },
+      {
+        "end": 19.0,
+        "planet": "mercury"
+      },
+      {
+        "end": 24.0,
+        "planet": "jupiter"
+      },
+      {
+        "end": 30.0,
+        "planet": "saturn"
+      }
+    ],
+    [
+      {
+        "end": 12.0,
+        "planet": "jupiter"
+      },
+      {
+        "end": 17.0,
+        "planet": "venus"
+      },
+      {
+        "end": 21.0,
+        "planet": "mercury"
+      },
+      {
+        "end": 26.0,
+        "planet": "saturn"
+      },
+      {
+        "end": 30.0,
+        "planet": "mars"
+      }
+    ],
+    [
+      {
+        "end": 7.0,
+        "planet": "mercury"
+      },
+      {
+        "end": 14.0,
+        "planet": "jupiter"
+      },
+      {
+        "end": 22.0,
+        "planet": "venus"
+      },
+      {
+        "end": 26.0,
+        "planet": "saturn"
+      },
+      {
+        "end": 30.0,
+        "planet": "mars"
+      }
+    ],
+    [
+      {
+        "end": 7.0,
+        "planet": "mercury"
+      },
+      {
+        "end": 13.0,
+        "planet": "venus"
+      },
+      {
+        "end": 20.0,
+        "planet": "jupiter"
+      },
+      {
+        "end": 25.0,
+        "planet": "mars"
+      },
+      {
+        "end": 30.0,
+        "planet": "saturn"
+      }
+    ],
+    [
+      {
+        "end": 12.0,
+        "planet": "venus"
+      },
+      {
+        "end": 16.0,
+        "planet": "jupiter"
+      },
+      {
+        "end": 19.0,
+        "planet": "mercury"
+      },
+      {
+        "end": 28.0,
+        "planet": "mars"
+      },
+      {
+        "end": 30.0,
+        "planet": "saturn"
+      }
+    ]
+  ],
+  "lilly": [
+    [
+      {
+        "end": 6.0,
+        "planet": "jupiter"
+      },
+      {
+        "end": 14.0,
+        "planet": "venus"
+      },
+      {
+        "end": 21.0,
+        "planet": "mercury"
+      },
+      {
+        "end": 26.0,
+        "planet": "mars"
+      },
+      {
+        "end": 30.0,
+        "planet": "saturn"
+      }
+    ],
+    [
+      {
+        "end": 8.0,
+        "planet": "venus"
+      },
+      {
+        "end": 15.0,
+        "planet": "mercury"
+      },
+      {
+        "end": 22.0,
+        "planet": "jupiter"
+      },
+      {
+        "end": 26.0,
+        "planet": "saturn"
+      },
+      {
+        "end": 30.0,
+        "planet": "mars"
+      }
+    ],
+    [
+      {
+        "end": 7.0,
+        "planet": "mercury"
+      },
+      {
+        "end": 14.0,
+        "planet": "jupiter"
+      },
+      {
+        "end": 21.0,
+        "planet": "venus"
+      },
+      {
+        "end": 25.0,
+        "planet": "saturn"
+      },
+      {
+        "end": 30.0,
+        "planet": "mars"
+      }
+    ],
+    [
+      {
+        "end": 6.0,
+        "planet": "mars"
+      },
+      {
+        "end": 13.0,
+        "planet": "jupiter"
+      },
+      {
+        "end": 20.0,
+        "planet": "mercury"
+      },
+      {
+        "end": 27.0,
+        "planet": "venus"
+      },
+      {
+        "end": 30.0,
+        "planet": "saturn"
+      }
+    ],
+    [
+      {
+        "end": 6.0,
+        "planet": "saturn"
+      },
+      {
+        "end": 13.0,
+        "planet": "mercury"
+      },
+      {
+        "end": 19.0,
+        "planet": "venus"
+      },
+      {
+        "end": 25.0,
+        "planet": "jupiter"
+      },
+      {
+        "end": 30.0,
+        "planet": "mars"
+      }
+    ],
+    [
+      {
+        "end": 7.0,
+        "planet": "mercury"
+      },
+      {
+        "end": 13.0,
+        "planet": "venus"
+      },
+      {
+        "end": 18.0,
+        "planet": "jupiter"
+      },
+      {
+        "end": 24.0,
+        "planet": "saturn"
+      },
+      {
+        "end": 30.0,
+        "planet": "mars"
+      }
+    ],
+    [
+      {
+        "end": 6.0,
+        "planet": "saturn"
+      },
+      {
+        "end": 11.0,
+        "planet": "venus"
+      },
+      {
+        "end": 19.0,
+        "planet": "jupiter"
+      },
+      {
+        "end": 24.0,
+        "planet": "mercury"
+      },
+      {
+        "end": 30.0,
+        "planet": "mars"
+      }
+    ],
+    [
+      {
+        "end": 6.0,
+        "planet": "mars"
+      },
+      {
+        "end": 14.0,
+        "planet": "jupiter"
+      },
+      {
+        "end": 21.0,
+        "planet": "venus"
+      },
+      {
+        "end": 27.0,
+        "planet": "mercury"
+      },
+      {
+        "end": 30.0,
+        "planet": "saturn"
+      }
+    ],
+    [
+      {
+        "end": 8.0,
+        "planet": "jupiter"
+      },
+      {
+        "end": 14.0,
+        "planet": "venus"
+      },
+      {
+        "end": 19.0,
+        "planet": "mercury"
+      },
+      {
+        "end": 25.0,
+        "planet": "saturn"
+      },
+      {
+        "end": 30.0,
+        "planet": "mars"
+      }
+    ],
+    [
+      {
+        "end": 6.0,
+        "planet": "venus"
+      },
+      {
+        "end": 12.0,
+        "planet": "mercury"
+      },
+      {
+        "end": 19.0,
+        "planet": "jupiter"
+      },
+      {
+        "end": 25.0,
+        "planet": "mars"
+      },
+      {
+        "end": 30.0,
+        "planet": "saturn"
+      }
+    ],
+    [
+      {
+        "end": 6.0,
+        "planet": "saturn"
+      },
+      {
+        "end": 12.0,
+        "planet": "mercury"
+      },
+      {
+        "end": 20.0,
+        "planet": "venus"
+      },
+      {
+        "end": 25.0,
+        "planet": "jupiter"
+      },
+      {
+        "end": 30.0,
+        "planet": "mars"
+      }
+    ],
+    [
+      {
+        "end": 8.0,
+        "planet": "venus"
+      },
+      {
+        "end": 14.0,
+        "planet": "jupiter"
+      },
+      {
+        "end": 20.0,
+        "planet": "mercury"
+      },
+      {
+        "end": 26.0,
+        "planet": "mars"
+      },
+      {
+        "end": 30.0,
+        "planet": "saturn"
+      }
+    ]
+  ]
+}

@@ -21,6 +21,14 @@ class PlanetPos(BaseModel):
     sign_degree: float
     house: int
     retrograde: bool
+    term_ruler: str | None = None
+
+
+class ArabicPart(BaseModel):
+    name: str
+    longitude: float
+    sign: str
+    sign_degree: float
 
 
 class Angles(BaseModel):
@@ -51,4 +59,5 @@ class NatalChartResponse(BaseModel):
     houses: list[float]
     angles: Angles
     aspects: list[AspectEntry]
+    arabic_parts: list[ArabicPart] = []
     meta: ChartMeta

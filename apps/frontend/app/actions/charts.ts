@@ -10,6 +10,7 @@ export interface NatalChartResult {
     house: number;
     retrograde: boolean;
     speed: number;
+    term_ruler: string | null;
   }>;
   houses: number[];
   angles: { asc: number; mc: number; dsc: number; ic: number };
@@ -20,6 +21,12 @@ export interface NatalChartResult {
     angle: number;
     orb: number;
     applying: boolean;
+  }[];
+  arabic_parts: {
+    name: string;
+    longitude: number;
+    sign: string;
+    sign_degree: number;
   }[];
 }
 
