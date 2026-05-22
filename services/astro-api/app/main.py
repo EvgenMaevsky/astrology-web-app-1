@@ -8,6 +8,7 @@ from app.database import Base, engine
 from app.routers.atlas import router as atlas_router
 from app.routers.auth import router as auth_router
 from app.routers.charts import router as charts_router
+from app.routers.persons import router as persons_router
 from app.routers.settings import router as settings_router
 
 
@@ -36,6 +37,7 @@ app.add_middleware(
 app.include_router(auth_router)
 app.include_router(settings_router)
 app.include_router(charts_router)
+app.include_router(persons_router)
 app.include_router(atlas_router)
 
 

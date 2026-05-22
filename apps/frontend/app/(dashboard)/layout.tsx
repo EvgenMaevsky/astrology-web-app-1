@@ -17,9 +17,9 @@ async function fetchMe(token: string) {
 
 const NAV = [
   { href: "/dashboard", label: "Overview" },
-  { href: "/dashboard/persons", label: "Persons" },
-  { href: "/dashboard/charts", label: "Charts" },
-  { href: "/dashboard/reports", label: "Reports" },
+  { href: "/persons", label: "Persons" },
+  { href: "/charts", label: "Charts" },
+  { href: "/reports", label: "Reports" },
 ];
 
 export default async function DashboardLayout({
