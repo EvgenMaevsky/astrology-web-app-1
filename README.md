@@ -42,6 +42,10 @@ cd services/astro-api && .venv/bin/python -m pytest
 - Regression tests pin planet longitudes to astro.com references and verify
   the Placidus semi-arc condition and solar-return convergence.
 
+## Roadmap
+
+Подальший план розвитку та виходу в продакшен: [ROADMAP.md](ROADMAP.md)
+
 ## Phases
 - [x] **Phase 1** — JWT Auth: register/login/refresh/logout, dashboard shell
 - [x] **Phase 2** — Ephemeris engine (Swiss Ephemeris natal charts)
