@@ -1,7 +1,34 @@
-# План Етапу A "Стабілізація" (згенеровано planner/Fable, 2026-07-15)
+---
+status: planned
+created: 2026-07-15
+updated: 2026-07-15
+related: "[[ROADMAP]]"
+tags: [plan, stage-a]
+---
 
-> Статус: ЗАТВЕРДЖЕНИЙ ПЛАН, ще не виконаний.
+# План Етапу A "Стабілізація"
+
+> Джерело: planner-агент (Fable), 2026-07-15.
 > Виконавцю: слідувати дослівно, кроки по порядку. Definition of Done — внизу.
+> Статуси кроків познач тут же по мірі виконання ( [ ] → [x] ); коли всі DoD-пункти
+> зелені, зміни поле `status:` вище на `done`. Якщо план застаріє чи буде замінений —
+> `status: superseded` з коротким поясненням, файл не видаляти (історія рішень).
+
+## Прогрес
+
+- [ ] 0.1 Закомітити untracked-міграцію
+- [ ] 1.1 CI workflow
+- [ ] 2.1–2.5 Settings + модель Payment + міграція
+- [ ] 2.6–2.11 Stripe/LiqPay фікси (checkout, webhook, portal, callback)
+- [ ] 2.12–2.14 require_plan дедуп + gate на charts.py + фронтенд
+- [ ] 3.1–3.3 slowapi підключення
+- [ ] 3.4 Rate limiting на login/register
+- [ ] 3.5–3.6 Ротація refresh (бекенд + proxy.ts)
+- [ ] 4.1–4.4 Тести (conftest, rotation, billing, plan gate)
+- [ ] DoD 1 — pytest 0 failed
+- [ ] DoD 2 — tsc --noEmit чисто
+- [ ] DoD 3 — міграція застосовується на чистій БД
+- [ ] DoD 4 — CI-файл валідний, все закомічено
 
 ## Передумови (0)
 
