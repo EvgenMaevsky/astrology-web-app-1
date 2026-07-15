@@ -17,6 +17,11 @@ class Settings(BaseSettings):
 
     cors_origins: list[str] = ["http://localhost:3000", "http://127.0.0.1:3000"]
     frontend_url: str = "http://localhost:3000"
+    api_public_url: str = "http://localhost:8000"
+
+    rate_limit_enabled: bool = True
+    rate_limit_login: str = "5/minute"
+    rate_limit_register: str = "3/minute"
 
     # Directory for JPL ephemeris files (de440s.bsp auto-downloads there, ~32 MB).
     skyfield_dir: str = "./skyfield-data"

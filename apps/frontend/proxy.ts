@@ -35,7 +35,13 @@ async function tryRefresh(
   request: NextRequest,
   refreshToken: string
 ): Promise<NextResponse | null> {
+  // The backend rotates + revokes the refresh token on every call. If two
+  // requests race here with no access-token cookie (e.g. two tabs), the
+  // second call reuses an already-revoked token and gets 401 → the user is
+  // bounced to /login even though the first refresh succeeded. Acceptable
+  // for now (rare, self-heals on next login); no grace-window implemented.
   let accessToken: string;
+  let newRefreshToken: string | undefined;
   try {
     const res = await fetch(`${API_URL}/api/v1/auth/refresh`, {
       method: "POST",
@@ -44,7 +50,13 @@ async function tryRefresh(
       cache: "no-store",
     });
     if (!res.ok) return null;
-    ({ access_token: accessToken } = await res.json());
+    const body = await res.json();
+    accessToken = body.access_token;
+    newRefreshToken = body.refresh_token;
+    // Backend rotates refresh tokens on every use; without the new one we
+    // can't renew the cookie and the client would be stuck re-using a
+    // revoked token on its next expiry.
+    if (!accessToken || !newRefreshToken) return null;
   } catch {
     return null;
   }
@@ -66,6 +78,13 @@ async function tryRefresh(
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     maxAge: 30 * 60,
+    path: "/",
+  });
+  response.cookies.set("refresh_token", newRefreshToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 30 * 24 * 60 * 60,
     path: "/",
   });
   return response;

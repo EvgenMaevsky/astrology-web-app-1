@@ -21,6 +21,7 @@ dependencies = [
   "aiosqlite>=0.20,<1.0",
   "skyfield>=1.49,<2.0",
   "stripe>=10.0,<16.0",
+  "slowapi>=0.1.9,<1.0",
 ]
 
 [project.optional-dependencies]

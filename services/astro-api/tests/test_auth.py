@@ -1,36 +1,4 @@
-import pytest
-from httpx import ASGITransport, AsyncClient
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-
-from app.database import Base, get_db
-from app.main import app
-
-TEST_DB = "sqlite+aiosqlite:///:memory:"
-test_engine = create_async_engine(TEST_DB)
-TestSession = async_sessionmaker(test_engine, expire_on_commit=False)
-
-
-@pytest.fixture(autouse=True)
-async def setup_db():
-    async with test_engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-    yield
-    async with test_engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
-
-
-async def override_db() -> AsyncSession:
-    async with TestSession() as session:
-        yield session
-
-
-app.dependency_overrides[get_db] = override_db
-
-
-@pytest.fixture
-async def client():
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as c:
-        yield c
+from httpx import AsyncClient
 
 
 async def test_health(client: AsyncClient):
@@ -83,6 +51,25 @@ async def test_refresh(client: AsyncClient):
     r = await client.post("/api/v1/auth/refresh", json={"refresh_token": refresh_token})
     assert r.status_code == 200
     assert "access_token" in r.json()
+    assert "refresh_token" in r.json()
+
+
+async def test_refresh_rotation(client: AsyncClient):
+    reg = await client.post("/api/v1/auth/register", json={"email": "rot@example.com", "password": "password123"})
+    old_refresh = reg.json()["refresh_token"]
+
+    r1 = await client.post("/api/v1/auth/refresh", json={"refresh_token": old_refresh})
+    assert r1.status_code == 200
+    new_refresh = r1.json()["refresh_token"]
+    assert new_refresh != old_refresh
+
+    # old token is revoked — reusing it must fail
+    r2 = await client.post("/api/v1/auth/refresh", json={"refresh_token": old_refresh})
+    assert r2.status_code == 401
+
+    # the new token still works
+    r3 = await client.post("/api/v1/auth/refresh", json={"refresh_token": new_refresh})
+    assert r3.status_code == 200
 
 
 async def test_logout(client: AsyncClient):

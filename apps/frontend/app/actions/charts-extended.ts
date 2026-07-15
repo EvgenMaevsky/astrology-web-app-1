@@ -55,9 +55,12 @@ async function authFetch(path: string, body: object): Promise<Response> {
   });
 }
 
-function handlePlanLimit(body: { detail?: { code?: string; message?: string; required?: string } }) {
-  if (body.detail?.code === "plan_limit") {
-    return { status: "plan_limit" as const, message: body.detail.message ?? "", required: body.detail.required ?? "pro" };
+function handlePlanLimit(body: { detail?: { code?: string; message?: string; required?: string | string[] } }) {
+  const code = body.detail?.code;
+  if (code === "plan_limit" || code === "plan_required") {
+    const required = body.detail?.required;
+    const requiredStr = Array.isArray(required) ? required[0] ?? "pro" : required ?? "pro";
+    return { status: "plan_limit" as const, message: body.detail?.message ?? "", required: requiredStr };
   }
   return null;
 }

@@ -311,7 +311,7 @@ class EphemerisEngine:
         aspects = self.calc_cross_aspects(
             transit["planets"], natal["planets"],
             label1="transit", label2="natal",
-            orbs={k: min(v, 3.0) for k, v in ASPECT_DEFS.items()},
+            orbs={k: min(orb, 3.0) for k, (_angle, orb) in ASPECT_DEFS.items()},
         )
         return {"natal": natal, "transit": transit["planets"], "aspects": aspects}
 

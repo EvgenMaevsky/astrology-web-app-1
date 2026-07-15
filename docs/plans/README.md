@@ -22,4 +22,4 @@ status: reference
 
 ## Активні / історичні плани
 
-- [2026-07-15 — Stage A Stabilization](2026-07-15-stage-a-stabilization.md) — `planned`
+- [2026-07-15 — Stage A Stabilization](2026-07-15-stage-a-stabilization.md) — `done`

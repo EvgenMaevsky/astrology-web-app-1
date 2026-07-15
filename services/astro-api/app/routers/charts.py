@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
 from app.dependencies.auth import get_current_user
+from app.dependencies.billing import require_plan
 from app.ephemeris.arabic_parts import compute_arabic_parts
 from app.ephemeris.engine import EphemerisEngine
 from app.ephemeris.terms import add_terms_to_planets
@@ -87,11 +88,9 @@ async def natal_chart(
 @router.post("/transit", response_model=TransitResponse)
 async def transit_chart(
     body: TransitRequest,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_plan("pro", "expert")),
     db: AsyncSession = Depends(get_db),
 ) -> TransitResponse:
-    await _check_free_limit(current_user, db)
-
     data = _engine.calc_transit(
         natal_dt=body.natal_dt, natal_lat=body.natal_lat, natal_lon=body.natal_lon,
         transit_dt=body.transit_dt, transit_lat=body.transit_lat, transit_lon=body.transit_lon,
@@ -128,11 +127,9 @@ async def transit_chart(
 @router.post("/solar-return", response_model=SolarReturnResponse)
 async def solar_return_chart(
     body: SolarReturnRequest,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_plan("pro", "expert")),
     db: AsyncSession = Depends(get_db),
 ) -> SolarReturnResponse:
-    await _check_free_limit(current_user, db)
-
     data = _engine.calc_solar_return(
         birth_dt=body.birth_dt, year=body.year,
         lat=body.lat, lon=body.lon, house_system=body.house_system,
@@ -161,11 +158,9 @@ async def solar_return_chart(
 @router.post("/synastry", response_model=SynastryResponse)
 async def synastry_chart(
     body: SynastryRequest,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_plan("pro", "expert")),
     db: AsyncSession = Depends(get_db),
 ) -> SynastryResponse:
-    await _check_free_limit(current_user, db)
-
     data = _engine.calc_synastry(
         dt1=body.dt1, lat1=body.lat1, lon1=body.lon1,
         dt2=body.dt2, lat2=body.lat2, lon2=body.lon2,

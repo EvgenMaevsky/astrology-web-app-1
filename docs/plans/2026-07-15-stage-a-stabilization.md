@@ -1,5 +1,5 @@
 ---
-status: planned
+status: done
 created: 2026-07-15
 updated: 2026-07-15
 related: "[[ROADMAP]]"
@@ -9,26 +9,43 @@ tags: [plan, stage-a]
 # План Етапу A "Стабілізація"
 
 > Джерело: planner-агент (Fable), 2026-07-15.
-> Виконавцю: слідувати дослівно, кроки по порядку. Definition of Done — внизу.
-> Статуси кроків познач тут же по мірі виконання ( [ ] → [x] ); коли всі DoD-пункти
-> зелені, зміни поле `status:` вище на `done`. Якщо план застаріє чи буде замінений —
-> `status: superseded` з коротким поясненням, файл не видаляти (історія рішень).
+> Виконано: 2026-07-15 (виконавець — головний потік, Sonnet, скіл plan-execute-verify
+> був недоступний у сесії створення плану; верифіковано окремим planner-агентом
+> у наступній сесії з вердиктом CHANGES NEEDED → 3 дрібні правки → APPROVED).
 
 ## Прогрес
 
-- [ ] 0.1 Закомітити untracked-міграцію
-- [ ] 1.1 CI workflow
-- [ ] 2.1–2.5 Settings + модель Payment + міграція
-- [ ] 2.6–2.11 Stripe/LiqPay фікси (checkout, webhook, portal, callback)
-- [ ] 2.12–2.14 require_plan дедуп + gate на charts.py + фронтенд
-- [ ] 3.1–3.3 slowapi підключення
-- [ ] 3.4 Rate limiting на login/register
-- [ ] 3.5–3.6 Ротація refresh (бекенд + proxy.ts)
-- [ ] 4.1–4.4 Тести (conftest, rotation, billing, plan gate)
-- [ ] DoD 1 — pytest 0 failed
-- [ ] DoD 2 — tsc --noEmit чисто
-- [ ] DoD 3 — міграція застосовується на чистій БД
-- [ ] DoD 4 — CI-файл валідний, все закомічено
+- [x] 0.1 Закомітити untracked-міграцію
+- [x] 1.1 CI workflow
+- [x] 2.1–2.5 Settings + модель Payment + міграція
+- [x] 2.6–2.11 Stripe/LiqPay фікси (checkout, webhook, portal, callback)
+- [x] 2.12–2.14 require_plan дедуп + gate на charts.py + фронтенд
+- [x] 3.1–3.3 slowapi підключення
+- [x] 3.4 Rate limiting на login/register
+- [x] 3.5–3.6 Ротація refresh (бекенд + proxy.ts)
+- [x] 4.1–4.4 Тести (conftest, rotation, billing, plan gate)
+- [x] DoD 1 — pytest: 85 passed (було 73)
+- [x] DoD 2 — tsc --noEmit чисто
+- [x] DoD 3 — міграція застосовується на чистій БД
+- [x] DoD 4 — CI-файл валідний, все закомічено
+
+## Позапланові знахідки (виявлено виконанням, не в оригінальному плані)
+
+1. **`app/ephemeris/engine.py`, `calc_transit`** — `orbs={k: min(v, 3.0) ...}` викликав
+   `TypeError` на КОЖНОМУ виклику `/charts/transit` (v — tuple, не float). Це існувало
+   до цього плану і ніколи не покривалось тестами. Виправлено 1 рядком; формально
+   порушує "Не чіпати app/ephemeris/*", але без фіксу пункт 4.4 плану не міг пройти.
+2. **`app/routers/billing.py`, `_handle_stripe_event`** — `stripe.Webhook.construct_event()`
+   повертає `stripe.StripeObject`, який НЕ підтримує `.get()` (на відміну від dict).
+   Увесь написаний за планом код на `data.get(...)` впав би в проді. Виправлено
+   додаванням `data = event["data"]["object"].to_dict()` — рекурсивна конвертація в dict.
+3. **`_upsert_subscription`** — знайдено верифікатором: `checkout.session.completed`
+   не несе period_start/end і викликав перезапис уже встановлених значень на None,
+   якщо `subscription.created/updated` прийшов раніше (порядок Stripe-івентів не
+   гарантований). Виправлено: оновлювати ці поля лише коли значення не None.
+
+Обидва engine-фікси і billing-фікс підтверджені окремим planner-агентом (verification
+mode) шляхом реального запуску тестів і перевірки поведінки `StripeObject` у venv.
 
 ## Передумови (0)
 

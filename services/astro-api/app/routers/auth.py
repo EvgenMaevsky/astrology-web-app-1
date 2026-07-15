@@ -4,7 +4,7 @@ from datetime import datetime, timedelta, timezone
 
 import bcrypt
 import jwt
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -12,8 +12,8 @@ from app.config import settings
 from app.database import get_db
 from app.dependencies.auth import get_current_user
 from app.models.user import RefreshToken, User, UserSettings
+from app.rate_limit import limiter
 from app.schemas.auth import (
-    AccessTokenResponse,
     LoginRequest,
     RefreshRequest,
     RegisterRequest,
@@ -55,7 +55,8 @@ def _token_hash(token: str) -> str:
 
 
 @router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
-async def register(body: RegisterRequest, db: AsyncSession = Depends(get_db)) -> TokenResponse:
+@limiter.limit(settings.rate_limit_register)
+async def register(request: Request, body: RegisterRequest, db: AsyncSession = Depends(get_db)) -> TokenResponse:
     existing = await db.execute(select(User).where(User.email == body.email))
     if existing.scalar_one_or_none() is not None:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already registered")
@@ -81,7 +82,8 @@ async def register(body: RegisterRequest, db: AsyncSession = Depends(get_db)) ->
 
 
 @router.post("/login", response_model=TokenResponse)
-async def login(body: LoginRequest, db: AsyncSession = Depends(get_db)) -> TokenResponse:
+@limiter.limit(settings.rate_limit_login)
+async def login(request: Request, body: LoginRequest, db: AsyncSession = Depends(get_db)) -> TokenResponse:
     result = await db.execute(select(User).where(User.email == body.email))
     user = result.scalar_one_or_none()
     if user is None or not _verify_password(body.password, user.password_hash):
@@ -103,8 +105,8 @@ async def login(body: LoginRequest, db: AsyncSession = Depends(get_db)) -> Token
     )
 
 
-@router.post("/refresh", response_model=AccessTokenResponse)
-async def refresh(body: RefreshRequest, db: AsyncSession = Depends(get_db)) -> AccessTokenResponse:
+@router.post("/refresh", response_model=TokenResponse)
+async def refresh(body: RefreshRequest, db: AsyncSession = Depends(get_db)) -> TokenResponse:
     exc = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
 
     try:
@@ -128,7 +130,22 @@ async def refresh(body: RefreshRequest, db: AsyncSession = Depends(get_db)) -> A
     if user is None or not user.is_active:
         raise exc
 
-    return AccessTokenResponse(access_token=_make_access_token(user_id))
+    # Rotate: revoke the used refresh token and issue a fresh one, so a stolen
+    # token only survives a single use before the legitimate client's next
+    # refresh call invalidates it.
+    stored.revoked = True
+    new_refresh = _make_refresh_token(user_id)
+    db.add(RefreshToken(
+        user_id=user_id,
+        token_hash=_token_hash(new_refresh),
+        expires_at=datetime.now(timezone.utc) + timedelta(days=settings.refresh_token_expire_days),
+    ))
+    await db.commit()
+
+    return TokenResponse(
+        access_token=_make_access_token(user_id),
+        refresh_token=new_refresh,
+    )
 
 
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
