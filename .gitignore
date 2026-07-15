@@ -72,8 +72,8 @@ $RECYCLE.BIN/
 *.swo
 *~
 
-# ── Astropy ephemeris cache (downloaded automatically) ────────────────────────
-# Lives in %USERPROFILE%\.astropy — outside the repo, no action needed
-
 # ── Alembic auto-generated (keep migrations, ignore only runtime artifacts) ──
 # alembic/versions/ is intentionally tracked
+
+# ── Claude Code (local-only session config; launch.json is shared/tracked) ───
+.claude/settings.local.json

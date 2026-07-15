@@ -8,18 +8,13 @@ import { Person } from "@/app/actions/persons";
 import { ChartWheel } from "@/app/_components/chart-wheel/ChartWheel";
 import { CityAutocomplete } from "@/app/_components/CityAutocomplete";
 import { UpgradePrompt } from "@/app/_components/UpgradePrompt";
+import { HOUSE_SYSTEMS } from "@/app/lib/house-systems";
 
 const CoordMap = dynamic(() => import("@/app/_components/CoordMap").then(m => m.CoordMap), {
   ssr: false,
   loading: () => <div className="w-full h-64 rounded-xl bg-stone-100 animate-pulse" />,
 });
 
-const HOUSE_SYSTEMS = [
-  { value: "placidus", label: "Placidus" },
-  { value: "koch", label: "Koch" },
-  { value: "equal", label: "Equal" },
-  { value: "whole_sign", label: "Whole Sign" },
-];
 
 const initialState: ChartState = { status: "idle" };
 
@@ -226,7 +221,7 @@ function PlanetTable({ planets }: { planets: NatalChartResult["planets"] }) {
           {rows.map((r) => (
             <tr key={r.name} className="border-b border-stone-50 hover:bg-stone-50">
               <td className="px-4 py-2 font-medium text-stone-800">
-                {r.name}{r.retrograde && <span className="ml-1 text-red-500 text-xs">℞</span>}
+                {r.name}{r.retrograde && <span className="ml-1 text-red-500 text-xs" title="Retrograde — планета в ретроградному русі">℞</span>}
               </td>
               <td className="px-4 py-2 text-stone-600">{r.sign}</td>
               <td className="px-4 py-2 text-stone-600 font-mono text-xs">{r.degree}</td>
@@ -256,8 +251,8 @@ function ArabicPartsTable({ parts }: { parts: NatalChartResult["arabic_parts"] }
           </tr>
         </thead>
         <tbody>
-          {parts.map((p) => (
-            <tr key={p.name} className="border-b border-stone-50 hover:bg-stone-50">
+          {parts.map((p, i) => (
+            <tr key={`${p.name}-${i}`} className="border-b border-stone-50 hover:bg-stone-50">
               <td className="px-4 py-1.5 text-stone-700">{p.name}</td>
               <td className="px-4 py-1.5 text-stone-600">{p.sign}</td>
               <td className="px-4 py-1.5 text-stone-600 font-mono text-xs">{fmtDeg(p.sign_degree)}</td>

@@ -1,7 +1,7 @@
 import { listPersons } from "@/app/actions/persons";
 import { ChartTabs } from "./_components/ChartTabs";
 
-export const metadata = { title: "Charts — ZET Geo" };
+export const metadata = { title: "Charts — Zorya" };
 
 export default async function ChartsPage({
   searchParams,

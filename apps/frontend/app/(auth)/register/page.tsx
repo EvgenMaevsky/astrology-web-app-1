@@ -12,7 +12,7 @@ export default function RegisterPage() {
       <div className="rounded-2xl bg-white/80 backdrop-blur shadow-xl shadow-amber-900/10 border border-stone-200 p-8">
         <div className="mb-8 text-center">
           <p className="text-xs font-semibold tracking-widest text-amber-700 uppercase mb-2">
-            ZET Geo
+            Zorya
           </p>
           <h1 className="text-2xl font-semibold text-stone-900">Create account</h1>
         </div>

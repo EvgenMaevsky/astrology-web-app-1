@@ -3,8 +3,8 @@ import uuid
 from datetime import datetime, timedelta, timezone
 
 import bcrypt
+import jwt
 from fastapi import APIRouter, Depends, HTTPException, status
-from jose import jwt
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -105,7 +105,6 @@ async def login(body: LoginRequest, db: AsyncSession = Depends(get_db)) -> Token
 
 @router.post("/refresh", response_model=AccessTokenResponse)
 async def refresh(body: RefreshRequest, db: AsyncSession = Depends(get_db)) -> AccessTokenResponse:
-    from jose import JWTError
     exc = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
 
     try:
@@ -113,7 +112,7 @@ async def refresh(body: RefreshRequest, db: AsyncSession = Depends(get_db)) -> A
         if payload.get("type") != "refresh":
             raise exc
         user_id: str = payload["sub"]
-    except JWTError:
+    except jwt.InvalidTokenError:
         raise exc
 
     h = _token_hash(body.refresh_token)
@@ -122,6 +121,11 @@ async def refresh(body: RefreshRequest, db: AsyncSession = Depends(get_db)) -> A
     )
     stored = result.scalar_one_or_none()
     if stored is None or stored.expires_at.replace(tzinfo=timezone.utc) < datetime.now(timezone.utc):
+        raise exc
+
+    user_result = await db.execute(select(User).where(User.id == user_id))
+    user = user_result.scalar_one_or_none()
+    if user is None or not user.is_active:
         raise exc
 
     return AccessTokenResponse(access_token=_make_access_token(user_id))

@@ -5,7 +5,7 @@ import "./globals.css";
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist" });
 
 export const metadata: Metadata = {
-  title: "ZET Geo — Astrology Platform",
+  title: "Zorya — Astrology Platform",
   description: "Professional astrology calculations and chart analysis",
 };
 

@@ -8,18 +8,13 @@ import { City } from "@/app/actions/atlas";
 import { ChartWheel } from "@/app/_components/chart-wheel/ChartWheel";
 import { CityAutocomplete } from "@/app/_components/CityAutocomplete";
 import { UpgradePrompt } from "@/app/_components/UpgradePrompt";
+import { HOUSE_SYSTEMS } from "@/app/lib/house-systems";
 
 const CoordMap = dynamic(() => import("@/app/_components/CoordMap").then(m => m.CoordMap), {
   ssr: false,
   loading: () => <div className="w-full h-64 rounded-xl bg-stone-100 animate-pulse" />,
 });
 
-const HOUSE_SYSTEMS = [
-  { value: "placidus", label: "Placidus" },
-  { value: "koch", label: "Koch" },
-  { value: "equal", label: "Equal" },
-  { value: "whole_sign", label: "Whole Sign" },
-];
 
 const initialState: ExtendedChartState<SolarReturnResult> = { status: "idle" };
 
@@ -33,6 +28,7 @@ export function SolarReturnForm({ persons = [] }: Props) {
   const [lat, setLat] = useState(50.45);
   const [lon, setLon] = useState(30.52);
   const [birthDt, setBirthDt] = useState("1990-01-01T12:00");
+  const [birthTz, setBirthTz] = useState("Europe/Kyiv");
   const [year, setYear] = useState(new Date().getFullYear());
 
   const handlePersonSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -41,6 +37,7 @@ export function SolarReturnForm({ persons = [] }: Props) {
     setLat(p.lat);
     setLon(p.lon);
     setBirthDt(p.birth_dt.replace("Z", "").slice(0, 16));
+    setBirthTz(p.timezone);
   };
 
   const handleCitySelect = (city: City) => {
@@ -88,6 +85,12 @@ export function SolarReturnForm({ persons = [] }: Props) {
               required
               className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400"
             />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-stone-500 mb-1">Birth timezone (IANA)</label>
+            <input type="text" name="timezone" value={birthTz}
+              onChange={e => setBirthTz(e.target.value)} placeholder="e.g. Europe/Kyiv"
+              className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400" />
           </div>
           <div>
             <label className="block text-xs font-medium text-stone-500 mb-1">Return year</label>

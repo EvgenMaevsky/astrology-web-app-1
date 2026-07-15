@@ -44,6 +44,7 @@ export async function calcNatalChart(
   if (!token) return { status: "error", error: "Not authenticated" };
 
   const birth_dt = formData.get("datetime") as string;
+  const timezone = (formData.get("timezone") as string)?.trim() || null;
   const lat = parseFloat(formData.get("lat") as string);
   const lon = parseFloat(formData.get("lon") as string);
   const house_system = (formData.get("house_system") as string) || "placidus";
@@ -62,7 +63,7 @@ export async function calcNatalChart(
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ birth_dt, lat, lon, house_system }),
+      body: JSON.stringify({ birth_dt, timezone, lat, lon, house_system }),
       cache: "no-store",
     });
   } catch {
@@ -75,9 +76,19 @@ export async function calcNatalChart(
     if (res.status === 403 && detail?.code === "plan_limit") {
       return { status: "plan_limit", message: detail.message, required: detail.required };
     }
-    return { status: "error", error: (typeof detail === "string" ? detail : detail?.message) ?? `Server error ${res.status}` };
+    return { status: "error", error: extractDetail(detail) ?? `Server error ${res.status}` };
   }
 
   const data: NatalChartResult = await res.json();
   return { status: "ok", data };
+}
+
+/** FastAPI error detail: string, {message}, or a 422 validation list. */
+function extractDetail(detail: unknown): string | undefined {
+  if (typeof detail === "string") return detail;
+  if (Array.isArray(detail)) return detail[0]?.msg;
+  if (detail && typeof detail === "object" && "message" in detail) {
+    return (detail as { message?: string }).message;
+  }
+  return undefined;
 }

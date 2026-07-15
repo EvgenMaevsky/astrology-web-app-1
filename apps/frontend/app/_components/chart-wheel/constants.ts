@@ -10,6 +10,9 @@ export const PLANET_GLYPHS: Record<string, string> = {
   uranus:  "♅",  // U+2645
   neptune: "♆",  // U+2646
   pluto:   "♇",  // U+2647
+  true_node: "☊", // U+260A (North Node)
+  lilith:  "⚸",  // U+26B8 (Black Moon Lilith)
+  chiron:  "⚷",  // U+26B7
   asc:     "AC",
   mc:      "MC",
 };

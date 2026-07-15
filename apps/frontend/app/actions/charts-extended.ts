@@ -62,6 +62,20 @@ function handlePlanLimit(body: { detail?: { code?: string; message?: string; req
   return null;
 }
 
+/** FastAPI error detail: string, {message}, or a 422 validation list. */
+function extractDetail(detail: unknown): string | undefined {
+  if (typeof detail === "string") return detail;
+  if (Array.isArray(detail)) return detail[0]?.msg;
+  if (detail && typeof detail === "object" && "message" in detail) {
+    return (detail as { message?: string }).message;
+  }
+  return undefined;
+}
+
+function tzField(formData: FormData, name: string): string | null {
+  return (formData.get(name) as string)?.trim() || null;
+}
+
 export async function calcTransit(
   _prev: ExtendedChartState<TransitResult>,
   formData: FormData
@@ -70,9 +84,11 @@ export async function calcTransit(
   if (!token) return { status: "error", error: "Not authenticated" };
 
   const natal_dt = formData.get("natal_dt") as string;
+  const natal_tz = tzField(formData, "natal_tz");
   const natal_lat = parseFloat(formData.get("natal_lat") as string);
   const natal_lon = parseFloat(formData.get("natal_lon") as string);
   const transit_dt = formData.get("transit_dt") as string;
+  const transit_tz = tzField(formData, "transit_tz");
   const transit_lat = parseFloat(formData.get("transit_lat") as string);
   const transit_lon = parseFloat(formData.get("transit_lon") as string);
   const house_system = (formData.get("house_system") as string) || "placidus";
@@ -84,7 +100,8 @@ export async function calcTransit(
   let res: Response;
   try {
     res = await authFetch("/api/v1/charts/transit", {
-      natal_dt, natal_lat, natal_lon, transit_dt, transit_lat, transit_lon, house_system,
+      natal_dt, natal_tz, natal_lat, natal_lon,
+      transit_dt, transit_tz, transit_lat, transit_lon, house_system,
     });
   } catch {
     return { status: "error", error: "Cannot connect to server" };
@@ -94,8 +111,7 @@ export async function calcTransit(
     const body = await res.json().catch(() => ({}));
     const limit = handlePlanLimit(body);
     if (limit) return limit;
-    const detail = body?.detail;
-    return { status: "error", error: (typeof detail === "string" ? detail : detail?.message) ?? `Server error ${res.status}` };
+    return { status: "error", error: extractDetail(body?.detail) ?? `Server error ${res.status}` };
   }
 
   const data: TransitResult = await res.json();
@@ -110,6 +126,7 @@ export async function calcSolarReturn(
   if (!token) return { status: "error", error: "Not authenticated" };
 
   const birth_dt = formData.get("birth_dt") as string;
+  const timezone = tzField(formData, "timezone");
   const year = parseInt(formData.get("year") as string);
   const lat = parseFloat(formData.get("lat") as string);
   const lon = parseFloat(formData.get("lon") as string);
@@ -121,7 +138,7 @@ export async function calcSolarReturn(
 
   let res: Response;
   try {
-    res = await authFetch("/api/v1/charts/solar-return", { birth_dt, year, lat, lon, house_system });
+    res = await authFetch("/api/v1/charts/solar-return", { birth_dt, timezone, year, lat, lon, house_system });
   } catch {
     return { status: "error", error: "Cannot connect to server" };
   }
@@ -130,8 +147,7 @@ export async function calcSolarReturn(
     const body = await res.json().catch(() => ({}));
     const limit = handlePlanLimit(body);
     if (limit) return limit;
-    const detail = body?.detail;
-    return { status: "error", error: (typeof detail === "string" ? detail : detail?.message) ?? `Server error ${res.status}` };
+    return { status: "error", error: extractDetail(body?.detail) ?? `Server error ${res.status}` };
   }
 
   const data: SolarReturnResult = await res.json();
@@ -146,9 +162,11 @@ export async function calcSynastry(
   if (!token) return { status: "error", error: "Not authenticated" };
 
   const dt1 = formData.get("dt1") as string;
+  const tz1 = tzField(formData, "tz1");
   const lat1 = parseFloat(formData.get("lat1") as string);
   const lon1 = parseFloat(formData.get("lon1") as string);
   const dt2 = formData.get("dt2") as string;
+  const tz2 = tzField(formData, "tz2");
   const lat2 = parseFloat(formData.get("lat2") as string);
   const lon2 = parseFloat(formData.get("lon2") as string);
   const house_system = (formData.get("house_system") as string) || "placidus";
@@ -159,7 +177,7 @@ export async function calcSynastry(
 
   let res: Response;
   try {
-    res = await authFetch("/api/v1/charts/synastry", { dt1, lat1, lon1, dt2, lat2, lon2, house_system });
+    res = await authFetch("/api/v1/charts/synastry", { dt1, tz1, lat1, lon1, dt2, tz2, lat2, lon2, house_system });
   } catch {
     return { status: "error", error: "Cannot connect to server" };
   }
@@ -168,8 +186,7 @@ export async function calcSynastry(
     const body = await res.json().catch(() => ({}));
     const limit = handlePlanLimit(body);
     if (limit) return limit;
-    const detail = body?.detail;
-    return { status: "error", error: (typeof detail === "string" ? detail : detail?.message) ?? `Server error ${res.status}` };
+    return { status: "error", error: extractDetail(body?.detail) ?? `Server error ${res.status}` };
   }
 
   const data: SynastryResult = await res.json();

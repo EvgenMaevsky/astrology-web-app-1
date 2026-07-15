@@ -37,7 +37,7 @@ export default async function DashboardLayout({
       <aside className="hidden lg:flex flex-col w-56 shrink-0 border-r border-stone-200 bg-white">
         <div className="px-5 py-6 border-b border-stone-100">
           <span className="text-xs font-semibold tracking-widest text-amber-700 uppercase">
-            ZET Geo
+            Zorya
           </span>
         </div>
         <nav className="flex-1 py-4 px-3 space-y-0.5">
@@ -66,7 +66,7 @@ export default async function DashboardLayout({
       <div className="flex flex-col flex-1 min-w-0">
         <header className="flex items-center justify-between px-6 py-4 bg-white border-b border-stone-200 h-14">
           <span className="lg:hidden text-xs font-semibold tracking-widest text-amber-700 uppercase">
-            ZET Geo
+            Zorya
           </span>
           <div className="flex items-center gap-3 ml-auto">
             {user && (

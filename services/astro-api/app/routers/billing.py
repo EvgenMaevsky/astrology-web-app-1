@@ -241,7 +241,7 @@ async def liqpay_checkout(
         "action": "subscribe",
         "amount": amount,
         "currency": "UAH",
-        "description": f"ZET Geo {plan_cfg['name']} — monthly",
+        "description": f"Zorya {plan_cfg['name']} — monthly",
         "order_id": f"{current_user.id}-{body.plan}-{__import__('time').time_ns()}",
         "subscribe": 1,
         "subscribe_date_start": __import__('datetime').datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),

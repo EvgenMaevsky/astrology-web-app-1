@@ -1,8 +1,6 @@
-from datetime import datetime, timezone
-
+import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from jose import JWTError, jwt
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -24,15 +22,12 @@ async def get_current_user(
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
+        # jwt.decode verifies signature and exp
         payload = jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])
         user_id: str | None = payload.get("sub")
-        token_type: str | None = payload.get("type")
-        exp: int | None = payload.get("exp")
-        if user_id is None or token_type != "access":
+        if user_id is None or payload.get("type") != "access":
             raise exc
-        if exp is not None and datetime.fromtimestamp(exp, tz=timezone.utc) < datetime.now(timezone.utc):
-            raise exc
-    except JWTError:
+    except jwt.InvalidTokenError:
         raise exc
 
     result = await db.execute(select(User).where(User.id == user_id))

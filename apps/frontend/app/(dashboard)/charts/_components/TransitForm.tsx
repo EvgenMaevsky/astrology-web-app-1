@@ -9,18 +9,13 @@ import { City } from "@/app/actions/atlas";
 import { ChartWheel } from "@/app/_components/chart-wheel/ChartWheel";
 import { CityAutocomplete } from "@/app/_components/CityAutocomplete";
 import { UpgradePrompt } from "@/app/_components/UpgradePrompt";
+import { HOUSE_SYSTEMS } from "@/app/lib/house-systems";
 
 const CoordMap = dynamic(() => import("@/app/_components/CoordMap").then(m => m.CoordMap), {
   ssr: false,
   loading: () => <div className="w-full h-64 rounded-xl bg-stone-100 animate-pulse" />,
 });
 
-const HOUSE_SYSTEMS = [
-  { value: "placidus", label: "Placidus" },
-  { value: "koch", label: "Koch" },
-  { value: "equal", label: "Equal" },
-  { value: "whole_sign", label: "Whole Sign" },
-];
 
 const initialState: ExtendedChartState<TransitResult> = { status: "idle" };
 
@@ -39,10 +34,12 @@ export function TransitForm({ persons = [] }: Props) {
   const [natalLat, setNatalLat] = useState(50.45);
   const [natalLon, setNatalLon] = useState(30.52);
   const [natalDt, setNatalDt] = useState("1990-01-01T12:00");
+  const [natalTz, setNatalTz] = useState("Europe/Kyiv");
 
   const [transitLat, setTransitLat] = useState(50.45);
   const [transitLon, setTransitLon] = useState(30.52);
   const [transitDt, setTransitDt] = useState(nowLocal);
+  const [transitTz, setTransitTz] = useState("Europe/Kyiv");
 
   const handlePersonSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const p = persons.find((x) => x.id === e.target.value);
@@ -50,16 +47,19 @@ export function TransitForm({ persons = [] }: Props) {
     setNatalLat(p.lat);
     setNatalLon(p.lon);
     setNatalDt(p.birth_dt.replace("Z", "").slice(0, 16));
+    setNatalTz(p.timezone);
   };
 
   const handleNatalCity = (city: City) => {
     setNatalLat(parseFloat(city.lat.toFixed(4)));
     setNatalLon(parseFloat(city.lon.toFixed(4)));
+    setNatalTz(city.timezone);
   };
 
   const handleTransitCity = (city: City) => {
     setTransitLat(parseFloat(city.lat.toFixed(4)));
     setTransitLon(parseFloat(city.lon.toFixed(4)));
+    setTransitTz(city.timezone);
   };
 
   return (
@@ -118,6 +118,12 @@ export function TransitForm({ persons = [] }: Props) {
                 value={natalLon} onChange={e => setNatalLon(parseFloat(e.target.value) || 0)} required
                 className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400" />
             </div>
+            <div className="sm:col-span-3">
+              <label className="block text-xs font-medium text-stone-500 mb-1">Birth timezone (IANA)</label>
+              <input type="text" name="natal_tz" value={natalTz}
+                onChange={e => setNatalTz(e.target.value)} placeholder="e.g. Europe/Kyiv"
+                className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400" />
+            </div>
           </div>
         </div>
 
@@ -152,6 +158,12 @@ export function TransitForm({ persons = [] }: Props) {
               <label className="block text-xs font-medium text-stone-500 mb-1">Longitude</label>
               <input type="number" name="transit_lon" step="0.0001" min="-180" max="180"
                 value={transitLon} onChange={e => setTransitLon(parseFloat(e.target.value) || 0)} required
+                className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400" />
+            </div>
+            <div className="sm:col-span-3">
+              <label className="block text-xs font-medium text-stone-500 mb-1">Transit timezone (IANA)</label>
+              <input type="text" name="transit_tz" value={transitTz}
+                onChange={e => setTransitTz(e.target.value)} placeholder="e.g. Europe/Kyiv"
                 className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400" />
             </div>
           </div>
@@ -220,7 +232,7 @@ function TransitResultPanel({ data }: { data: TransitResult }) {
             {Object.entries(data.transit).map(([name, p]) => (
               <tr key={name} className="border-b border-stone-50 hover:bg-stone-50">
                 <td className="px-4 py-2 font-medium text-stone-800 capitalize">
-                  {name}{p.retrograde && <span className="ml-1 text-red-500 text-xs">℞</span>}
+                  {name}{p.retrograde && <span className="ml-1 text-red-500 text-xs" title="Retrograde — планета в ретроградному русі">℞</span>}
                 </td>
                 <td className="px-4 py-2 text-stone-600">{p.sign}</td>
                 <td className="px-4 py-2 text-stone-600 font-mono text-xs">{fmtDeg(p.sign_degree)}</td>

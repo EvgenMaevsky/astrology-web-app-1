@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "astro-api"
 version = "0.2.0"
-description = "ZET Geo Astro API — FastAPI backend with auth and ephemeris engine"
+description = "Zorya Astro API — FastAPI backend with auth and ephemeris engine"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
@@ -13,14 +13,13 @@ dependencies = [
   "pydantic[email]>=2.11,<3.0",
   "pydantic-settings>=2.7,<3.0",
   "uvicorn[standard]>=0.35,<1.0",
-  "sqlalchemy>=2.0,<3.0",
+  "sqlalchemy[asyncio]>=2.0,<3.0",
   "alembic>=1.14,<2.0",
-  "python-jose[cryptography]>=3.3,<4.0",
+  "pyjwt>=2.8,<3.0",
   "bcrypt>=4.0,<5.0",
   "python-multipart>=0.0.20,<1.0",
   "aiosqlite>=0.20,<1.0",
-  "astropy>=7.0,<8.0",
-  "jplephem>=2.21,<3.0",
+  "pyswisseph>=2.10,<3.0",
   "stripe>=10.0,<16.0",
 ]
 

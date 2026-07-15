@@ -16,13 +16,15 @@ from app.routers.settings import router as settings_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    # Dev convenience only; production schema is managed by Alembic migrations.
+    if settings.environment != "production":
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
     yield
 
 
 app = FastAPI(
-    title="ZET Geo Astro API",
+    title="Zorya Astro API",
     version="0.2.0",
     summary="Astrology web platform — backend with auth and ephemeris engine.",
     lifespan=lifespan,

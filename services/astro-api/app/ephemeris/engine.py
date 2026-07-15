@@ -1,46 +1,51 @@
 """
-EphemerisEngine — geocentric ecliptic positions + house cusps.
+EphemerisEngine — apparent geocentric ecliptic positions + house cusps.
 
-Uses astropy + JPL DE432s (built-in, no internet required).
-Accuracy: sub-arcminute for planets, ~1' for the Moon, matching ZET9.
+Uses the Swiss Ephemeris (pyswisseph) — the same engine as ZET9 and astro.com.
+Without SE1 data files it falls back to the built-in Moshier ephemeris
+(accuracy ~0.1″ for planets, no Chiron). Set `ephe_path` in settings to a
+directory with SE1 files to enable Chiron and full precision.
 """
 from __future__ import annotations
 
 import math
-import warnings
 from datetime import datetime, timezone
-from functools import lru_cache
 
-from astropy import units as u
-from astropy.coordinates import (
-    EarthLocation,
-    GeocentricMeanEcliptic,
-    get_body,
-    solar_system_ephemeris,
-)
-from astropy.time import Time
-from astropy.utils.iers import conf as iers_conf
+import swisseph as swe
 
-from app.ephemeris.houses import HOUSE_SYSTEMS, _obliquity, get_asc, get_mc
+from app.config import settings
 
-# Suppress the IERS polar-motion warning for historical dates
-iers_conf.auto_max_age = None
-warnings.filterwarnings("ignore", category=UserWarning, module="astropy")
+if settings.ephe_path:
+    swe.set_ephe_path(settings.ephe_path)
 
-# de432s covers 1950–2050 including Pluto; downloaded once (~10 MB) by astropy.
-solar_system_ephemeris.set("de432s")
+_CALC_FLAGS = swe.FLG_SWIEPH | swe.FLG_SPEED
 
-BODY_MAP: dict[str, str] = {
-    "sun": "sun",
-    "moon": "moon",
-    "mercury": "mercury",
-    "venus": "venus",
-    "mars": "mars",
-    "jupiter": "jupiter",
-    "saturn": "saturn",
-    "uranus": "uranus",
-    "neptune": "neptune",
-    "pluto": "pluto",
+BODY_MAP: dict[str, int] = {
+    "sun": swe.SUN,
+    "moon": swe.MOON,
+    "mercury": swe.MERCURY,
+    "venus": swe.VENUS,
+    "mars": swe.MARS,
+    "jupiter": swe.JUPITER,
+    "saturn": swe.SATURN,
+    "uranus": swe.URANUS,
+    "neptune": swe.NEPTUNE,
+    "pluto": swe.PLUTO,
+    "true_node": swe.TRUE_NODE,
+    "lilith": swe.MEAN_APOG,
+    "chiron": swe.CHIRON,  # requires seas_*.se1 file; skipped if unavailable
+}
+
+# Nodes/apogee have no meaningful retrograde flag of their own in reports,
+# but their speeds are still returned by swisseph, so no special-casing needed.
+
+HOUSE_SYSTEMS: dict[str, bytes] = {
+    "placidus": b"P",
+    "koch": b"K",
+    "equal": b"E",
+    "whole_sign": b"W",
+    "regiomontanus": b"R",
+    "campanus": b"C",
 }
 
 ASPECT_DEFS: dict[str, tuple[float, float]] = {
@@ -59,42 +64,53 @@ ASPECT_DEFS: dict[str, tuple[float, float]] = {
 }
 
 
-def _dt_to_astropy_time(dt: datetime) -> Time:
-    """Convert Python datetime (aware or naive UTC) to astropy Time."""
+def _jd_ut(dt: datetime) -> float:
+    """Julian Day (UT1≈UTC) from a datetime; naive datetimes are taken as UTC."""
     if dt.tzinfo is None:
         dt = dt.replace(tzinfo=timezone.utc)
-    return Time(dt, scale="utc")
+    dt = dt.astimezone(timezone.utc)
+    _, jd_ut = swe.utc_to_jd(
+        dt.year, dt.month, dt.day,
+        dt.hour, dt.minute, dt.second + dt.microsecond / 1e6,
+        swe.GREG_CAL,
+    )
+    return jd_ut
 
 
-def _jd(t: Time) -> float:
-    return float(t.jd)
+def _jd_to_utc(jd_ut: float) -> datetime:
+    y, m, d, h, mi, s = swe.jdut1_to_utc(jd_ut, swe.GREG_CAL)
+    sec = int(s)
+    micro = int(round((s - sec) * 1e6))
+    if micro >= 1_000_000:
+        sec, micro = sec + 1, 0
+    return datetime(y, m, d, h, mi, min(sec, 59), micro, tzinfo=timezone.utc)
 
 
-def _get_ecliptic_pos(body_name: str, t: Time, loc: EarthLocation) -> dict:
-    """Return geocentric ecliptic longitude, latitude, distance, speed."""
-    body = get_body(body_name, t, loc)
-    ecl = body.transform_to(GeocentricMeanEcliptic(equinox=t))
-    lon = float(ecl.lon.deg) % 360.0
-    lat = float(ecl.lat.deg)
-    dist = float(ecl.distance.au)
-
-    # Approximate daily speed via finite difference (1 day)
-    t2 = Time(t.jd + 1.0, format="jd", scale="utc")
-    body2 = get_body(body_name, t2, loc)
-    ecl2 = body2.transform_to(GeocentricMeanEcliptic(equinox=t2))
-    lon2 = float(ecl2.lon.deg) % 360.0
-    speed = (lon2 - lon + 360) % 360
-    if speed > 180:
-        speed -= 360  # retrograde if negative
-
-    return {"longitude": round(lon, 6), "latitude": round(lat, 6),
-            "distance": round(dist, 8), "speed": round(speed, 6)}
+def _calc_body(jd_ut: float, body: int) -> dict:
+    (lon, lat, dist, lon_speed, _lat_speed, _dist_speed), _ = swe.calc_ut(
+        jd_ut, body, _CALC_FLAGS
+    )
+    return {
+        "longitude": round(lon % 360.0, 6),
+        "latitude": round(lat, 6),
+        "distance": round(dist, 8),
+        "speed": round(lon_speed, 6),
+    }
 
 
-def _get_ramc(t: Time, lon_deg: float) -> float:
-    """RAMC = Local Apparent Sidereal Time × 15, in degrees."""
-    lst = t.sidereal_time("apparent", longitude=lon_deg * u.deg)
-    return float(lst.deg)
+def _signed_sep(lon_a: float, lon_b: float) -> float:
+    """Signed separation lon_a − lon_b, wrapped to (−180, 180]."""
+    return (lon_a - lon_b + 180.0) % 360.0 - 180.0
+
+
+def _is_applying(lon_a: float, speed_a: float, lon_b: float, speed_b: float,
+                 asp_angle: float) -> bool:
+    """True if the aspect is applying (deviation from exact is shrinking)."""
+    sep = _signed_sep(lon_a, lon_b)
+    # d|sep|/dt: |sep| grows when sep and relative speed share sign
+    d_abs_sep = math.copysign(1.0, sep or 1.0) * (speed_a - speed_b)
+    # deviation = | |sep| − angle |; it shrinks when (|sep| − angle) and d|sep|/dt disagree
+    return (abs(sep) - asp_angle) * d_abs_sep < 0
 
 
 class EphemerisEngine:
@@ -118,24 +134,24 @@ class EphemerisEngine:
         if bodies is None:
             bodies = list(BODY_MAP.keys())
 
-        t = _dt_to_astropy_time(dt)
-        loc = EarthLocation(lat=lat * u.deg, lon=lon * u.deg)
-        jd = _jd(t)
-        obl = _obliquity(jd)
-        ramc = _get_ramc(t, lon)
+        jd = _jd_ut(dt)
+        hsys = HOUSE_SYSTEMS.get(house_system, HOUSE_SYSTEMS["placidus"])
+        cusps, ascmc = swe.houses_ex(jd, lat, lon, hsys)
+        cusps = [c % 360.0 for c in cusps]
+        asc, mc, ramc = ascmc[0], ascmc[1], ascmc[2]
 
-        hs_fn = HOUSE_SYSTEMS.get(house_system, HOUSE_SYSTEMS["placidus"])
-        cusps = hs_fn(ramc, obl, lat)
-
-        asc = cusps[0]
-        mc = cusps[9]
+        # True obliquity of date
+        (obl_true, *_), _ = swe.calc_ut(jd, swe.ECL_NUT)
 
         planets: dict[str, dict] = {}
         for name in bodies:
-            astropy_name = BODY_MAP.get(name)
-            if astropy_name is None:
+            body_id = BODY_MAP.get(name)
+            if body_id is None:
                 continue
-            pos = _get_ecliptic_pos(astropy_name, t, loc)
+            try:
+                pos = _calc_body(jd, body_id)
+            except swe.Error:
+                continue  # e.g. Chiron without SE1 asteroid files
             pos["sign"] = _sign(pos["longitude"])
             pos["sign_degree"] = round(pos["longitude"] % 30, 4)
             pos["house"] = _which_house(pos["longitude"], cusps)
@@ -154,7 +170,7 @@ class EphemerisEngine:
             "meta": {
                 "jd": round(jd, 8),
                 "ramc": round(ramc, 6),
-                "obliquity": round(obl, 6),
+                "obliquity": round(obl_true, 6),
                 "house_system": house_system,
             },
         }
@@ -198,29 +214,27 @@ class EphemerisEngine:
         """
         Find the Solar Return moment for a given year and compute its chart.
 
-        The Solar Return occurs when transiting Sun reaches the exact natal Sun longitude.
-        Uses Newton's method (converges in < 10 iterations).
+        Newton's method on JD: correction = diff / sun_speed (~0.9856°/day),
+        converges to < 0.001″ in 3–4 iterations.
         """
         natal = self.calc_natal(birth_dt, lat, lon, house_system)
         natal_sun_lon = natal["planets"]["sun"]["longitude"]
 
-        loc = EarthLocation(lat=lat * u.deg, lon=lon * u.deg)
-
         # Seed: same calendar day in the target year
         try:
-            seed_dt = birth_dt.replace(year=year, tzinfo=timezone.utc)
-        except ValueError:
-            seed_dt = birth_dt.replace(year=year, day=28, tzinfo=timezone.utc)
-        t = _dt_to_astropy_time(seed_dt)
+            seed_dt = birth_dt.replace(year=year)
+        except ValueError:  # Feb 29 in a non-leap year
+            seed_dt = birth_dt.replace(year=year, day=28)
+        jd = _jd_ut(seed_dt)
 
-        for _ in range(30):
-            pos = _get_ecliptic_pos("sun", t, loc)
-            diff = (natal_sun_lon - pos["longitude"] + 180) % 360 - 180
-            if abs(diff) < 1e-5:
+        for _ in range(20):
+            (sun_lon, _lat, _dist, sun_speed, *_), _ = swe.calc_ut(jd, swe.SUN, _CALC_FLAGS)
+            diff = _signed_sep(natal_sun_lon, sun_lon)
+            if abs(diff) < 1e-7:
                 break
-            t = Time(t.jd + diff / 360.0, format="jd", scale="utc")
+            jd += diff / sun_speed
 
-        sr_dt = t.to_datetime(timezone=timezone.utc)
+        sr_dt = _jd_to_utc(jd)
         sr_chart = self.calc_natal(sr_dt, lat, lon, house_system)
         return {
             "return_dt": sr_dt.isoformat(),
@@ -263,26 +277,23 @@ class EphemerisEngine:
         results: list[dict] = []
         for name_a, p_a in planets_a.items():
             for name_b, p_b in planets_b.items():
-                lon_a = p_a["longitude"]
-                lon_b = p_b["longitude"]
-                diff = abs(lon_a - lon_b) % 360
-                if diff > 180:
-                    diff = 360 - diff
+                diff = abs(_signed_sep(p_a["longitude"], p_b["longitude"]))
 
                 for asp_name, (asp_angle, default_orb) in ASPECT_DEFS.items():
                     orb = (orbs or {}).get(asp_name, default_orb)
                     deviation = abs(diff - asp_angle)
                     if deviation <= orb:
-                        speed_a = p_a.get("speed", 0)
-                        speed_b = p_b.get("speed", 0)
-                        approaching = (speed_a - speed_b) * (lon_a - lon_b) < 0
                         results.append({
                             label1: name_a,
                             label2: name_b,
                             "aspect": asp_name,
                             "angle": round(asp_angle, 2),
                             "orb": round(deviation, 4),
-                            "applying": approaching,
+                            "applying": _is_applying(
+                                p_a["longitude"], p_a.get("speed", 0),
+                                p_b["longitude"], p_b.get("speed", 0),
+                                asp_angle,
+                            ),
                         })
         return results
 
@@ -302,24 +313,23 @@ class EphemerisEngine:
             for p2 in names[i + 1:]:
                 lon1 = planets[p1]["longitude"]
                 lon2 = planets[p2]["longitude"]
-                diff = abs(lon1 - lon2) % 360
-                if diff > 180:
-                    diff = 360 - diff
+                diff = abs(_signed_sep(lon1, lon2))
 
                 for asp_name, (asp_angle, default_orb) in ASPECT_DEFS.items():
                     orb = (orbs or {}).get(asp_name, default_orb)
                     deviation = abs(diff - asp_angle)
                     if deviation <= orb:
-                        speed1 = planets[p1].get("speed", 0)
-                        speed2 = planets[p2].get("speed", 0)
-                        approaching = (speed1 - speed2) * (lon1 - lon2) < 0
                         results.append({
                             "planet1": p1,
                             "planet2": p2,
                             "aspect": asp_name,
                             "angle": round(asp_angle, 2),
                             "orb": round(deviation, 4),
-                            "applying": approaching,
+                            "applying": _is_applying(
+                                lon1, planets[p1].get("speed", 0),
+                                lon2, planets[p2].get("speed", 0),
+                                asp_angle,
+                            ),
                         })
         return results
 

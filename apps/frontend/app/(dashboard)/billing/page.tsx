@@ -2,7 +2,7 @@ import Link from "next/link";
 import { getSubscription, getChartUsage, getPlans } from "@/app/actions/billing";
 import { ManageButton } from "./_components/ManageButton";
 
-export const metadata = { title: "Billing — ZET Geo" };
+export const metadata = { title: "Billing — Zorya" };
 
 export default async function BillingPage({
   searchParams,

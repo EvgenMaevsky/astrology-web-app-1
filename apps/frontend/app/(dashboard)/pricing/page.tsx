@@ -1,7 +1,7 @@
 import { getPlans, getSubscription } from "@/app/actions/billing";
 import { PricingCard } from "./_components/PricingCard";
 
-export const metadata = { title: "Pricing — ZET Geo" };
+export const metadata = { title: "Pricing — Zorya" };
 
 export default async function PricingPage({
   searchParams,

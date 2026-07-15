@@ -6,13 +6,8 @@ import { Person } from "@/app/actions/persons";
 import { City } from "@/app/actions/atlas";
 import { CityAutocomplete } from "@/app/_components/CityAutocomplete";
 import { UpgradePrompt } from "@/app/_components/UpgradePrompt";
+import { HOUSE_SYSTEMS } from "@/app/lib/house-systems";
 
-const HOUSE_SYSTEMS = [
-  { value: "placidus", label: "Placidus" },
-  { value: "koch", label: "Koch" },
-  { value: "equal", label: "Equal" },
-  { value: "whole_sign", label: "Whole Sign" },
-];
 
 const initialState: ExtendedChartState<SynastryResult> = { status: "idle" };
 
@@ -38,16 +33,19 @@ export function SynastryForm({ persons = [] }: Props) {
   const [lat1, setLat1] = useState(50.45);
   const [lon1, setLon1] = useState(30.52);
   const [dt1, setDt1] = useState("1990-01-01T12:00");
+  const [tz1, setTz1] = useState("Europe/Kyiv");
 
   const [lat2, setLat2] = useState(50.45);
   const [lon2, setLon2] = useState(30.52);
   const [dt2, setDt2] = useState("1992-06-15T12:00");
+  const [tz2, setTz2] = useState("Europe/Kyiv");
 
   const handlePersonSelect1 = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const p = persons.find((x) => x.id === e.target.value);
     if (!p) return;
     setLat1(p.lat); setLon1(p.lon);
     setDt1(p.birth_dt.replace("Z", "").slice(0, 16));
+    setTz1(p.timezone);
   };
 
   const handlePersonSelect2 = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -55,6 +53,7 @@ export function SynastryForm({ persons = [] }: Props) {
     if (!p) return;
     setLat2(p.lat); setLon2(p.lon);
     setDt2(p.birth_dt.replace("Z", "").slice(0, 16));
+    setTz2(p.timezone);
   };
 
   return (
@@ -75,11 +74,16 @@ export function SynastryForm({ persons = [] }: Props) {
               </select>
             )}
 
-            <CityAutocomplete onSelect={(c: City) => { setLat1(parseFloat(c.lat.toFixed(4))); setLon1(parseFloat(c.lon.toFixed(4))); }} placeholder="Search city…" />
+            <CityAutocomplete onSelect={(c: City) => { setLat1(parseFloat(c.lat.toFixed(4))); setLon1(parseFloat(c.lon.toFixed(4))); setTz1(c.timezone); }} placeholder="Search city…" />
 
             <div>
               <label className="block text-xs font-medium text-stone-500 mb-1">Birth date &amp; time</label>
               <input type="datetime-local" name="dt1" value={dt1} onChange={e => setDt1(e.target.value)} required
+                className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400" />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-stone-500 mb-1">Timezone (IANA)</label>
+              <input type="text" name="tz1" value={tz1} onChange={e => setTz1(e.target.value)} placeholder="e.g. Europe/Kyiv"
                 className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400" />
             </div>
             <div className="grid grid-cols-2 gap-3">
@@ -110,11 +114,16 @@ export function SynastryForm({ persons = [] }: Props) {
               </select>
             )}
 
-            <CityAutocomplete onSelect={(c: City) => { setLat2(parseFloat(c.lat.toFixed(4))); setLon2(parseFloat(c.lon.toFixed(4))); }} placeholder="Search city…" />
+            <CityAutocomplete onSelect={(c: City) => { setLat2(parseFloat(c.lat.toFixed(4))); setLon2(parseFloat(c.lon.toFixed(4))); setTz2(c.timezone); }} placeholder="Search city…" />
 
             <div>
               <label className="block text-xs font-medium text-stone-500 mb-1">Birth date &amp; time</label>
               <input type="datetime-local" name="dt2" value={dt2} onChange={e => setDt2(e.target.value)} required
+                className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400" />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-stone-500 mb-1">Timezone (IANA)</label>
+              <input type="text" name="tz2" value={tz2} onChange={e => setTz2(e.target.value)} placeholder="e.g. Europe/Kyiv"
                 className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400" />
             </div>
             <div className="grid grid-cols-2 gap-3">
@@ -186,7 +195,7 @@ function SynastryResultPanel({ data }: { data: SynastryResult }) {
                 {Object.entries(data[key].planets).map(([name, p]) => (
                   <tr key={name} className="border-b border-stone-50 hover:bg-stone-50">
                     <td className="px-4 py-1.5 font-medium text-stone-800 capitalize">
-                      {name}{p.retrograde && <span className="ml-1 text-red-500 text-xs">℞</span>}
+                      {name}{p.retrograde && <span className="ml-1 text-red-500 text-xs" title="Retrograde — планета в ретроградному русі">℞</span>}
                     </td>
                     <td className="px-4 py-1.5 text-stone-600">{p.sign}</td>
                     <td className="px-4 py-1.5 text-stone-600 font-mono text-xs">{fmtDeg(p.sign_degree)}</td>
