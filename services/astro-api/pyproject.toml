@@ -19,7 +19,7 @@ dependencies = [
   "bcrypt>=4.0,<5.0",
   "python-multipart>=0.0.20,<1.0",
   "aiosqlite>=0.20,<1.0",
-  "pyswisseph>=2.10,<3.0",
+  "skyfield>=1.49,<2.0",
   "stripe>=10.0,<16.0",
 ]
 
@@ -28,6 +28,9 @@ dev = [
   "httpx>=0.28,<1.0",
   "pytest>=8.3,<9.0",
   "pytest-asyncio>=0.25,<1.0",
+  # Swiss Ephemeris is AGPL — dev/CI cross-validation oracle ONLY,
+  # must never be imported by runtime code (app/*)
+  "pyswisseph>=2.10,<3.0",
 ]
 
 [tool.pytest.ini_options]

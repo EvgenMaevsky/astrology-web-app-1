@@ -77,3 +77,4 @@ $RECYCLE.BIN/
 
 # ── Claude Code (local-only session config; launch.json is shared/tracked) ───
 .claude/settings.local.json
+skyfield-data/

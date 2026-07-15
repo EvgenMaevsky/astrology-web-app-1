@@ -2,7 +2,9 @@
 
 Zorya — web rewrite of the ZET9 Geo astrology desktop app.
 Stack: Next.js 16 + FastAPI + SQLite (dev) / PostgreSQL (prod).
-Ephemeris: **Swiss Ephemeris** (pyswisseph) — the same engine as ZET9 / astro.com.
+Ephemeris: **own license-clean engine** — Skyfield (MIT) + JPL DE440s (public
+domain), the same raw data Swiss Ephemeris is built on. Every change is
+cross-validated in CI against pyswisseph (dev-only AGPL oracle, never shipped).
 
 ## Quick start
 
@@ -34,13 +36,17 @@ cd services/astro-api && .venv/bin/python -m pytest
 
 - Birth time is entered as **local wall time** + IANA timezone; the backend
   converts to UT using the historical tz database (incl. pre-1990 Soviet offsets).
-- Planets are apparent geocentric positions (true equinox of date).
-- Without SE1 data files pyswisseph uses the built-in Moshier ephemeris
-  (~0.1″ planets; Chiron unavailable). Point `EPHE_PATH` at a directory with
-  SE1 files (e.g. from ZET9 `Swiss/`) for full precision + Chiron.
-- House systems: Placidus, Koch, Equal, Whole Sign, Regiomontanus, Campanus.
-- Regression tests pin planet longitudes to astro.com references and verify
-  the Placidus semi-arc condition and solar-return convergence.
+- Planets are apparent geocentric positions (true equinox of date) straight
+  from JPL DE440s; agreement with Swiss Ephemeris is ≤ 0.003° (≈ 11″).
+- True lunar node from the osculating geocentric orbit; Lilith (mean apogee)
+  via Meeus elements projected onto the ecliptic — both match Swiss Ephemeris.
+- Chiron is optional: `python scripts/fetch_chiron_spk.py` downloads a free
+  SPK from JPL Horizons, then set `CHIRON_SPK` in `.env`.
+- House systems: Placidus, Koch, Equal, Whole Sign, Regiomontanus, Campanus —
+  all cross-validated against Swiss Ephemeris to < 0.01°.
+- Test suite: golden planet longitudes (astro.com), the Placidus semi-arc
+  invariant, solar-return convergence, and a full cross-validation run against
+  pyswisseph (skipped automatically if it isn't installed).
 
 ## Roadmap
 

@@ -18,9 +18,10 @@ class Settings(BaseSettings):
     cors_origins: list[str] = ["http://localhost:3000", "http://127.0.0.1:3000"]
     frontend_url: str = "http://localhost:3000"
 
-    # Optional path to Swiss Ephemeris SE1 data files (enables Chiron + max precision).
-    # Without it pyswisseph uses the built-in Moshier ephemeris.
-    ephe_path: str = ""
+    # Directory for JPL ephemeris files (de440s.bsp auto-downloads there, ~32 MB).
+    skyfield_dir: str = "./skyfield-data"
+    # Optional SPK file with 2060 Chiron from JPL Horizons (see scripts/fetch_chiron_spk.py).
+    chiron_spk: str = ""
 
     # Stripe
     stripe_secret_key: str = ""

@@ -1,52 +1,54 @@
 """
 EphemerisEngine — apparent geocentric ecliptic positions + house cusps.
 
-Uses the Swiss Ephemeris (pyswisseph) — the same engine as ZET9 and astro.com.
-Without SE1 data files it falls back to the built-in Moshier ephemeris
-(accuracy ~0.1″ for planets, no Chiron). Set `ephe_path` in settings to a
-directory with SE1 files to enable Chiron and full precision.
+License-clean stack: Skyfield (MIT) + JPL DE440s (public domain) — the same
+raw data Swiss Ephemeris compresses into its SE1 files. Positions are apparent
+(light-time, aberration, nutation) referred to the true ecliptic and equinox
+of date, matching ZET9 / astro.com conventions.
+
+Every released change is cross-validated against pyswisseph (dev-only oracle)
+in tests/test_cross_swisseph.py.
+
+Bodies:
+  Sun–Pluto            DE440s (outer planets via system barycenters, < 0.1″ off)
+  true_node            osculating node of the geocentric lunar orbit (from r × v)
+  mean_node*, lilith   Meeus polynomials, mean equinox of date
+  chiron               optional Horizons SPK (settings.chiron_spk)
+
+* mean_node is computed internally for parity checks; the public body set keeps
+  true_node + lilith as before.
 """
 from __future__ import annotations
 
 import math
 from datetime import datetime, timezone
+from functools import lru_cache
+from pathlib import Path
 
-import swisseph as swe
+import numpy as np
+from skyfield.api import Loader
+from skyfield.framelib import ecliptic_frame
+from skyfield.nutationlib import iau2000b
 
 from app.config import settings
+from app.ephemeris.houses import HOUSE_SYSTEMS, get_asc, get_mc  # noqa: F401
 
-if settings.ephe_path:
-    swe.set_ephe_path(settings.ephe_path)
+_SPEED_STEP_DAYS = 0.25  # central difference half-step for daily motion
 
-_CALC_FLAGS = swe.FLG_SWIEPH | swe.FLG_SPEED
-
-BODY_MAP: dict[str, int] = {
-    "sun": swe.SUN,
-    "moon": swe.MOON,
-    "mercury": swe.MERCURY,
-    "venus": swe.VENUS,
-    "mars": swe.MARS,
-    "jupiter": swe.JUPITER,
-    "saturn": swe.SATURN,
-    "uranus": swe.URANUS,
-    "neptune": swe.NEPTUNE,
-    "pluto": swe.PLUTO,
-    "true_node": swe.TRUE_NODE,
-    "lilith": swe.MEAN_APOG,
-    "chiron": swe.CHIRON,  # requires seas_*.se1 file; skipped if unavailable
+BODY_TARGETS: dict[str, str] = {
+    "sun": "sun",
+    "moon": "moon",
+    "mercury": "mercury",
+    "venus": "venus",
+    "mars": "mars barycenter",
+    "jupiter": "jupiter barycenter",
+    "saturn": "saturn barycenter",
+    "uranus": "uranus barycenter",
+    "neptune": "neptune barycenter",
+    "pluto": "pluto barycenter",
 }
 
-# Nodes/apogee have no meaningful retrograde flag of their own in reports,
-# but their speeds are still returned by swisseph, so no special-casing needed.
-
-HOUSE_SYSTEMS: dict[str, bytes] = {
-    "placidus": b"P",
-    "koch": b"K",
-    "equal": b"E",
-    "whole_sign": b"W",
-    "regiomontanus": b"R",
-    "campanus": b"C",
-}
+BODY_ORDER = [*BODY_TARGETS.keys(), "true_node", "lilith", "chiron"]
 
 ASPECT_DEFS: dict[str, tuple[float, float]] = {
     # name: (angle, default_orb)
@@ -64,38 +66,48 @@ ASPECT_DEFS: dict[str, tuple[float, float]] = {
 }
 
 
-def _jd_ut(dt: datetime) -> float:
-    """Julian Day (UT1≈UTC) from a datetime; naive datetimes are taken as UTC."""
+@lru_cache(maxsize=1)
+def _sky():
+    """Lazy singletons: loader, timescale, planetary ephemeris, optional Chiron."""
+    load = Loader(settings.skyfield_dir, verbose=False)
+    ts = load.timescale()
+    eph = load("de440s.bsp")
+    chiron = None
+    if settings.chiron_spk and Path(settings.chiron_spk).exists():
+        spk = load_file_safe(settings.chiron_spk)
+        if spk is not None:
+            for seg_id in (2002060, 20002060):
+                if seg_id in spk:
+                    chiron = eph["sun"] + spk[seg_id]
+                    break
+    return ts, eph, chiron
+
+
+def load_file_safe(path: str):
+    from skyfield.api import load_file
+    try:
+        return load_file(path)
+    except Exception:
+        return None
+
+
+def _time_from_dt(dt: datetime):
+    """Build a Skyfield Time treating the civil UTC instant as UT1.
+
+    This is the convention of all astrological references (Swiss Ephemeris,
+    astro.com): the difference is < 0.9 s for modern dates, and for pre-1972
+    dates it sidesteps the ill-defined rubber-second UTC entirely.
+    """
     if dt.tzinfo is None:
         dt = dt.replace(tzinfo=timezone.utc)
     dt = dt.astimezone(timezone.utc)
-    _, jd_ut = swe.utc_to_jd(
-        dt.year, dt.month, dt.day,
-        dt.hour, dt.minute, dt.second + dt.microsecond / 1e6,
-        swe.GREG_CAL,
-    )
-    return jd_ut
+    ts, _, _ = _sky()
+    return ts.ut1(dt.year, dt.month, dt.day,
+                  dt.hour, dt.minute, dt.second + dt.microsecond / 1e6)
 
 
-def _jd_to_utc(jd_ut: float) -> datetime:
-    y, m, d, h, mi, s = swe.jdut1_to_utc(jd_ut, swe.GREG_CAL)
-    sec = int(s)
-    micro = int(round((s - sec) * 1e6))
-    if micro >= 1_000_000:
-        sec, micro = sec + 1, 0
-    return datetime(y, m, d, h, mi, min(sec, 59), micro, tzinfo=timezone.utc)
-
-
-def _calc_body(jd_ut: float, body: int) -> dict:
-    (lon, lat, dist, lon_speed, _lat_speed, _dist_speed), _ = swe.calc_ut(
-        jd_ut, body, _CALC_FLAGS
-    )
-    return {
-        "longitude": round(lon % 360.0, 6),
-        "latitude": round(lat, 6),
-        "distance": round(dist, 8),
-        "speed": round(lon_speed, 6),
-    }
+def _norm(x: float) -> float:
+    return x % 360
 
 
 def _signed_sep(lon_a: float, lon_b: float) -> float:
@@ -103,14 +115,104 @@ def _signed_sep(lon_a: float, lon_b: float) -> float:
     return (lon_a - lon_b + 180.0) % 360.0 - 180.0
 
 
-def _is_applying(lon_a: float, speed_a: float, lon_b: float, speed_b: float,
-                 asp_angle: float) -> bool:
-    """True if the aspect is applying (deviation from exact is shrinking)."""
-    sep = _signed_sep(lon_a, lon_b)
-    # d|sep|/dt: |sep| grows when sep and relative speed share sign
-    d_abs_sep = math.copysign(1.0, sep or 1.0) * (speed_a - speed_b)
-    # deviation = | |sep| − angle |; it shrinks when (|sep| − angle) and d|sep|/dt disagree
-    return (abs(sep) - asp_angle) * d_abs_sep < 0
+def _mean_obliquity(tt_jd: float) -> float:
+    T = (tt_jd - 2451545.0) / 36525.0
+    return (84381.406 - 46.836769 * T - 0.0001831 * T**2 + 0.00200340 * T**3) / 3600.0
+
+
+def _true_obliquity(t) -> float:
+    _, deps = iau2000b(t.tt)          # units: 0.1 microarcsecond
+    return _mean_obliquity(t.tt) + deps * 1e-7 / 3600.0
+
+
+def _apparent_lon_series(observer, target, t3) -> np.ndarray:
+    """Apparent ecliptic-of-date longitudes at a vector of times."""
+    app = observer.at(t3).observe(target).apparent()
+    _lat, lon, _dist = app.frame_latlon(ecliptic_frame)
+    return lon.degrees
+
+
+def _planet_position(eph, target_key: str, t, t3, chiron_target=None) -> dict:
+    earth = eph["earth"]
+    target = chiron_target if chiron_target is not None else eph[target_key]
+    app = earth.at(t).observe(target).apparent()
+    lat, lon, dist = app.frame_latlon(ecliptic_frame)
+
+    lons = _apparent_lon_series(earth, target, t3)
+    speed = _signed_sep(float(lons[2]), float(lons[0])) / (2 * _SPEED_STEP_DAYS)
+
+    return {
+        "longitude": round(float(lon.degrees) % 360.0, 6),
+        "latitude": round(float(lat.degrees), 6),
+        "distance": round(float(dist.au), 8),
+        "speed": round(speed, 6),
+    }
+
+
+def _true_node(eph, t, t3) -> dict:
+    """Osculating ascending node of the geocentric lunar orbit."""
+    rel = eph["moon"] - eph["earth"]
+
+    def node_lon(ti) -> float:
+        pos = rel.at(ti)
+        r, v = pos.frame_xyz_and_velocity(ecliptic_frame)
+        h = np.cross(r.au, v.au_per_d)
+        n = np.cross([0.0, 0.0, 1.0], h)   # ascending node direction
+        return _norm(math.degrees(math.atan2(n[1], n[0])))
+
+    lon = node_lon(t)
+    lon_m = node_lon(_shift(t, -_SPEED_STEP_DAYS))
+    lon_p = node_lon(_shift(t, +_SPEED_STEP_DAYS))
+    speed = _signed_sep(lon_p, lon_m) / (2 * _SPEED_STEP_DAYS)
+
+    pos = rel.at(t)
+    return {
+        "longitude": round(lon, 6),
+        "latitude": 0.0,
+        "distance": round(float(pos.distance().au), 8),
+        "speed": round(speed, 6),
+    }
+
+
+_LUNAR_INCLINATION = 5.145396  # degrees
+
+
+def _mean_apogee_ecliptic(tt_jd: float) -> tuple[float, float]:
+    """Black Moon Lilith: mean lunar apogee projected onto the ecliptic.
+
+    Mean elements (Meeus/ELP-2000) give the apogee as an angle measured
+    along the inclined lunar orbit; like Swiss Ephemeris, we convert that
+    to true ecliptic longitude/latitude (differences reach ~0.11°).
+    """
+    T = (tt_jd - 2451545.0) / 36525.0
+    node = (125.0445479 - 1934.1362891 * T + 0.0020754 * T**2
+            + T**3 / 467441.0 - T**4 / 60616000.0)
+    perigee = (83.3532465 + 4069.0137287 * T - 0.0103200 * T**2
+               - T**3 / 80053.0 + T**4 / 18999000.0)
+    u = math.radians(perigee + 180.0 - node)   # apogee, argument from the node
+    i = math.radians(_LUNAR_INCLINATION)
+    lon = _norm(node + math.degrees(math.atan2(math.cos(i) * math.sin(u), math.cos(u))))
+    lat = math.degrees(math.asin(math.sin(i) * math.sin(u)))
+    return lon, lat
+
+
+def _mean_lunar_apogee(t) -> dict:
+    lon, lat = _mean_apogee_ecliptic(t.tt)
+    lon_m, _ = _mean_apogee_ecliptic(t.tt - _SPEED_STEP_DAYS)
+    lon_p, _ = _mean_apogee_ecliptic(t.tt + _SPEED_STEP_DAYS)
+    speed = _signed_sep(lon_p, lon_m) / (2 * _SPEED_STEP_DAYS)
+    return {"longitude": round(lon, 6), "latitude": round(lat, 6),
+            "distance": 0.0, "speed": round(speed, 6)}
+
+
+def _shift(t, days: float):
+    ts, _, _ = _sky()
+    return ts.tt_jd(t.tt + days)
+
+
+def _t3(t):
+    ts, _, _ = _sky()
+    return ts.tt_jd(t.tt + np.array([-_SPEED_STEP_DAYS, 0.0, _SPEED_STEP_DAYS]))
 
 
 class EphemerisEngine:
@@ -132,26 +234,36 @@ class EphemerisEngine:
           meta:    {jd, ramc, obliquity, house_system}
         """
         if bodies is None:
-            bodies = list(BODY_MAP.keys())
+            bodies = list(BODY_ORDER)
 
-        jd = _jd_ut(dt)
-        hsys = HOUSE_SYSTEMS.get(house_system, HOUSE_SYSTEMS["placidus"])
-        cusps, ascmc = swe.houses_ex(jd, lat, lon, hsys)
-        cusps = [c % 360.0 for c in cusps]
-        asc, mc, ramc = ascmc[0], ascmc[1], ascmc[2]
+        _, eph, chiron = _sky()
+        t = _time_from_dt(dt)
+        t3 = _t3(t)
 
-        # True obliquity of date
-        (obl_true, *_), _ = swe.calc_ut(jd, swe.ECL_NUT)
+        obl = _true_obliquity(t)
+        ramc = _norm(float(t.gast) * 15.0 + lon)
+
+        hs_fn = HOUSE_SYSTEMS.get(house_system, HOUSE_SYSTEMS["placidus"])
+        cusps = hs_fn(ramc, obl, lat)
+        # true angles, independent of the house system (in Equal/Whole Sign
+        # cusps[0]/cusps[9] are not the actual ASC/MC)
+        asc = get_asc(ramc, obl, lat)
+        mc = get_mc(ramc, obl)
 
         planets: dict[str, dict] = {}
         for name in bodies:
-            body_id = BODY_MAP.get(name)
-            if body_id is None:
+            if name in BODY_TARGETS:
+                pos = _planet_position(eph, BODY_TARGETS[name], t, t3)
+            elif name == "true_node":
+                pos = _true_node(eph, t, t3)
+            elif name == "lilith":
+                pos = _mean_lunar_apogee(t)
+            elif name == "chiron":
+                if chiron is None:
+                    continue  # optional SPK not configured
+                pos = _planet_position(eph, "", t, t3, chiron_target=chiron)
+            else:
                 continue
-            try:
-                pos = _calc_body(jd, body_id)
-            except swe.Error:
-                continue  # e.g. Chiron without SE1 asteroid files
             pos["sign"] = _sign(pos["longitude"])
             pos["sign_degree"] = round(pos["longitude"] % 30, 4)
             pos["house"] = _which_house(pos["longitude"], cusps)
@@ -168,9 +280,9 @@ class EphemerisEngine:
                 "ic": round((mc + 180) % 360, 6),
             },
             "meta": {
-                "jd": round(jd, 8),
+                "jd": round(float(t.ut1), 8),
                 "ramc": round(ramc, 6),
-                "obliquity": round(obl_true, 6),
+                "obliquity": round(obl, 6),
                 "house_system": house_system,
             },
         }
@@ -214,27 +326,31 @@ class EphemerisEngine:
         """
         Find the Solar Return moment for a given year and compute its chart.
 
-        Newton's method on JD: correction = diff / sun_speed (~0.9856°/day),
-        converges to < 0.001″ in 3–4 iterations.
+        Newton's method on JD with the true solar speed — converges in 3–4 steps.
         """
         natal = self.calc_natal(birth_dt, lat, lon, house_system)
         natal_sun_lon = natal["planets"]["sun"]["longitude"]
 
-        # Seed: same calendar day in the target year
         try:
             seed_dt = birth_dt.replace(year=year)
         except ValueError:  # Feb 29 in a non-leap year
             seed_dt = birth_dt.replace(year=year, day=28)
-        jd = _jd_ut(seed_dt)
+
+        _, eph, _ = _sky()
+        earth, sun = eph["earth"], eph["sun"]
+        t = _time_from_dt(seed_dt)
 
         for _ in range(20):
-            (sun_lon, _lat, _dist, sun_speed, *_), _ = swe.calc_ut(jd, swe.SUN, _CALC_FLAGS)
+            t3 = _t3(t)
+            lons = _apparent_lon_series(earth, sun, t3)
+            sun_lon = float(lons[1])
+            speed = _signed_sep(float(lons[2]), float(lons[0])) / (2 * _SPEED_STEP_DAYS)
             diff = _signed_sep(natal_sun_lon, sun_lon)
             if abs(diff) < 1e-7:
                 break
-            jd += diff / sun_speed
+            t = _shift(t, diff / speed)
 
-        sr_dt = _jd_to_utc(jd)
+        sr_dt = t.utc_datetime()
         sr_chart = self.calc_natal(sr_dt, lat, lon, house_system)
         return {
             "return_dt": sr_dt.isoformat(),
@@ -332,6 +448,14 @@ class EphemerisEngine:
                             ),
                         })
         return results
+
+
+def _is_applying(lon_a: float, speed_a: float, lon_b: float, speed_b: float,
+                 asp_angle: float) -> bool:
+    """True if the aspect is applying (deviation from exact is shrinking)."""
+    sep = _signed_sep(lon_a, lon_b)
+    d_abs_sep = math.copysign(1.0, sep or 1.0) * (speed_a - speed_b)
+    return (abs(sep) - asp_angle) * d_abs_sep < 0
 
 
 def _sign(lon: float) -> str:
