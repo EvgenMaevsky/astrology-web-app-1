@@ -219,28 +219,30 @@ function TransitResultPanel({ data }: { data: TransitResult }) {
         <div className="px-4 py-3 border-b border-stone-100 bg-stone-50">
           <h3 className="text-xs font-semibold text-stone-500 uppercase tracking-wider">Transit Planets</h3>
         </div>
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-stone-100 bg-stone-50">
-              <th className="text-left px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">Planet</th>
-              <th className="text-left px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">Sign</th>
-              <th className="text-left px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">Degree</th>
-              <th className="text-left px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">House</th>
-            </tr>
-          </thead>
-          <tbody>
-            {Object.entries(data.transit).map(([name, p]) => (
-              <tr key={name} className="border-b border-stone-50 hover:bg-stone-50">
-                <td className="px-4 py-2 font-medium text-stone-800 capitalize">
-                  {name}{p.retrograde && <span className="ml-1 text-red-500 text-xs" title="Retrograde — планета в ретроградному русі">℞</span>}
-                </td>
-                <td className="px-4 py-2 text-stone-600">{p.sign}</td>
-                <td className="px-4 py-2 text-stone-600 font-mono text-xs">{fmtDeg(p.sign_degree)}</td>
-                <td className="px-4 py-2 text-stone-500">{p.house}</td>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-stone-100 bg-stone-50">
+                <th className="text-left px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">Planet</th>
+                <th className="text-left px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">Sign</th>
+                <th className="text-left px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">Degree</th>
+                <th className="text-left px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">House</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {Object.entries(data.transit).map(([name, p]) => (
+                <tr key={name} className="border-b border-stone-50 hover:bg-stone-50">
+                  <td className="px-4 py-2 font-medium text-stone-800 capitalize">
+                    {name}{p.retrograde && <span className="ml-1 text-red-500 text-xs" title="Retrograde — планета в ретроградному русі">℞</span>}
+                  </td>
+                  <td className="px-4 py-2 text-stone-600">{p.sign}</td>
+                  <td className="px-4 py-2 text-stone-600 font-mono text-xs">{fmtDeg(p.sign_degree)}</td>
+                  <td className="px-4 py-2 text-stone-500">{p.house}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* Transit-to-natal aspects */}
@@ -249,30 +251,32 @@ function TransitResultPanel({ data }: { data: TransitResult }) {
           <div className="px-4 py-3 border-b border-stone-100 bg-stone-50">
             <h3 className="text-xs font-semibold text-stone-500 uppercase tracking-wider">Transit → Natal Aspects</h3>
           </div>
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-stone-100 bg-stone-50">
-                <th className="text-left px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">Transit</th>
-                <th className="text-center px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">Asp</th>
-                <th className="text-left px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">Natal</th>
-                <th className="text-right px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">Orb</th>
-                <th className="text-center px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">App/Sep</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.aspects.map((a, i) => (
-                <tr key={i} className="border-b border-stone-50 hover:bg-stone-50">
-                  <td className="px-4 py-1.5 text-stone-700 capitalize">{a.transit}</td>
-                  <td className="px-4 py-1.5 text-center text-stone-600">
-                    <span title={a.aspect}>{ASPECT_LABELS[a.aspect] ?? a.aspect}</span>
-                  </td>
-                  <td className="px-4 py-1.5 text-stone-700 capitalize">{a.natal}</td>
-                  <td className="px-4 py-1.5 text-right text-stone-500 font-mono text-xs">{a.orb.toFixed(2)}°</td>
-                  <td className="px-4 py-1.5 text-center text-xs text-stone-400">{a.applying ? "▲" : "▽"}</td>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-stone-100 bg-stone-50">
+                  <th className="text-left px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">Transit</th>
+                  <th className="text-center px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">Asp</th>
+                  <th className="text-left px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">Natal</th>
+                  <th className="text-right px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">Orb</th>
+                  <th className="text-center px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">App/Sep</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {data.aspects.map((a, i) => (
+                  <tr key={i} className="border-b border-stone-50 hover:bg-stone-50">
+                    <td className="px-4 py-1.5 text-stone-700 capitalize">{a.transit}</td>
+                    <td className="px-4 py-1.5 text-center text-stone-600">
+                      <span title={a.aspect}>{ASPECT_LABELS[a.aspect] ?? a.aspect}</span>
+                    </td>
+                    <td className="px-4 py-1.5 text-stone-700 capitalize">{a.natal}</td>
+                    <td className="px-4 py-1.5 text-right text-stone-500 font-mono text-xs">{a.orb.toFixed(2)}°</td>
+                    <td className="px-4 py-1.5 text-center text-xs text-stone-400">{a.applying ? "▲" : "▽"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>

@@ -62,38 +62,40 @@ export function SavedChartsTab() {
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-xl border border-stone-200 overflow-hidden">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-stone-100 bg-stone-50">
-              <th className="text-left px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">Title</th>
-              <th className="text-left px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">Type</th>
-              <th className="text-left px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">Saved</th>
-              <th className="text-right px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {charts.map((c) => (
-              <tr key={c.id} className="border-b border-stone-50 hover:bg-stone-50">
-                <td className="px-4 py-2 font-medium text-stone-800">
-                  <button onClick={() => handleOpen(c.id)} className="hover:text-amber-700 text-left">
-                    {c.title}
-                  </button>
-                </td>
-                <td className="px-4 py-2 text-stone-600">{CHART_TYPE_LABELS[c.chart_type] ?? c.chart_type}</td>
-                <td className="px-4 py-2 text-stone-500">{new Date(c.created_at).toLocaleDateString()}</td>
-                <td className="px-4 py-2 text-right">
-                  <button
-                    onClick={() => handleDelete(c.id)}
-                    disabled={pending}
-                    className="text-red-600 hover:text-red-800 text-xs disabled:opacity-50"
-                  >
-                    Delete
-                  </button>
-                </td>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-stone-100 bg-stone-50">
+                <th className="text-left px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">Title</th>
+                <th className="text-left px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">Type</th>
+                <th className="text-left px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">Saved</th>
+                <th className="text-right px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {charts.map((c) => (
+                <tr key={c.id} className="border-b border-stone-50 hover:bg-stone-50">
+                  <td className="px-4 py-2 font-medium text-stone-800">
+                    <button onClick={() => handleOpen(c.id)} className="hover:text-amber-700 text-left">
+                      {c.title}
+                    </button>
+                  </td>
+                  <td className="px-4 py-2 text-stone-600">{CHART_TYPE_LABELS[c.chart_type] ?? c.chart_type}</td>
+                  <td className="px-4 py-2 text-stone-500">{new Date(c.created_at).toLocaleDateString()}</td>
+                  <td className="px-4 py-2 text-right">
+                    <button
+                      onClick={() => handleDelete(c.id)}
+                      disabled={pending}
+                      className="text-red-600 hover:text-red-800 text-xs disabled:opacity-50"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {selected && (() => {

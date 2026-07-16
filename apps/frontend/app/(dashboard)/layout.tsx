@@ -91,6 +91,18 @@ export default async function DashboardLayout({
           </div>
         </header>
 
+        <nav className="lg:hidden flex gap-1 overflow-x-auto px-3 py-2 bg-white border-b border-stone-200">
+          {NAV.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="shrink-0 px-3 py-1.5 text-sm rounded-lg text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition-colors whitespace-nowrap"
+            >
+              {item.label}
+            </Link>
+          ))}
+        </nav>
+
         {user && !user.email_verified && <EmailVerificationBanner />}
 
         <main className="flex-1 p-6">{children}</main>
