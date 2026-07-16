@@ -19,6 +19,16 @@ _SEARCH_SQL = text("""
     LIMIT :limit
 """)
 
+_SEARCH_SQL_PG = text("""
+    SELECT c.id, c.name, c.ascii_name, c.country, c.region,
+           c.lat, c.lon, c.timezone, c.population
+    FROM cities c
+    WHERE c.name ILIKE :prefix OR c.ascii_name ILIKE :prefix
+       OR similarity(c.ascii_name, :q) > 0.35
+    ORDER BY (c.ascii_name ILIKE :prefix) DESC, c.population DESC
+    LIMIT :limit
+""")
+
 _TZ_SQL = text("""
     SELECT timezone
     FROM cities
@@ -38,9 +48,16 @@ async def search_cities(
 ):
     # Sanitize FTS query — escape special chars
     q_clean = q.replace('"', "").replace("*", "").strip()
-    fts_query = f'"{q_clean}"* OR {q_clean}*'
 
-    rows = await db.execute(_SEARCH_SQL, {"q": fts_query, "limit": limit * 3})
+    dialect = db.get_bind().dialect.name
+    if dialect == "postgresql":
+        rows = await db.execute(
+            _SEARCH_SQL_PG,
+            {"prefix": q_clean + "%", "q": q_clean, "limit": limit * 3},
+        )
+    else:
+        fts_query = f'"{q_clean}"* OR {q_clean}*'
+        rows = await db.execute(_SEARCH_SQL, {"q": fts_query, "limit": limit * 3})
     cities = rows.fetchall()
 
     if country:

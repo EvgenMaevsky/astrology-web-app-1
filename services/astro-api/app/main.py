@@ -26,6 +26,15 @@ async def lifespan(app: FastAPI):
     yield
 
 
+if settings.sentry_dsn:
+    import sentry_sdk
+
+    sentry_sdk.init(
+        dsn=settings.sentry_dsn,
+        environment=settings.environment,
+        traces_sample_rate=0.1,
+    )
+
 app = FastAPI(
     title="Zorya Astro API",
     version="0.2.0",

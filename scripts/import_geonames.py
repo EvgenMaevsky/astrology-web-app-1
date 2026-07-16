@@ -1,16 +1,33 @@
 """
-Download cities15000.txt from GeoNames and import into SQLite with FTS5.
-Run once: python scripts/import_geonames.py
+Download cities15000.txt from GeoNames and import into the app database
+(SQLite dev or PostgreSQL prod, via SQLAlchemy).
+
+Run from services/astro-api (so the relative sqlite DATABASE_URL resolves
+correctly), or export DATABASE_URL explicitly (e.g. for Postgres):
+
+    cd services/astro-api && ../../scripts/import_geonames.py
+    # or
+    DATABASE_URL=postgresql+asyncpg://... python scripts/import_geonames.py
+
+Requires the `cities` table to already exist — run `alembic upgrade head`
+first (this script does not create schema).
 """
 
+import asyncio
 import io
-import sqlite3
 import sys
 import urllib.request
 import zipfile
 from pathlib import Path
 
-DB_PATH = Path(__file__).parent.parent / "services" / "astro-api" / "astro.db"
+sys.path.insert(0, str(Path(__file__).parent.parent / "services" / "astro-api"))
+
+from sqlalchemy import inspect, text  # noqa: E402
+
+from app.config import settings  # noqa: E402
+from app.database import engine  # noqa: E402
+from app.models.city import City  # noqa: E402
+
 URL = "https://download.geonames.org/export/dump/cities15000.zip"
 
 COLS = {
@@ -69,54 +86,66 @@ def parse(raw: bytes):
     return rows
 
 
-def import_db(rows):
-    con = sqlite3.connect(DB_PATH)
-    cur = con.cursor()
+async def import_db(rows):
+    dialect = engine.dialect.name
 
-    cur.executescript("""
-        DROP TABLE IF EXISTS cities_fts;
-        DROP TABLE IF EXISTS cities;
+    async with engine.begin() as conn:
+        has_table = await conn.run_sync(lambda c: inspect(c).has_table("cities"))
+        if not has_table:
+            print("Table 'cities' does not exist. run alembic upgrade head first")
+            sys.exit(1)
 
-        CREATE TABLE cities (
-            id          INTEGER PRIMARY KEY,
-            name        TEXT NOT NULL,
-            ascii_name  TEXT NOT NULL,
-            country     TEXT NOT NULL,
-            region      TEXT,
-            lat         REAL NOT NULL,
-            lon         REAL NOT NULL,
-            timezone    TEXT NOT NULL,
-            population  INTEGER DEFAULT 0
-        );
+        await conn.execute(text("DELETE FROM cities"))
 
-        CREATE INDEX idx_cities_country ON cities(country);
-        CREATE INDEX idx_cities_ascii   ON cities(ascii_name COLLATE NOCASE);
+        row_dicts = [
+            {
+                "id": r[0],
+                "name": r[1],
+                "ascii_name": r[2],
+                "country": r[3],
+                "region": r[4],
+                "lat": r[5],
+                "lon": r[6],
+                "timezone": r[7],
+                "population": r[8],
+            }
+            for r in rows
+        ]
+        for i in range(0, len(row_dicts), 5000):
+            await conn.execute(City.__table__.insert(), row_dicts[i:i + 5000])
 
-        CREATE VIRTUAL TABLE cities_fts USING fts5(
-            city_id UNINDEXED,
-            name,
-            ascii_name
-        );
-    """)
+        if dialect == "sqlite":
+            await conn.execute(text("DROP TABLE IF EXISTS cities_fts"))
+            await conn.execute(text("""
+                CREATE VIRTUAL TABLE cities_fts USING fts5(
+                    city_id UNINDEXED,
+                    name,
+                    ascii_name
+                )
+            """))
+            fts_rows = [
+                {"city_id": r[0], "name": r[1], "ascii_name": r[2]}
+                for r in rows
+            ]
+            for i in range(0, len(fts_rows), 5000):
+                await conn.execute(
+                    text(
+                        "INSERT INTO cities_fts(city_id, name, ascii_name) "
+                        "VALUES (:city_id, :name, :ascii_name)"
+                    ),
+                    fts_rows[i:i + 5000],
+                )
 
-    cur.executemany(
-        "INSERT INTO cities VALUES (?,?,?,?,?,?,?,?,?)",
-        [r[:9] for r in rows],
-    )
-
-    cur.executemany(
-        "INSERT INTO cities_fts(city_id, name, ascii_name) VALUES (?,?,?)",
-        [(r[0], r[1], r[2]) for r in rows],
-    )
-
-    con.commit()
-    con.close()
-    print(f"Imported {len(rows):,} cities into {DB_PATH}")
+    print(f"Imported {len(rows):,} cities into {settings.database_url}")
 
 
-if __name__ == "__main__":
+async def main():
     raw = download()
     rows = parse(raw)
     print(f"Parsed {len(rows):,} cities")
-    import_db(rows)
+    await import_db(rows)
     print("Done.")
+
+
+if __name__ == "__main__":
+    asyncio.run(main())

@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     environment: str = "development"  # development | production
 
     database_url: str = "sqlite+aiosqlite:///./astro.db"
+    sentry_dsn: str = ""
     secret_key: str = _DEV_SECRET
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 30

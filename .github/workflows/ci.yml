@@ -28,6 +28,34 @@ jobs:
       - run: pip install -e ".[dev]"
       - run: python -m pytest
 
+  backend-postgres:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/astro-api
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: zorya
+          POSTGRES_PASSWORD: zorya
+          POSTGRES_DB: zorya
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U zorya" --health-interval 5s
+          --health-timeout 5s --health-retries 10
+    env:
+      TEST_DATABASE_URL: postgresql+asyncpg://zorya:zorya@localhost:5432/zorya
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: services/astro-api/pyproject.toml
+      - run: pip install -e ".[dev]"
+      - run: python -m pytest tests/test_postgres_integration.py -q
+
   frontend:
     runs-on: ubuntu-latest
     defaults:

@@ -1,0 +1,33 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: zorya
+      POSTGRES_DB: zorya
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set in .env}
+    volumes: ["pgdata:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U zorya"]
+      interval: 5s
+      retries: 10
+  api:
+    build: ../services/astro-api
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://zorya:${POSTGRES_PASSWORD}@db:5432/zorya
+      ENVIRONMENT: production
+    volumes: ["apidata:/data"]
+    depends_on:
+      db:
+        condition: service_healthy
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports: ["80:80", "443:443"]
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddydata:/data
+    depends_on: [api]
+volumes: {pgdata: {}, apidata: {}, caddydata: {}}
