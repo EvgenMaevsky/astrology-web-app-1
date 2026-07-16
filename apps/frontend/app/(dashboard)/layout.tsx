@@ -23,6 +23,7 @@ const NAV = [
   { href: "/reports", label: "Reports" },
   { href: "/pricing", label: "Pricing" },
   { href: "/billing", label: "Billing" },
+  { href: "/account", label: "Account" },
 ];
 
 export default async function DashboardLayout({

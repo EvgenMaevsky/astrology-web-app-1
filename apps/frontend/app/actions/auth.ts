@@ -147,6 +147,34 @@ export async function sendVerificationEmail(
   return { message: "Verification email sent." };
 }
 
+export async function deleteAccount(
+  _state: MessageState,
+  formData: FormData
+): Promise<MessageState> {
+  const password = formData.get("password") as string;
+  if (!password) return { error: "Password is required" };
+
+  const token = await getAccessToken();
+  if (!token) return { error: "Not authenticated" };
+
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}/api/v1/users/me`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ password }),
+    });
+  } catch {
+    return { error: "Cannot connect to server. Please try again." };
+  }
+
+  if (res.status === 403) return { error: "Incorrect password." };
+  if (!res.ok) return { error: `Could not delete account (error ${res.status}).` };
+
+  await clearAuthCookies();
+  redirect("/login");
+}
+
 export async function verifyEmail(
   _state: MessageState,
   formData: FormData

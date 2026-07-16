@@ -22,6 +22,7 @@ from app.routers.charts import router as charts_router
 from app.routers.persons import router as persons_router
 from app.routers.saved_charts import router as saved_charts_router
 from app.routers.settings import router as settings_router
+from app.routers.users import router as users_router
 
 
 @asynccontextmanager
@@ -67,6 +68,7 @@ app.include_router(persons_router)
 app.include_router(saved_charts_router)
 app.include_router(billing_router)
 app.include_router(atlas_router)
+app.include_router(users_router)
 
 
 @app.get("/health")
