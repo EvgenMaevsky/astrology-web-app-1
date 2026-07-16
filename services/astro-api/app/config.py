@@ -29,6 +29,8 @@ class Settings(BaseSettings):
     resend_api_key: str = ""
     email_from: str = "Zorya <noreply@example.com>"
 
+    max_saved_charts: int = 50
+
     # Directory for JPL ephemeris files (de440s.bsp auto-downloads there, ~32 MB).
     skyfield_dir: str = "./skyfield-data"
     # Optional SPK file with 2060 Chiron from JPL Horizons (see scripts/fetch_chiron_spk.py).

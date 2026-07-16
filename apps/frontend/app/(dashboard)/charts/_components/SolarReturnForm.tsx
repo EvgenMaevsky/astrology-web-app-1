@@ -9,6 +9,7 @@ import { ChartWheel } from "@/app/_components/chart-wheel/ChartWheel";
 import { CityAutocomplete } from "@/app/_components/CityAutocomplete";
 import { UpgradePrompt } from "@/app/_components/UpgradePrompt";
 import { HOUSE_SYSTEMS } from "@/app/lib/house-systems";
+import { SaveChartButton } from "./SaveChartButton";
 
 const CoordMap = dynamic(() => import("@/app/_components/CoordMap").then(m => m.CoordMap), {
   ssr: false,
@@ -141,11 +142,19 @@ export function SolarReturnForm({ persons = [] }: Props) {
 
       {state.status === "ok" && (
         <div className="space-y-4">
-          <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-sm text-amber-800">
-            <span className="font-semibold">Solar Return moment: </span>
-            {new Date(state.data.return_dt).toLocaleString(undefined, {
-              dateStyle: "full", timeStyle: "short", timeZone: "UTC",
-            })} UTC
+          <div className="flex items-center justify-between gap-4 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-sm text-amber-800">
+            <div>
+              <span className="font-semibold">Solar Return moment: </span>
+              {new Date(state.data.return_dt).toLocaleString(undefined, {
+                dateStyle: "full", timeStyle: "short", timeZone: "UTC",
+              })} UTC
+            </div>
+            <SaveChartButton
+              chartType="solar_return"
+              defaultTitle={`Solar Return ${year} — ${birthDt}`}
+              requestPayload={{ birth_dt: birthDt, timezone: birthTz, year, lat, lon }}
+              result={state.data}
+            />
           </div>
           <ChartWheel data={state.data} />
         </div>

@@ -43,7 +43,9 @@ tags: [plan, stage-c]
       dev-режим email (лінк у лозі) мовчки нічого не виводив — додано
       `logging.basicConfig` у main.py; також виправлено server_default для
       email_verified у міграції (без нього падало на непустій БД)
-- [ ] Частина 2 — Збереження карт (natal + solar return)
+- [x] Частина 2 — Збереження карт (natal + solar return) — перевірено наскрізь
+      у браузері: save → 201, list, get full (колесо + таблиці рендеряться),
+      delete → 204, empty state; ізоляція між юзерами і ліміт покриті тестами
 - [ ] Частина 3 — Сторінка /account + видалення акаунта (GDPR)
 - [ ] Частина 4 — Landing page + SEO (robots, sitemap, OG)
 - [ ] Частина 5 — Юридичні сторінки /privacy і /terms

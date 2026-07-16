@@ -6,12 +6,14 @@ import { ChartForm } from "./ChartForm";
 import { TransitForm } from "./TransitForm";
 import { SolarReturnForm } from "./SolarReturnForm";
 import { SynastryForm } from "./SynastryForm";
+import { SavedChartsTab } from "./SavedChartsTab";
 
 const TABS = [
   { id: "natal", label: "Natal" },
   { id: "transit", label: "Transit" },
   { id: "solar-return", label: "Solar Return" },
   { id: "synastry", label: "Synastry" },
+  { id: "saved", label: "Saved" },
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];
@@ -48,6 +50,7 @@ export function ChartTabs({ persons, selectedPerson }: Props) {
       {active === "transit" && <TransitForm persons={persons} />}
       {active === "solar-return" && <SolarReturnForm persons={persons} />}
       {active === "synastry" && <SynastryForm persons={persons} />}
+      {active === "saved" && <SavedChartsTab />}
     </div>
   );
 }

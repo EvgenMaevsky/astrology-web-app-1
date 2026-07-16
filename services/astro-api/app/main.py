@@ -13,13 +13,14 @@ from slowapi.errors import RateLimitExceeded
 
 from app.config import settings
 from app.database import Base, engine
-from app.models import chart_log, person  # noqa: F401 — ensure tables are registered
+from app.models import chart, chart_log, person  # noqa: F401 — ensure tables are registered
 from app.rate_limit import limiter
 from app.routers.atlas import router as atlas_router
 from app.routers.auth import router as auth_router
 from app.routers.billing import router as billing_router
 from app.routers.charts import router as charts_router
 from app.routers.persons import router as persons_router
+from app.routers.saved_charts import router as saved_charts_router
 from app.routers.settings import router as settings_router
 
 
@@ -63,6 +64,7 @@ app.include_router(auth_router)
 app.include_router(settings_router)
 app.include_router(charts_router)
 app.include_router(persons_router)
+app.include_router(saved_charts_router)
 app.include_router(billing_router)
 app.include_router(atlas_router)
 
