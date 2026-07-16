@@ -21,9 +21,23 @@ class RefreshRequest(BaseModel):
     refresh_token: str
 
 
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str = Field(min_length=8, max_length=128)
+
+
+class VerifyEmailRequest(BaseModel):
+    token: str
+
+
 class UserOut(BaseModel):
     id: str
     email: str
     plan: str
+    email_verified: bool
 
     model_config = {"from_attributes": True}

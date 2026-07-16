@@ -1,6 +1,7 @@
 import { logout } from "@/app/actions/auth";
 import { getAccessToken, API_URL } from "@/app/lib/auth";
 import Link from "next/link";
+import { EmailVerificationBanner } from "./_EmailVerificationBanner";
 
 async function fetchMe(token: string) {
   try {
@@ -9,7 +10,7 @@ async function fetchMe(token: string) {
       cache: "no-store",
     });
     if (!res.ok) return null;
-    return res.json() as Promise<{ email: string; plan: string }>;
+    return res.json() as Promise<{ email: string; plan: string; email_verified: boolean }>;
   } catch {
     return null;
   }
@@ -84,6 +85,8 @@ export default async function DashboardLayout({
             </form>
           </div>
         </header>
+
+        {user && !user.email_verified && <EmailVerificationBanner />}
 
         <main className="flex-1 p-6">{children}</main>
       </div>

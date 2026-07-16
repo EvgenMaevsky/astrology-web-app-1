@@ -23,6 +23,11 @@ class Settings(BaseSettings):
     rate_limit_enabled: bool = True
     rate_limit_login: str = "5/minute"
     rate_limit_register: str = "3/minute"
+    rate_limit_forgot_password: str = "3/minute"
+
+    # Resend (https://resend.com) — empty key = dev mode, emails are logged not sent
+    resend_api_key: str = ""
+    email_from: str = "Zorya <noreply@example.com>"
 
     # Directory for JPL ephemeris files (de440s.bsp auto-downloads there, ~32 MB).
     skyfield_dir: str = "./skyfield-data"

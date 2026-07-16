@@ -37,7 +37,12 @@ tags: [plan, stage-c]
 
 ## Прогрес
 
-- [ ] Частина 1 — Email-флоу: forgot/reset password + верифікація email (Resend)
+- [x] Частина 1 — Email-флоу: forgot/reset password + верифікація email (Resend) —
+      dev-режим перевірено наскрізь у браузері (лінк з логу бекенда); знайдено й
+      виправлено позаплановий баг: uvicorn не конфігурував root-логер, тож
+      dev-режим email (лінк у лозі) мовчки нічого не виводив — додано
+      `logging.basicConfig` у main.py; також виправлено server_default для
+      email_verified у міграції (без нього падало на непустій БД)
 - [ ] Частина 2 — Збереження карт (natal + solar return)
 - [ ] Частина 3 — Сторінка /account + видалення акаунта (GDPR)
 - [ ] Частина 4 — Landing page + SEO (robots, sitemap, OG)

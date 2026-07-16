@@ -1,26 +1,33 @@
 import hashlib
+import logging
+import secrets
 import uuid
 from datetime import datetime, timedelta, timezone
 
 import bcrypt
 import jwt
 from fastapi import APIRouter, Depends, HTTPException, Request, status
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app import email as email_module
 from app.config import settings
 from app.database import get_db
 from app.dependencies.auth import get_current_user
-from app.models.user import RefreshToken, User, UserSettings
+from app.models.user import EmailToken, RefreshToken, User, UserSettings
 from app.rate_limit import limiter
 from app.schemas.auth import (
+    ForgotPasswordRequest,
     LoginRequest,
     RefreshRequest,
     RegisterRequest,
+    ResetPasswordRequest,
     TokenResponse,
     UserOut,
+    VerifyEmailRequest,
 )
 
+log = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
 
 
@@ -54,6 +61,32 @@ def _token_hash(token: str) -> str:
     return hashlib.sha256(token.encode()).hexdigest()
 
 
+async def _issue_email_token(db: AsyncSession, user_id: str, purpose: str, ttl: timedelta) -> str:
+    raw = secrets.token_urlsafe(32)
+    db.add(EmailToken(
+        user_id=user_id,
+        token_hash=_token_hash(raw),
+        purpose=purpose,
+        expires_at=datetime.now(timezone.utc) + ttl,
+    ))
+    return raw
+
+
+async def _consume_email_token(db: AsyncSession, raw_token: str, purpose: str) -> EmailToken | None:
+    h = _token_hash(raw_token)
+    result = await db.execute(
+        select(EmailToken).where(
+            EmailToken.token_hash == h,
+            EmailToken.purpose == purpose,
+            EmailToken.used.is_(False),
+        )
+    )
+    token = result.scalar_one_or_none()
+    if token is None or token.expires_at.replace(tzinfo=timezone.utc) < datetime.now(timezone.utc):
+        return None
+    return token
+
+
 @router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
 @limiter.limit(settings.rate_limit_register)
 async def register(request: Request, body: RegisterRequest, db: AsyncSession = Depends(get_db)) -> TokenResponse:
@@ -73,7 +106,17 @@ async def register(request: Request, body: RegisterRequest, db: AsyncSession = D
         token_hash=_token_hash(refresh_raw),
         expires_at=datetime.now(timezone.utc) + timedelta(days=settings.refresh_token_expire_days),
     ))
+    verify_raw = await _issue_email_token(db, user.id, "verify", timedelta(hours=24))
     await db.commit()
+
+    try:
+        link = f"{settings.frontend_url}/verify-email?token={verify_raw}"
+        await email_module.send_email(
+            user.email, "Confirm your Zorya account",
+            f"<p>Confirm your email: <a href='{link}'>{link}</a></p>",
+        )
+    except Exception:
+        log.exception("Failed to send verification email to %s", user.email)
 
     return TokenResponse(
         access_token=_make_access_token(user.id),
@@ -164,3 +207,82 @@ async def logout(
 @router.get("/me", response_model=UserOut)
 async def me(current_user: User = Depends(get_current_user)) -> UserOut:
     return UserOut.model_validate(current_user)
+
+
+@router.post("/forgot-password", status_code=status.HTTP_204_NO_CONTENT)
+@limiter.limit(settings.rate_limit_forgot_password)
+async def forgot_password(
+    request: Request, body: ForgotPasswordRequest, db: AsyncSession = Depends(get_db)
+) -> None:
+    # Always 204 regardless of whether the account exists — avoids leaking
+    # which emails are registered.
+    result = await db.execute(select(User).where(User.email == body.email))
+    user = result.scalar_one_or_none()
+    if user is not None:
+        raw = await _issue_email_token(db, user.id, "reset", timedelta(hours=1))
+        await db.commit()
+        try:
+            link = f"{settings.frontend_url}/reset-password?token={raw}"
+            await email_module.send_email(
+                user.email, "Reset your Zorya password",
+                f"<p>Reset your password: <a href='{link}'>{link}</a></p>",
+            )
+        except Exception:
+            log.exception("Failed to send reset email to %s", user.email)
+
+
+@router.post("/reset-password", status_code=status.HTTP_204_NO_CONTENT)
+async def reset_password(body: ResetPasswordRequest, db: AsyncSession = Depends(get_db)) -> None:
+    token = await _consume_email_token(db, body.token, "reset")
+    if token is None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired token")
+
+    result = await db.execute(select(User).where(User.id == token.user_id))
+    user = result.scalar_one_or_none()
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired token")
+
+    user.password_hash = _hash_password(body.new_password)
+    token.used = True
+    # A password reset must invalidate any session an attacker may hold.
+    await db.execute(
+        update(RefreshToken).where(RefreshToken.user_id == user.id).values(revoked=True)
+    )
+    await db.commit()
+
+
+@router.post("/send-verification", status_code=status.HTTP_204_NO_CONTENT)
+@limiter.limit(settings.rate_limit_forgot_password)
+async def send_verification(
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> None:
+    if current_user.email_verified:
+        return
+    raw = await _issue_email_token(db, current_user.id, "verify", timedelta(hours=24))
+    await db.commit()
+    try:
+        link = f"{settings.frontend_url}/verify-email?token={raw}"
+        await email_module.send_email(
+            current_user.email, "Confirm your Zorya account",
+            f"<p>Confirm your email: <a href='{link}'>{link}</a></p>",
+        )
+    except Exception:
+        log.exception("Failed to send verification email to %s", current_user.email)
+
+
+@router.post("/verify-email", status_code=status.HTTP_204_NO_CONTENT)
+async def verify_email(body: VerifyEmailRequest, db: AsyncSession = Depends(get_db)) -> None:
+    token = await _consume_email_token(db, body.token, "verify")
+    if token is None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired token")
+
+    result = await db.execute(select(User).where(User.id == token.user_id))
+    user = result.scalar_one_or_none()
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired token")
+
+    user.email_verified = True
+    token.used = True
+    await db.commit()

@@ -1,11 +1,16 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-const PUBLIC_PATHS = ["/login", "/register"];
+// Paths reachable without a session. Logged-in users may still visit most of
+// these (e.g. /verify-email from an email link) — only AUTH_REDIRECT_PATHS
+// bounce an already-authenticated user away.
+const PUBLIC_PATHS = ["/login", "/register", "/forgot-password", "/reset-password", "/verify-email"];
+const AUTH_REDIRECT_PATHS = ["/login", "/register"];
 const API_URL = process.env.API_URL ?? "http://127.0.0.1:8000";
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const isPublic = PUBLIC_PATHS.some((p) => pathname.startsWith(p));
+  const isAuthRedirectPath = AUTH_REDIRECT_PATHS.some((p) => pathname.startsWith(p));
   const hasAccess = request.cookies.has("access_token");
   const refreshToken = request.cookies.get("refresh_token")?.value;
 
@@ -24,7 +29,7 @@ export async function proxy(request: NextRequest) {
     return response;
   }
 
-  if (isPublic && hasAccess) {
+  if (isAuthRedirectPath && hasAccess) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
