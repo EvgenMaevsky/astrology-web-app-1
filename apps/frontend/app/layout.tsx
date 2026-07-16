@@ -6,7 +6,12 @@ const geist = Geist({ subsets: ["latin"], variable: "--font-geist" });
 
 export const metadata: Metadata = {
   title: "Zorya — Astrology Platform",
-  description: "Professional astrology calculations and chart analysis",
+  description: "Точна натальна астрологія у браузері: власний ефемеридний рушій, звірений зі Swiss Ephemeris, транзити, соляри, синастрія.",
+  openGraph: {
+    title: "Zorya — Astrology Platform",
+    description: "Точна натальна астрологія у браузері: власний ефемеридний рушій, звірений зі Swiss Ephemeris, транзити, соляри, синастрія.",
+    type: "website",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

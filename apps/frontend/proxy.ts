@@ -9,8 +9,10 @@ const API_URL = process.env.API_URL ?? "http://127.0.0.1:8000";
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const isPublic = PUBLIC_PATHS.some((p) => pathname.startsWith(p));
-  const isAuthRedirectPath = AUTH_REDIRECT_PATHS.some((p) => pathname.startsWith(p));
+  // "/" is matched exactly, never as a startsWith() prefix — a prefix match
+  // on "/" would make every route in the app "public".
+  const isPublic = pathname === "/" || PUBLIC_PATHS.some((p) => pathname.startsWith(p));
+  const isAuthRedirectPath = pathname === "/" || AUTH_REDIRECT_PATHS.some((p) => pathname.startsWith(p));
   const hasAccess = request.cookies.has("access_token");
   const refreshToken = request.cookies.get("refresh_token")?.value;
 
