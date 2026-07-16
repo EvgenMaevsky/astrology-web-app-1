@@ -43,8 +43,10 @@ tags: [plan, stage-b]
 - [x] DoD 3 — ci.yml + infra/docker-compose.yml: валідний YAML
 - [x] DoD 4 — локальний імпорт атласу новим скриптом: 34 006 міст, live-перевірка
       пошуку `/api/v1/atlas/search?q=Kyiv` через запущений uvicorn — працює
-- [ ] DoD 5 — після пушу: CI job backend-postgres зелений (перевіряє користувач або
-      наступна сесія через `gh run list`)
+- [x] DoD 5 — CI job backend-postgres зелений (перевірено 2026-07-16: перший
+      запуск CI в історії репо, після створення гілки `main` з поточного стану;
+      усі 3 job — frontend, backend, backend-postgres — success,
+      run 29476480244)
 
 ## Знахідка поза скоупом (не блокер)
 
