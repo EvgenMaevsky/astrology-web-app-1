@@ -48,7 +48,20 @@ tags: [plan, stage-d]
 
 ## Прогрес
 
-- [ ] Частина 1 — Чесні тарифи: Pro без нереалізованих фіч, Expert схований з продажу
+- [x] Частина 1 — Чесні тарифи: Pro без нереалізованих фіч (прибрано "custom orbs",
+      "progressions", "PDF export"), Expert схований з продажу через
+      `"public": False` (запис НЕ видалено — fallback у get_subscription лишається
+      коректним для існуючих expert-юзерів); /billing/plans повертає лише
+      public-плани; обидва checkout-ендпоінти (Stripe, LiqPay) відхиляють
+      прихований план 400-кою. ПОЗАПЛАНОВА знахідка й фікс: повідомлення
+      require_plan() у app/dependencies/billing.py будувалось як
+      "This feature requires: expert or pro" (алфавітний сортинг) — тобто
+      живцем показувало слово "expert" вільному юзеру на пейволі transit/
+      synastry/solar_return. Виправлено на "This feature requires the Pro
+      plan or higher" (назва лише найдешевшого дозволеного плану). Перевірено
+      наскрізь у браузері: /pricing і /billing/plans показують рівно 2 тарифи;
+      /terms згадує тільки Pro; пейвол на Transit-вкладці (вільний юзер) більше
+      не згадує Expert. 3 нових тести, 101 passed/2 skipped, tsc чисто.
 - [ ] Частина 2 — Security-харденінг бекенда (rate limits, bcrypt-ліміт, audit залежностей)
 - [ ] Частина 3 — Security-заголовки фронтенда (next.config.ts headers)
 - [ ] Частина 4 — Живий E2E Stripe test mode (СТОП-точка: ключі від користувача)

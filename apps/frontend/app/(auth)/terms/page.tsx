@@ -26,7 +26,7 @@ export default function TermsPage() {
         <section className="space-y-2">
           <h2 className="font-semibold text-stone-900">Тарифи, оплата і скасування</h2>
           <p className="text-stone-600">
-            Сервіс має безкоштовний план з обмеженнями та платні плани Pro і Expert. Оплата
+            Сервіс має безкоштовний план з обмеженнями та платний план Pro. Оплата
             обробляється через Stripe або LiqPay. Підписку можна скасувати будь-коли через
             Customer Portal (Stripe) або звернувшись до підтримки (LiqPay) — доступ до платних
             функцій зберігається до кінця оплаченого періоду.

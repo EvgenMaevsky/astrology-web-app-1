@@ -59,11 +59,10 @@ PLANS = [
         "price_uah": 350,
         "features": [
             "Unlimited natal charts",
-            "All aspects + custom orbs",
-            "Transits & progressions",
+            "All major & minor aspects",
+            "Transits",
             "Solar return",
             "Synastry",
-            "PDF export",
             "Priority support",
         ],
         "limits": {},
@@ -84,13 +83,18 @@ PLANS = [
         ],
         "limits": {},
         "stripe_price_id": settings.stripe_price_expert_monthly,
+        # Not for sale yet — none of the features above are implemented.
+        # Kept in the catalogue (not deleted) because get_subscription()
+        # falls back to PLANS[0] for an unknown plan id, and any user whose
+        # DB row already has plan="expert" must still resolve to a real name.
+        "public": False,
     },
 ]
 
 
 @router.get("/plans")
 async def list_plans() -> list[dict]:
-    return PLANS
+    return [p for p in PLANS if p.get("public", True)]
 
 
 # ── Current subscription ──────────────────────────────────────────────────────
@@ -122,7 +126,7 @@ async def stripe_checkout(
         raise HTTPException(status_code=503, detail="Stripe not configured")
 
     plan_cfg = next((p for p in PLANS if p["id"] == body.plan), None)
-    if not plan_cfg or body.plan == "free":
+    if not plan_cfg or body.plan == "free" or not plan_cfg.get("public", True):
         raise HTTPException(status_code=400, detail="Invalid plan")
 
     price_id = plan_cfg.get("stripe_price_id", "")
@@ -335,7 +339,7 @@ async def liqpay_checkout(
         raise HTTPException(status_code=503, detail="LiqPay not configured")
 
     plan_cfg = next((p for p in PLANS if p["id"] == body.plan), None)
-    if not plan_cfg or body.plan == "free":
+    if not plan_cfg or body.plan == "free" or not plan_cfg.get("public", True):
         raise HTTPException(status_code=400, detail="Invalid plan")
 
     amount = plan_cfg["price_uah"]

@@ -5,8 +5,10 @@ interface Props {
   required?: string;
 }
 
-export function UpgradePrompt({ message, required }: Props) {
-  const planName = required === "pro" ? "Pro" : required === "expert" ? "Expert" : "Pro";
+export function UpgradePrompt({ message, required: _required }: Props) {
+  // Only "pro" is ever purchasable right now — "expert" is hidden from sale
+  // (see billing.py PLANS), so there's no other plan name to show here.
+  const planName = "Pro";
   return (
     <div className="rounded-xl bg-amber-50 border border-amber-200 p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3">
       <div className="flex-1">

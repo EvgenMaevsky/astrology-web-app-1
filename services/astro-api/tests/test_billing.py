@@ -204,3 +204,38 @@ async def test_liqpay_invalid_signature_rejected(client: AsyncClient):
         "/api/v1/billing/liqpay/callback", data={"data": data, "signature": "bogus"}
     )
     assert r.status_code == 400
+
+
+# ── Plan catalogue: honest pricing ──────────────────────────────────────────
+
+async def test_list_plans_hides_expert_and_unimplemented_features(client: AsyncClient):
+    r = await client.get("/api/v1/billing/plans")
+    assert r.status_code == 200
+    plans = r.json()
+    assert [p["id"] for p in plans] == ["free", "pro"]
+
+    all_features = " ".join(f for p in plans for f in p["features"]).lower()
+    for unimplemented in ("pdf export", "progression", "custom orb"):
+        assert unimplemented not in all_features
+
+
+async def test_stripe_checkout_rejects_hidden_plan(client: AsyncClient, monkeypatch):
+    monkeypatch.setattr(settings, "stripe_secret_key", "sk_test_fake")
+    token = await _register(client, "hidden-stripe@example.com")
+    r = await client.post(
+        "/api/v1/billing/stripe/checkout",
+        json={"plan": "expert"},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert r.status_code == 400
+
+
+async def test_liqpay_checkout_rejects_hidden_plan(client: AsyncClient, monkeypatch):
+    monkeypatch.setattr(settings, "liqpay_public_key", "pub_test_fake")
+    token = await _register(client, "hidden-liqpay@example.com")
+    r = await client.post(
+        "/api/v1/billing/liqpay/checkout",
+        json={"plan": "expert"},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert r.status_code == 400
