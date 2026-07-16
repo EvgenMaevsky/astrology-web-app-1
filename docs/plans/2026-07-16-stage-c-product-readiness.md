@@ -73,11 +73,16 @@ tags: [plan, stage-c]
       залишено. Хибна тривога: вкладка "Saved" у ChartTabs виглядала
       обрізаною на скріншоті, але `getBoundingClientRect()` підтвердив, що
       вона повністю в межах viewport — фікс НЕ застосовувався.
-- [ ] DoD 1 — pytest 0 failed (з новими тестами)
-- [ ] DoD 2 — tsc --noEmit + next build чисті
-- [ ] DoD 3 — міграції застосовуються на чистій БД (ланцюжок від 5a88b1e15a4b)
-- [ ] DoD 4 — браузерна верифікація (landing, reset-флоу, збереження карти,
-      видалення акаунта, 375px)
+- [x] DoD 1 — pytest 0 failed (98 passed, 2 skipped, з новими тестами:
+      test_email_flow, test_saved_charts, test_account_deletion)
+- [x] DoD 2 — tsc --noEmit + next build чисті
+- [x] DoD 3 — міграції застосовуються на чистій БД: ланцюжок
+      955ec162720e → ad058419ca40 → 5a88b1e15a4b → 97e5ec4091bb →
+      ee0a96658a6f, exit 0; у схемі присутні email_tokens, charts,
+      users.email_verified
+- [x] DoD 4 — браузерна верифікація виконана по кожній частині окремо
+      (a: Частина 4, b: Частина 1, c: Частина 2, d: Частина 3) + повний
+      прохід 375px у Частині 6
 - [ ] DoD 5 — CI зелений на main після синхронізації
 
 ---
