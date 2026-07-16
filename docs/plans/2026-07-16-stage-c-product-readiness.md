@@ -1,5 +1,5 @@
 ---
-status: planned
+status: done
 created: 2026-07-16
 updated: 2026-07-16
 related: "[[ROADMAP]]"
@@ -83,7 +83,8 @@ tags: [plan, stage-c]
 - [x] DoD 4 — браузерна верифікація виконана по кожній частині окремо
       (a: Частина 4, b: Частина 1, c: Частина 2, d: Частина 3) + повний
       прохід 375px у Частині 6
-- [ ] DoD 5 — CI зелений на main після синхронізації
+- [x] DoD 5 — CI зелений на main після синхронізації (run 29524814546,
+      всі 3 job: backend-postgres, frontend, backend)
 
 ---
 
