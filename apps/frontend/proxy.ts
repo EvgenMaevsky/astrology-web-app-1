@@ -3,7 +3,10 @@ import { type NextRequest, NextResponse } from "next/server";
 // Paths reachable without a session. Logged-in users may still visit most of
 // these (e.g. /verify-email from an email link) — only AUTH_REDIRECT_PATHS
 // bounce an already-authenticated user away.
-const PUBLIC_PATHS = ["/login", "/register", "/forgot-password", "/reset-password", "/verify-email"];
+const PUBLIC_PATHS = [
+  "/login", "/register", "/forgot-password", "/reset-password", "/verify-email",
+  "/privacy", "/terms",
+];
 const AUTH_REDIRECT_PATHS = ["/login", "/register"];
 const API_URL = process.env.API_URL ?? "http://127.0.0.1:8000";
 

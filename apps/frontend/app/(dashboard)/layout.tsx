@@ -62,6 +62,10 @@ export default async function DashboardLayout({
               Sign out
             </button>
           </form>
+          <div className="flex items-center gap-3 px-3 pt-2 text-xs text-stone-400">
+            <Link href="/privacy" className="hover:text-stone-600">Privacy</Link>
+            <Link href="/terms" className="hover:text-stone-600">Terms</Link>
+          </div>
         </div>
       </aside>
 
