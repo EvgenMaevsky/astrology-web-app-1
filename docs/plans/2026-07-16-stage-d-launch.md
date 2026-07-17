@@ -78,7 +78,15 @@ tags: [plan, stage-d]
       підтверджено чисті після перевстановлення. Ручний чек 2.4: `.env`
       і `.env.*` в .gitignore (root), жодного `.env`-файлу в git ls-files;
       `/docs` лишається відкритим — свідоме рішення (публічний API).
-- [ ] Частина 3 — Security-заголовки фронтенда (next.config.ts headers)
+- [x] Частина 3 — Security-заголовки фронтенда: `next.config.ts` → `headers()`
+      для `/(.*)`, усі 5 заголовків (X-Content-Type-Options, X-Frame-Options,
+      Referrer-Policy, Permissions-Policy, мінімальний CSP без script-src/
+      style-src/img-src). Живо перевірено `curl -sI http://localhost:3000/login`
+      — усі 5 присутні. Браузером: /charts — Leaflet-мапа з OSM-тайлами
+      рендериться повністю, розрахунок натальної карти (форма → server action
+      → бекенд → таблиці) пройшов наскрізь без жодної CSP-помилки в консолі.
+      tsc --noEmit + next build чисті (потрібен був рестарт dev-сервера —
+      зміни next.config.ts не хот-релоадяться).
 - [ ] Частина 4 — Живий E2E Stripe test mode (СТОП-точка: ключі від користувача)
 - [ ] Частина 4б — LiqPay sandbox — ЗАБЛОКОВАНО (немає ключів; mocked-тести — чинне покриття)
 - [ ] Частина 5 — Plausible analytics (gated на env, без cookie-банера)
