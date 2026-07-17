@@ -232,7 +232,10 @@ async def forgot_password(
 
 
 @router.post("/reset-password", status_code=status.HTTP_204_NO_CONTENT)
-async def reset_password(body: ResetPasswordRequest, db: AsyncSession = Depends(get_db)) -> None:
+@limiter.limit(settings.rate_limit_token_check)
+async def reset_password(
+    request: Request, body: ResetPasswordRequest, db: AsyncSession = Depends(get_db)
+) -> None:
     token = await _consume_email_token(db, body.token, "reset")
     if token is None:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired token")
@@ -273,7 +276,10 @@ async def send_verification(
 
 
 @router.post("/verify-email", status_code=status.HTTP_204_NO_CONTENT)
-async def verify_email(body: VerifyEmailRequest, db: AsyncSession = Depends(get_db)) -> None:
+@limiter.limit(settings.rate_limit_token_check)
+async def verify_email(
+    request: Request, body: VerifyEmailRequest, db: AsyncSession = Depends(get_db)
+) -> None:
     token = await _consume_email_token(db, body.token, "verify")
     if token is None:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired token")

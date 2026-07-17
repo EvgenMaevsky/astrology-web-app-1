@@ -24,6 +24,7 @@ class Settings(BaseSettings):
     rate_limit_login: str = "5/minute"
     rate_limit_register: str = "3/minute"
     rate_limit_forgot_password: str = "3/minute"
+    rate_limit_token_check: str = "10/minute"
 
     # Resend (https://resend.com) — empty key = dev mode, emails are logged not sent
     resend_api_key: str = ""

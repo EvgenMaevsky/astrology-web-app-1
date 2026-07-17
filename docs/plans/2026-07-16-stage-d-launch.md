@@ -62,7 +62,22 @@ tags: [plan, stage-d]
       наскрізь у браузері: /pricing і /billing/plans показують рівно 2 тарифи;
       /terms згадує тільки Pro; пейвол на Transit-вкладці (вільний юзер) більше
       не згадує Expert. 3 нових тести, 101 passed/2 skipped, tsc чисто.
-- [ ] Частина 2 — Security-харденінг бекенда (rate limits, bcrypt-ліміт, audit залежностей)
+- [x] Частина 2 — Security-харденінг бекенда: rate limit `10/minute` додано на
+      `/reset-password` і `/verify-email` (`rate_limit_token_check`) — живо
+      перевірено curl-циклом ×12 на реальному сервері: запити 1-10 → 400
+      (bogus token), запити 11-12 → 429; пароль обмежено 72 байтами
+      (RegisterRequest.password, ResetPasswordRequest.new_password) —
+      bcrypt мовчки обрізає довші паролі. pip-audit: 1 вразливість
+      (pytest 8.4.2 → PYSEC-2026-1845, фікс лише в 9.0.3 — major-бамп
+      усупереч поточному пінові `<9.0`) — НЕ бампали, зафіксовано як відоме.
+      npm audit --omit=dev: 3 moderate через постарілий postcss усередині
+      власного `node_modules/next` (не наш прямий пакет); офіційний фікс —
+      примусовий даунгрейд до `next@9.3.3`, що зламало б весь застосунок.
+      Застосовано точковий `overrides.postcss: "^8.5.10"` у package.json
+      замість цього — npm audit тепер 0 вразливостей, tsc + `next build`
+      підтверджено чисті після перевстановлення. Ручний чек 2.4: `.env`
+      і `.env.*` в .gitignore (root), жодного `.env`-файлу в git ls-files;
+      `/docs` лишається відкритим — свідоме рішення (публічний API).
 - [ ] Частина 3 — Security-заголовки фронтенда (next.config.ts headers)
 - [ ] Частина 4 — Живий E2E Stripe test mode (СТОП-точка: ключі від користувача)
 - [ ] Частина 4б — LiqPay sandbox — ЗАБЛОКОВАНО (немає ключів; mocked-тести — чинне покриття)
