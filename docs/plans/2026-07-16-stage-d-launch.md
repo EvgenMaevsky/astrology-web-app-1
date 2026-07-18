@@ -1,7 +1,7 @@
 ---
-status: planned
+status: in-progress
 created: 2026-07-16
-updated: 2026-07-16
+updated: 2026-07-18
 related: "[[ROADMAP]]"
 tags: [plan, stage-d]
 ---
@@ -107,7 +107,12 @@ tags: [plan, stage-d]
       Заодно прибрано `payment_method_types=["card"]` з checkout-сесії (актуальна
       best-practice Stripe: не хардкодити, дати Stripe динамічно підбирати методи —
       підтверджено, що Apple Pay зʼявився на чекауті після цього). 102 passed/2 skipped.
-- [ ] Частина 4б — LiqPay sandbox — ЗАБЛОКОВАНО (немає ключів; mocked-тести — чинне покриття)
+- [x] Частина 4б — LiqPay sandbox — SUPERSEDED (2026-07-18): рішення власника —
+      LiqPay видаляється повністю, гривневі платежі переїжджають на monopay
+      (еквайринг monobank). Окремий план:
+      [[2026-07-18-monopay-migration]]. Рекомендований порядок: Частина 5
+      (Plausible) → міграція monopay → Частина 6 (LAUNCH.md пишеться вже
+      з monopay, без переписування).
 - [ ] Частина 5 — Plausible analytics (gated на env, без cookie-банера)
 - [ ] Частина 6 — Бета-готовність: feedback-лінк + docs/LAUNCH.md + ROADMAP
 - [ ] DoD 1 — pytest 0 failed (з новими тестами)
@@ -228,11 +233,12 @@ tags: [plan, stage-d]
 → дочекатись customer.subscription.deleted у listen-лозі → перевірити plan="free".
 ### 4.6. Зафіксувати повний ланцюжок у Прогресі (ID сесій/подій — можна, секрети — ні).
 
-## Частина 4б — LiqPay sandbox — ЗАБЛОКОВАНО
-Ключів немає (підтверджено користувачем). Нічого не робити. Mocked-тести
-(5 шт. у test_billing.py) — чинне покриття callback-логіки. Відмітити в
-Прогресі як заблоковане, у LAUNCH.md — як обов'язковий ручний крок перед
-прийомом гривневих платежів.
+## Частина 4б — LiqPay sandbox — SUPERSEDED (2026-07-18)
+Було «заблоковано: немає ключів». Рішення власника: LiqPay не тестуємо і не
+лишаємо — гривневі платежі переїжджають на monopay (еквайринг monobank),
+LiqPay-код видаляється. Повний план міграції:
+[[2026-07-18-monopay-migration]] (виконувати після Частини 5, перед
+Частиною 6, щоб LAUNCH.md одразу писався з monopay).
 
 ---
 
@@ -268,7 +274,9 @@ Plausible cookie-less → cookie-банер НЕ потрібен.
 ### 6.2. `docs/LAUNCH.md` — чекліст РУЧНИХ кроків власника
 Домен (перевірити/купити — блокер №3 ROADMAP); Vercel-деплой фронтенда;
 VPS-деплой бекенда за docs/DEPLOY.md; DNS; Stripe live-ключі + webhook endpoint
-у Stripe Dashboard (не CLI!); LiqPay прод-ключі + sandbox-прогін; SENTRY_DSN
+у Stripe Dashboard (не CLI!); monopay: бойовий мерчант-токен monobank +
+публічний API_PUBLIC_URL для вебхука (див. [[2026-07-18-monopay-migration]]);
+SENTRY_DSN
 обох частин; NEXT_PUBLIC_PLAUSIBLE_DOMAIN + реєстрація сайту в Plausible;
 uptime-моніторинг; NEXT_PUBLIC_FEEDBACK_EMAIL; запрошення 10–20 бета-юзерів
 (насамперед астрологи-практики — зловлять розбіжності точності); вичитка

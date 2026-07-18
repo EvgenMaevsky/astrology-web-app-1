@@ -25,4 +25,5 @@ status: reference
 - [2026-07-15 — Stage A Stabilization](2026-07-15-stage-a-stabilization.md) — `done`
 - [2026-07-15 — Stage B Infrastructure](2026-07-15-stage-b-infrastructure.md) — `done`
 - [2026-07-16 — Stage C Product Readiness](2026-07-16-stage-c-product-readiness.md) — `done`
-- [2026-07-16 — Stage D Launch](2026-07-16-stage-d-launch.md) — `planned`
+- [2026-07-16 — Stage D Launch](2026-07-16-stage-d-launch.md) — `in-progress` (частини 1–4 done; 4б superseded → monopay)
+- [2026-07-18 — MonoPay Migration](2026-07-18-monopay-migration.md) — `planned` (заміна LiqPay на еквайринг monobank)
