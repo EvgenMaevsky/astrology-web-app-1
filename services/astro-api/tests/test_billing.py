@@ -109,6 +109,44 @@ async def test_checkout_session_completed_upgrades_plan(client: AsyncClient):
         assert sub.stripe_sub_id == "sub_test123"
 
 
+# ── Stripe customer.subscription.created/updated ────────────────────────────
+
+async def test_subscription_created_reads_period_from_items(client: AsyncClient):
+    # As of API version 2026-06-24.dahlia, Stripe moved current_period_start/
+    # end off the top-level Subscription object onto each item in
+    # items.data[] — this reproduces that shape (confirmed against a real
+    # event pulled from the Stripe CLI during live E2E testing).
+    await _register(client, "stripe-period@example.com")
+    user = await _get_user("stripe-period@example.com")
+
+    event = {
+        "type": "customer.subscription.created",
+        "data": {"object": {
+            "id": "sub_period_test",
+            "status": "active",
+            "metadata": {"user_id": user.id, "plan": "pro"},
+            "items": {"data": [{
+                "current_period_start": 1784357910,
+                "current_period_end": 1787036310,
+            }]},
+        }},
+    }
+    payload, sig = _stripe_signed_payload(event)
+    r = await client.post(
+        "/api/v1/billing/stripe/webhook", content=payload, headers={"stripe-signature": sig}
+    )
+    assert r.status_code == 200
+
+    async with TestSession() as session:
+        result = await session.execute(
+            select(Subscription).where(Subscription.stripe_sub_id == "sub_period_test")
+        )
+        sub = result.scalar_one()
+        assert sub.period_start is not None
+        assert sub.period_end is not None
+        assert sub.period_start < sub.period_end
+
+
 # ── Stripe invoice.payment_succeeded ────────────────────────────────────────
 
 async def test_invoice_payment_succeeded_records_payment(client: AsyncClient):

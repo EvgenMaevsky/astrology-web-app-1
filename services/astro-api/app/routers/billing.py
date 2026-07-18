@@ -136,7 +136,10 @@ async def stripe_checkout(
     stripe.api_key = settings.stripe_secret_key
 
     session_kwargs: dict = dict(
-        payment_method_types=["card"],
+        # No payment_method_types here on purpose — Stripe dynamically picks
+        # eligible payment methods from the Dashboard config. Hardcoding
+        # ["card"] locks out other methods that would otherwise improve
+        # conversion (per current Stripe subscription-checkout guidance).
         line_items=[{"price": price_id, "quantity": 1}],
         mode="subscription",
         success_url=f"{settings.frontend_url}/billing?success=1",
@@ -207,6 +210,20 @@ def _ts(value) -> datetime | None:
     return datetime.fromtimestamp(value, tz=timezone.utc) if value else None
 
 
+def _subscription_period(data: dict) -> tuple[datetime | None, datetime | None]:
+    """current_period_start/end live on each subscription item, not on the
+    top-level Subscription object, as of API version 2026-06-24.dahlia —
+    Stripe moved them there to support multiple prices with independent
+    billing cycles on one subscription. We only ever attach a single price,
+    so the first item's period is the subscription's period.
+    """
+    items = (data.get("items") or {}).get("data") or []
+    if not items:
+        return None, None
+    item = items[0]
+    return _ts(item.get("current_period_start")), _ts(item.get("current_period_end"))
+
+
 async def _upsert_subscription(
     db: AsyncSession, user_id: str, plan: str, status_: str,
     stripe_sub_id: str | None, period_start=None, period_end=None,
@@ -265,10 +282,11 @@ async def _handle_stripe_event(event: dict, db: AsyncSession) -> None:
                 await db.execute(
                     update(User).where(User.id == user_id).values(plan=plan)
                 )
+            period_start, period_end = _subscription_period(data)
             await _upsert_subscription(
                 db, user_id, plan, sub_status, sub_id,
-                period_start=_ts(data.get("current_period_start")),
-                period_end=_ts(data.get("current_period_end")),
+                period_start=period_start,
+                period_end=period_end,
             )
             await db.commit()
             log.info("Subscription %s for user %s: status=%s plan=%s", sub_id, user_id, sub_status, plan)

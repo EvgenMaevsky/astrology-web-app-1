@@ -87,7 +87,26 @@ tags: [plan, stage-d]
       → бекенд → таблиці) пройшов наскрізь без жодної CSP-помилки в консолі.
       tsc --noEmit + next build чисті (потрібен був рестарт dev-сервера —
       зміни next.config.ts не хот-релоадяться).
-- [ ] Частина 4 — Живий E2E Stripe test mode (СТОП-точка: ключі від користувача)
+- [x] Частина 4 — Живий E2E Stripe test mode: користувач надав STRIPE_SECRET_KEY
+      і Price ID (спершу помилково вставив Product ID `prod_...` замість Price ID
+      `price_...` — виправлено через `stripe prices list --product`); Stripe CLI
+      вже був залогінений (`stripe login` виконано заздалегідь). Живий цикл:
+      реєстрація → /pricing → "Upgrade with Card (Stripe)" → Stripe Checkout з
+      тестовою карткою 4242 4242 4242 4242 → редірект на /billing з "Payment
+      successful" → бейдж Pro. Всі вебхуми (checkout.session.completed,
+      customer.subscription.created, invoice.payment_succeeded і т.д.) — 200 у
+      stripe listen. У БД: user.plan=pro, payment.amount_cents=900,
+      subscription.status=active. Скасування: `stripe subscriptions cancel` →
+      customer.subscription.deleted → user.plan=free, subscription.status=canceled.
+      ПОЗАПЛАНОВА знахідка й фікс (підтверджено користувачем): у API-версії
+      2026-06-24.dahlia Stripe переніс `current_period_start`/`current_period_end`
+      з верхнього рівня Subscription у `items.data[]` — обробник читав старий шлях
+      і мовчки писав NULL у обидва поля. Додано `_subscription_period()`, що читає
+      з `items.data[0]`; підтверджено і юніт-тестом (реальний payload з Stripe CLI),
+      і повторним живим циклом — нова підписка отримала коректні period_start/end.
+      Заодно прибрано `payment_method_types=["card"]` з checkout-сесії (актуальна
+      best-practice Stripe: не хардкодити, дати Stripe динамічно підбирати методи —
+      підтверджено, що Apple Pay зʼявився на чекауті після цього). 102 passed/2 skipped.
 - [ ] Частина 4б — LiqPay sandbox — ЗАБЛОКОВАНО (немає ключів; mocked-тести — чинне покриття)
 - [ ] Частина 5 — Plausible analytics (gated на env, без cookie-банера)
 - [ ] Частина 6 — Бета-готовність: feedback-лінк + docs/LAUNCH.md + ROADMAP
