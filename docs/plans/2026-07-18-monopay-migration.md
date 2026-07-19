@@ -89,11 +89,55 @@ LiqPay мав нативні підписки (`action: subscribe`, щоміся
 
 ## Прогрес
 
-- [ ] Частина 1 — Бекенд: конфіг, модель, міграція, клієнт monopay
-- [ ] Частина 2 — Бекенд: checkout + вебхук + sync-ендпоінт, видалення LiqPay
-- [ ] Частина 3 — Lazy-експірація monopay-підписок
-- [ ] Частина 4 — Фронтенд: кнопка monobank, /billing з датою закінчення, тексти
-- [ ] Частина 5 — Тести (нові monopay замість старих liqpay)
+- [x] Частина 1 — Бекенд: `cryptography>=44,<46` додано, venv перевстановлено;
+      `monopay_token` замінив liqpay_public/private_key у config.py;
+      `.env.example` (обох частин) оновлено; `Subscription.monopay_invoice_id`
+      (String(64), nullable, indexed) + автогенерована міграція на чистій
+      тимчасовій БД (down_revision=ee0a96658a6f, без server_default —
+      колонка nullable); `app/monopay.py` (create_invoice/get_invoice_status/
+      verify_webhook_signature). Живо звірено з реальним API (тестовий
+      токен): create_invoice → `{invoiceId, pageUrl}`, status → `{status:
+      "created", amount, ccy, ...}` — точно як у фактах плану;
+      `/pubkey` → base64 PEM secp256r1, завантажується напряму через
+      `cryptography.load_pem_public_key`.
+- [x] Частина 2 — `/monopay/checkout` (валідація плану, створює інвойс,
+      pending-рядок Subscription з monopay_invoice_id), `_apply_monopay_status`
+      (спільна логіка success/reversed/failure/expired), `/monopay/sync`
+      (шукає останню pending-підписку юзера, для dev/redirect-time),
+      `/monopay/webhook` (сирі байти → verify → apply). `/billing/subscription`
+      розширено — тепер повертає `provider` (stripe|monopay|null) і
+      `period_end` активної підписки. LiqPay видалено повністю (роутер,
+      конфіг, обидва ендпоінти, imports base64/hashlib/hmac/time — усі
+      використовувались ЛИШЕ в LiqPay-коді). docs/DEPLOY.md: розділ 5
+      (Stripe) оновлено — монопей не потребує ручного налаштування вебхука
+      в кабінеті, але наголошено, що `API_PUBLIC_URL` має бути реальним
+      публічним HTTPS для доставки вебхука.
+- [x] Частина 3 — Lazy-експірація: `_expire_stale_monopay_subscriptions` у
+      `app/dependencies/auth.py` → `get_current_user`, викликається на
+      кожен authed-запит платного юзера. Прострочені monopay-рядки
+      (`period_end` у минулому) → status="expired"; юзера понижує до
+      free ЛИШЕ якщо не лишилось інших чинних підписок (Stripe-рядок з
+      period_end=None завжди вважається чинним — тестами підтверджено,
+      що lazy-експірація його не чіпає).
+- [x] Частина 4 — `startMonopayCheckout`/`syncMonopay` замінили `getLiqPayForm`
+      у actions/billing.ts; `PricingCard` — проп `monopayAvailable`, кнопка
+      «Pay with monobank (UAH)» викликає checkout напряму (без окремого
+      form-POST компонента, на відміну від LiqPay — monopay віддає звичайний
+      redirect-URL); `/billing`: `?monopay=1` → серверний `syncMonopay()`
+      перед рендером + банер успіху (спільний із Stripe `?success=1`);
+      для monopay-підписки показує «Active until DD/MM/YYYY — no
+      auto-renewal» + `RenewButton` замість `ManageButton`; Stripe-гілка
+      не чіпалась. Тексти pricing/terms/privacy — чесно про «30 днів без
+      автопродовження» для monobank проти автопродовження Stripe.
+- [x] Частина 5 — 5 liqpay-тестів + `_liqpay_signed_form` видалено; 10 нових
+      monopay-тестів: checkout (pending-рядок, hidden-план 400, без токена
+      503), webhook (success активує + дедуп Payment, reversed → free,
+      failure → pending/failed, невалідний підпис 400 — це ЄДИНИЙ тест, де
+      справжня ECDSA-перевірка виконується насправді, з фіктивним ключем
+      замість мережевого виклику), sync (застосовує статус пендінг-інвойса),
+      продовження (друга оплата подовжує ІСНУЮЧУ активну підписку, а не
+      створює другу), lazy-експірація ×2 (monopay понижує, Stripe — ні).
+      107 passed/2 skipped (було 102; -5 liqpay +10 monopay).
 - [ ] Частина 6 — Живий E2E з тестовим токеном (СТОП-точка) + доки
 - [ ] DoD — див. внизу
 

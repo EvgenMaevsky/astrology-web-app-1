@@ -25,6 +25,7 @@ dependencies = [
   "asyncpg>=0.29,<1.0",
   "sentry-sdk[fastapi]>=2.0,<3.0",
   "httpx>=0.28,<1.0",
+  "cryptography>=44,<46",
 ]
 
 [project.optional-dependencies]

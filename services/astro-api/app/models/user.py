@@ -57,6 +57,7 @@ class Subscription(Base):
     status: Mapped[str] = mapped_column(String(32), nullable=False)  # active|canceled|past_due
     stripe_sub_id: Mapped[str | None] = mapped_column(String(256), nullable=True)
     liqpay_order_id: Mapped[str | None] = mapped_column(String(256), nullable=True)
+    monopay_invoice_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
     period_start: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     period_end: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
@@ -71,7 +72,7 @@ class Payment(Base):
     user_id: Mapped[str] = mapped_column(String(36), ForeignKey("users.id"), nullable=False, index=True)
     amount_cents: Mapped[int] = mapped_column(Integer, nullable=False)
     currency: Mapped[str] = mapped_column(String(8), nullable=False)
-    provider: Mapped[str] = mapped_column(String(16), nullable=False)  # stripe|liqpay
+    provider: Mapped[str] = mapped_column(String(16), nullable=False)  # stripe|monopay
     provider_payment_id: Mapped[str | None] = mapped_column(String(256), nullable=True, index=True)
     status: Mapped[str] = mapped_column(String(32), nullable=False)  # pending|succeeded|failed
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)

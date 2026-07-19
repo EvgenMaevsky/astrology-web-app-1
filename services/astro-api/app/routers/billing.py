@@ -1,25 +1,26 @@
 """
-Billing router — Stripe + LiqPay payment integrations.
+Billing router — Stripe + monopay payment integrations.
 
 Stripe flow:
   POST /stripe/checkout  → creates a Checkout Session, returns {url}
   POST /stripe/portal    → creates a Customer Portal session, returns {url}
   POST /stripe/webhook   → receives Stripe webhook events
 
-LiqPay flow (for Ukrainian users):
-  POST /liqpay/checkout  → returns {data, signature} for the embedded form
-  POST /liqpay/callback  → LiqPay server-to-server callback (IPN)
+monopay flow (monobank acquiring, for Ukrainian users — one-time invoice,
+no native subscriptions; a successful payment grants 30 days of the plan
+with no auto-renewal):
+  POST /monopay/checkout → creates an invoice, returns {url} to redirect to
+  POST /monopay/sync     → re-checks the caller's pending invoice status
+                            (used right after redirect-back, since a
+                            localhost webhook URL is unreachable from mono)
+  POST /monopay/webhook  → monobank server-to-server callback
 """
 from __future__ import annotations
 
-import base64
-import hashlib
-import hmac
 import json
 import logging
-import time
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 import stripe
 from fastapi import APIRouter, Depends, HTTPException, Request, status
@@ -27,6 +28,7 @@ from pydantic import BaseModel
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app import monopay
 from app.config import settings
 from app.database import get_db
 from app.dependencies.auth import get_current_user
@@ -106,7 +108,26 @@ async def get_subscription(
     db: AsyncSession = Depends(get_db),
 ) -> dict:
     plan = next((p for p in PLANS if p["id"] == current_user.plan), PLANS[0])
-    return {"plan": current_user.plan, "plan_name": plan["name"]}
+
+    result = await db.execute(
+        select(Subscription)
+        .where(Subscription.user_id == current_user.id, Subscription.status == "active")
+        .order_by(Subscription.created_at.desc())
+    )
+    active_sub = result.scalars().first()
+    provider = None
+    period_end = None
+    if active_sub is not None:
+        if active_sub.monopay_invoice_id:
+            provider = "monopay"
+        elif active_sub.stripe_sub_id:
+            provider = "stripe"
+        period_end = active_sub.period_end.isoformat() if active_sub.period_end else None
+
+    return {
+        "plan": current_user.plan, "plan_name": plan["name"],
+        "provider": provider, "period_end": period_end,
+    }
 
 
 # ── Stripe ────────────────────────────────────────────────────────────────────
@@ -335,118 +356,175 @@ async def _handle_stripe_event(event: dict, db: AsyncSession) -> None:
                 log.warning("invoice.payment_succeeded for unknown Stripe customer %s", customer_id)
 
 
-# ── LiqPay ───────────────────────────────────────────────────────────────────
+# ── monopay ──────────────────────────────────────────────────────────────────
+
+MONOPAY_PERIOD = timedelta(days=30)
 
 
-class LiqPayCheckoutRequest(BaseModel):
+class MonopayCheckoutRequest(BaseModel):
     plan: str
-    interval: str = "month"
 
 
-def _liqpay_sign(data: str) -> str:
-    raw = settings.liqpay_private_key + data + settings.liqpay_private_key
-    return base64.b64encode(hashlib.sha1(raw.encode()).digest()).decode()
-
-
-@router.post("/liqpay/checkout")
-async def liqpay_checkout(
-    body: LiqPayCheckoutRequest,
+@router.post("/monopay/checkout")
+async def monopay_checkout(
+    body: MonopayCheckoutRequest,
     current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ) -> dict:
-    if not settings.liqpay_public_key or not settings.liqpay_private_key:
-        raise HTTPException(status_code=503, detail="LiqPay not configured")
+    if not settings.monopay_token:
+        raise HTTPException(status_code=503, detail="monopay not configured")
 
     plan_cfg = next((p for p in PLANS if p["id"] == body.plan), None)
     if not plan_cfg or body.plan == "free" or not plan_cfg.get("public", True):
         raise HTTPException(status_code=400, detail="Invalid plan")
 
-    amount = plan_cfg["price_uah"]
-    payload = {
-        "version": 3,
-        "public_key": settings.liqpay_public_key,
-        "action": "subscribe",
-        "amount": amount,
-        "currency": "UAH",
-        "description": f"Zorya {plan_cfg['name']} — monthly",
-        "order_id": f"{current_user.id}-{body.plan}-{time.time_ns()}",
-        "subscribe": 1,
-        "subscribe_date_start": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"),
-        "subscribe_periodicity": "month",
-        "result_url": f"{settings.frontend_url}/billing?success=1",
-        "server_url": f"{settings.api_public_url}/api/v1/billing/liqpay/callback",
-        "customer": current_user.email,
-        "info": json.dumps({"user_id": current_user.id, "plan": body.plan}),
-    }
-    data = base64.b64encode(json.dumps(payload).encode()).decode()
-    signature = _liqpay_sign(data)
-    return {"data": data, "signature": signature}
+    invoice = await monopay.create_invoice(
+        amount_kopecks=plan_cfg["price_uah"] * 100,
+        reference=f"{current_user.id}-{body.plan}-{uuid.uuid4().hex[:8]}",
+        destination=f"Zorya {plan_cfg['name']} — 30 days",
+        redirect_url=f"{settings.frontend_url}/billing?monopay=1",
+        webhook_url=f"{settings.api_public_url}/api/v1/billing/monopay/webhook",
+    )
+
+    # Local mapping of invoiceId -> (user, plan) — the webhook and /sync both
+    # look the invoice up here rather than trusting fields on the callback.
+    db.add(Subscription(
+        id=str(uuid.uuid4()), user_id=current_user.id, plan=body.plan, status="pending",
+        monopay_invoice_id=invoice["invoiceId"],
+    ))
+    await db.commit()
+
+    return {"url": invoice["pageUrl"]}
 
 
-@router.post("/liqpay/callback")
-async def liqpay_callback(
+async def _apply_monopay_status(inv: dict, db: AsyncSession) -> None:
+    """Shared status-transition logic for both the webhook and /sync —
+    `inv` has the same shape whether it came from the callback body or
+    GET /invoice/status (both carry invoiceId, status, amount, ...).
+    """
+    invoice_id = inv.get("invoiceId")
+    if not invoice_id:
+        return
+
+    result = await db.execute(
+        select(Subscription).where(Subscription.monopay_invoice_id == invoice_id)
+    )
+    sub = result.scalar_one_or_none()
+    if sub is None:
+        log.warning("monopay status for unknown invoice %s", invoice_id)
+        return
+
+    mono_status = inv.get("status")
+
+    if mono_status == "success":
+        if sub.status != "active":
+            now = datetime.now(timezone.utc)
+            # Renewal: if the user already has a different active monopay
+            # subscription, extend ITS period instead of activating this
+            # (new) pending row as a second concurrent one.
+            existing = await db.execute(
+                select(Subscription).where(
+                    Subscription.user_id == sub.user_id,
+                    Subscription.status == "active",
+                    Subscription.monopay_invoice_id.is_not(None),
+                    Subscription.id != sub.id,
+                )
+            )
+            active_sub = existing.scalar_one_or_none()
+            if active_sub is not None:
+                base = active_sub.period_end
+                if base is not None and base.tzinfo is None:
+                    base = base.replace(tzinfo=timezone.utc)
+                active_sub.period_end = max(now, base or now) + MONOPAY_PERIOD
+                sub.status = "merged"
+            else:
+                sub.status = "active"
+                sub.period_start = now
+                sub.period_end = now + MONOPAY_PERIOD
+
+            user_result = await db.execute(select(User).where(User.id == sub.user_id))
+            user = user_result.scalar_one_or_none()
+            if user:
+                user.plan = sub.plan
+
+        existing_payment = await db.execute(
+            select(Payment).where(Payment.provider_payment_id == invoice_id)
+        )
+        if existing_payment.scalar_one_or_none() is None:
+            db.add(Payment(
+                id=str(uuid.uuid4()), user_id=sub.user_id,
+                amount_cents=inv.get("amount", 0),
+                currency="UAH",
+                provider="monopay", provider_payment_id=invoice_id,
+                status="succeeded",
+            ))
+        await db.commit()
+        log.info("monopay: invoice %s succeeded for user %s -> plan %s", invoice_id, sub.user_id, sub.plan)
+
+    elif mono_status == "reversed":
+        sub.status = "canceled"
+        # Only downgrade to free if the user has no other active subscription
+        # (e.g. a paying Stripe user shouldn't be knocked down by a dead
+        # mono invoice).
+        other_active = await db.execute(
+            select(Subscription).where(
+                Subscription.user_id == sub.user_id,
+                Subscription.status == "active",
+                Subscription.id != sub.id,
+            )
+        )
+        if other_active.scalar_one_or_none() is None:
+            user_result = await db.execute(select(User).where(User.id == sub.user_id))
+            user = user_result.scalar_one_or_none()
+            if user:
+                user.plan = "free"
+        await db.commit()
+        log.info("monopay: invoice %s reversed for user %s", invoice_id, sub.user_id)
+
+    elif mono_status in ("failure", "expired"):
+        if sub.status == "pending":
+            sub.status = "failed"
+            await db.commit()
+        log.info("monopay: invoice %s %s", invoice_id, mono_status)
+
+    else:
+        log.debug("monopay: invoice %s status=%s (no action)", invoice_id, mono_status)
+
+
+@router.post("/monopay/sync")
+async def monopay_sync(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    result = await db.execute(
+        select(Subscription)
+        .where(
+            Subscription.user_id == current_user.id,
+            Subscription.monopay_invoice_id.is_not(None),
+            Subscription.status == "pending",
+        )
+        .order_by(Subscription.created_at.desc())
+    )
+    sub = result.scalars().first()
+    if sub is not None:
+        inv = await monopay.get_invoice_status(sub.monopay_invoice_id)
+        await _apply_monopay_status(inv, db)
+        await db.refresh(current_user)
+
+    return {"plan": current_user.plan}
+
+
+@router.post("/monopay/webhook")
+async def monopay_webhook(
     request: Request,
     db: AsyncSession = Depends(get_db),
 ) -> dict:
-    form = await request.form()
-    data = form.get("data", "")
-    signature = form.get("signature", "")
+    raw_body = await request.body()
+    x_sign = request.headers.get("x-sign", "")
 
-    expected = _liqpay_sign(str(data))
-    if not hmac.compare_digest(expected, str(signature)):
-        raise HTTPException(status_code=400, detail="Invalid LiqPay signature")
+    if not await monopay.verify_webhook_signature(raw_body, x_sign):
+        raise HTTPException(status_code=400, detail="Invalid signature")
 
-    payload = json.loads(base64.b64decode(str(data)))
-    pay_status = payload.get("status")
-    info = json.loads(payload.get("info", "{}"))
-    user_id = info.get("user_id")
-    plan = info.get("plan", "free")
-    order_id = payload.get("order_id")
-
-    if pay_status in ("subscribed", "success") and user_id:
-        await db.execute(
-            update(User).where(User.id == user_id).values(plan=plan)
-        )
-
-        existing_sub = None
-        if order_id:
-            result = await db.execute(select(Subscription).where(Subscription.liqpay_order_id == order_id))
-            existing_sub = result.scalar_one_or_none()
-        if existing_sub:
-            existing_sub.status = "active"
-            existing_sub.plan = plan
-        else:
-            db.add(Subscription(
-                id=str(uuid.uuid4()), user_id=user_id, plan=plan, status="active",
-                liqpay_order_id=order_id,
-            ))
-
-        payment_id = str(payload.get("payment_id") or "") or None
-        existing_payment = None
-        if payment_id:
-            result = await db.execute(select(Payment).where(Payment.provider_payment_id == payment_id))
-            existing_payment = result.scalar_one_or_none()
-        if not existing_payment:
-            db.add(Payment(
-                id=str(uuid.uuid4()), user_id=user_id,
-                amount_cents=int(round(float(payload.get("amount", 0)) * 100)),
-                currency=payload.get("currency", "UAH"),
-                provider="liqpay", provider_payment_id=payment_id,
-                status=pay_status,
-            ))
-
-        await db.commit()
-        log.info("LiqPay: upgraded user %s to %s", user_id, plan)
-
-    elif pay_status in ("unsubscribed", "failure", "error") and user_id:
-        await db.execute(
-            update(User).where(User.id == user_id).values(plan="free")
-        )
-        if order_id:
-            result = await db.execute(select(Subscription).where(Subscription.liqpay_order_id == order_id))
-            sub = result.scalar_one_or_none()
-            if sub:
-                sub.status = "canceled"
-        await db.commit()
-        log.info("LiqPay: downgraded user %s to free (status=%s)", user_id, pay_status)
-
+    inv = json.loads(raw_body)
+    await _apply_monopay_status(inv, db)
     return {"ok": True}

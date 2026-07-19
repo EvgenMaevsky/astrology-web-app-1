@@ -18,7 +18,7 @@ bought, registered, or run against a live VPS/Vercel/Stripe/Sentry account.
    - `SECRET_KEY` — generate with `openssl rand -hex 32`.
    - `API_DOMAIN`, `FRONTEND_URL`, `API_PUBLIC_URL`, `CORS_ORIGINS` — set to
      the real domain(s) from step 1 / step 4.
-   - `SENTRY_DSN`, Stripe and LiqPay keys — from steps 5–6 below (can be left
+   - `SENTRY_DSN`, Stripe and monopay keys — from steps 5–6 below (can be left
      empty initially and filled in later; empty `SENTRY_DSN` disables Sentry).
 4. `docker compose up -d` (from `infra/`).
 
@@ -60,8 +60,15 @@ bought, registered, or run against a live VPS/Vercel/Stripe/Sentry account.
 - Subscribe to events: `checkout.session.completed`,
   `customer.subscription.*`, `invoice.payment_succeeded`.
 - Copy the signing secret into `STRIPE_WEBHOOK_SECRET` in `infra/.env`.
-- LiqPay: no dashboard webhook config needed — `server_url` is already built
-  server-side from `API_PUBLIC_URL`.
+- monopay (monobank acquiring): no dashboard webhook config needed —
+  `webHookUrl` is built server-side per-invoice from `API_PUBLIC_URL`, which
+  **must be a real, publicly reachable HTTPS URL** for monobank's servers to
+  deliver the callback (a localhost URL silently never fires — use `/monopay/sync`
+  as the redirect-time fallback, but the webhook is still needed for renewals
+  the user doesn't watch happen). Get a live merchant token from the
+  monobank acquiring dashboard and set `MONOPAY_TOKEN` in `infra/.env`. The
+  webhook's signing public key is fetched automatically from
+  `GET /api/merchant/pubkey` — nothing to configure by hand.
 
 ## 6. Sentry
 

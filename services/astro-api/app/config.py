@@ -43,9 +43,9 @@ class Settings(BaseSettings):
     stripe_price_pro_monthly: str = ""
     stripe_price_expert_monthly: str = ""
 
-    # LiqPay
-    liqpay_public_key: str = ""
-    liqpay_private_key: str = ""
+    # monopay (monobank acquiring, https://api.monobank.ua) — empty token =
+    # monopay disabled, checkout returns 503 (same pattern as Stripe)
+    monopay_token: str = ""
 
     @model_validator(mode="after")
     def _no_dev_secret_in_production(self) -> "Settings":
