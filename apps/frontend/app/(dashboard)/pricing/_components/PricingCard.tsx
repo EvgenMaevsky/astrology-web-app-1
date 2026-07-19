@@ -1,21 +1,29 @@
 "use client";
 
-import { startStripeCheckout } from "@/app/actions/billing";
+import { startStripeCheckout, startMonopayCheckout } from "@/app/actions/billing";
 import { Plan } from "@/app/actions/billing";
 
 interface Props {
   plan: Plan;
   currentPlan: string;
-  liqpayAvailable: boolean;
+  monopayAvailable: boolean;
 }
 
-export function PricingCard({ plan, currentPlan, liqpayAvailable }: Props) {
+export function PricingCard({ plan, currentPlan, monopayAvailable }: Props) {
   const isCurrent = plan.id === currentPlan;
   const isUpgrade = plan.price_usd > 0 && plan.id !== currentPlan;
 
   const handleStripe = async () => {
     try {
       await startStripeCheckout(plan.id);
+    } catch (e) {
+      alert((e as Error).message);
+    }
+  };
+
+  const handleMonopay = async () => {
+    try {
+      await startMonopayCheckout(plan.id);
     } catch (e) {
       alert((e as Error).message);
     }
@@ -71,46 +79,16 @@ export function PricingCard({ plan, currentPlan, liqpayAvailable }: Props) {
           >
             Upgrade with Card (Stripe)
           </button>
-          {liqpayAvailable && (
-            <LiqPayButton plan={plan.id} />
+          {monopayAvailable && (
+            <button
+              onClick={handleMonopay}
+              className="rounded-lg border border-green-600 text-green-700 hover:bg-green-50 text-sm font-semibold px-4 py-2.5 transition-colors"
+            >
+              Pay with monobank (UAH)
+            </button>
           )}
         </div>
       ) : null}
     </div>
-  );
-}
-
-function LiqPayButton({ plan }: { plan: string }) {
-  const handleLiqPay = async () => {
-    const { getLiqPayForm } = await import("@/app/actions/billing");
-    const form = await getLiqPayForm(plan);
-    if (!form) { alert("LiqPay unavailable"); return; }
-
-    const f = document.createElement("form");
-    f.method = "POST";
-    f.action = "https://www.liqpay.ua/api/3/checkout";
-    f.target = "_blank";
-    f.style.display = "none";
-
-    const addField = (name: string, value: string) => {
-      const i = document.createElement("input");
-      i.type = "hidden"; i.name = name; i.value = value;
-      f.appendChild(i);
-    };
-    addField("data", form.data);
-    addField("signature", form.signature);
-
-    document.body.appendChild(f);
-    f.submit();
-    document.body.removeChild(f);
-  };
-
-  return (
-    <button
-      onClick={handleLiqPay}
-      className="rounded-lg border border-green-600 text-green-700 hover:bg-green-50 text-sm font-semibold px-4 py-2.5 transition-colors"
-    >
-      Upgrade with LiqPay (UAH)
-    </button>
   );
 }

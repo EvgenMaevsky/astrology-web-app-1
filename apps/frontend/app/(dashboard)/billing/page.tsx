@@ -1,15 +1,22 @@
 import Link from "next/link";
-import { getSubscription, getChartUsage, getPlans } from "@/app/actions/billing";
+import { getSubscription, getChartUsage, getPlans, syncMonopay } from "@/app/actions/billing";
 import { ManageButton } from "./_components/ManageButton";
+import { RenewButton } from "./_components/RenewButton";
 
 export const metadata = { title: "Billing — Zorya" };
 
 export default async function BillingPage({
   searchParams,
 }: {
-  searchParams: Promise<{ success?: string }>;
+  searchParams: Promise<{ success?: string; monopay?: string }>;
 }) {
-  const { success } = await searchParams;
+  const { success, monopay } = await searchParams;
+  // A localhost webhook URL is unreachable from monobank's servers during
+  // dev, and the production webhook can lag — re-check the pending invoice
+  // right when the user lands back here from the payment page.
+  if (monopay) {
+    await syncMonopay();
+  }
   const [sub, usage, plans] = await Promise.all([
     getSubscription(),
     getChartUsage(),
@@ -18,6 +25,7 @@ export default async function BillingPage({
 
   const planDetails = plans.find((p) => p.id === (sub?.plan ?? "free"));
   const isPaid = sub?.plan && sub.plan !== "free";
+  const periodEndDate = sub?.period_end ? new Date(sub.period_end) : null;
 
   return (
     <div className="space-y-6 max-w-2xl">
@@ -26,7 +34,7 @@ export default async function BillingPage({
         <p className="mt-1 text-sm text-stone-500">Manage your subscription.</p>
       </div>
 
-      {success && (
+      {(success || monopay) && (
         <div className="rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-700">
           Payment successful! Your plan has been upgraded.
         </div>
@@ -41,11 +49,15 @@ export default async function BillingPage({
             <p className="text-sm text-stone-500 mt-1">
               {planDetails?.price_usd === 0
                 ? "Free forever"
+                : sub?.provider === "monopay" && periodEndDate
+                ? `Active until ${periodEndDate.toLocaleDateString()} — no auto-renewal`
                 : `$${planDetails?.price_usd}/month`}
             </p>
           </div>
           <div className="flex gap-3">
-            {isPaid ? (
+            {sub?.provider === "monopay" ? (
+              <RenewButton plan={sub.plan} />
+            ) : isPaid ? (
               <ManageButton />
             ) : (
               <Link

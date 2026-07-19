@@ -12,8 +12,8 @@ export default async function PricingPage({
   const [plans, sub] = await Promise.all([getPlans(), getSubscription()]);
   const currentPlan = sub?.plan ?? "free";
 
-  // LiqPay is available when LIQPAY env is configured (server checks internally)
-  const liqpayAvailable = true;
+  // monopay is available when MONOPAY_TOKEN env is configured (server checks internally)
+  const monopayAvailable = true;
 
   return (
     <div className="space-y-8 max-w-4xl mx-auto">
@@ -34,14 +34,15 @@ export default async function PricingPage({
             key={plan.id}
             plan={plan}
             currentPlan={currentPlan}
-            liqpayAvailable={liqpayAvailable}
+            monopayAvailable={monopayAvailable}
           />
         ))}
       </div>
 
       <p className="text-center text-xs text-stone-400">
-        All prices shown in USD. Ukrainian users may pay in UAH via LiqPay.
-        Subscriptions renew monthly and can be canceled at any time.
+        All prices shown in USD. Card payments (Stripe) renew monthly and can
+        be canceled at any time. Ukrainian users may pay in UAH via monobank
+        — 30 days per payment, no auto-renewal.
       </p>
     </div>
   );

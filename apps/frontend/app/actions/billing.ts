@@ -15,6 +15,8 @@ export interface Plan {
 export interface Subscription {
   plan: string;
   plan_name: string;
+  provider: "stripe" | "monopay" | null;
+  period_end: string | null;
 }
 
 export interface ChartUsage {
@@ -98,14 +100,36 @@ export async function openStripePortal(): Promise<void> {
   redirect(url);
 }
 
-export async function getLiqPayForm(plan: string): Promise<{ data: string; signature: string } | null> {
+export async function startMonopayCheckout(plan: string): Promise<void> {
+  const token = await getAccessToken();
+  if (!token) redirect("/login");
+
+  const res = await fetch(`${API_URL}/api/v1/billing/monopay/checkout`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ plan }),
+    cache: "no-store",
+  });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body?.detail ?? "monobank checkout failed");
+  }
+
+  const { url } = await res.json();
+  redirect(url);
+}
+
+/** Re-checks the caller's pending monopay invoice against monobank and
+ * applies its status — needed right after redirect-back, since a localhost
+ * webhook URL is unreachable from mono's servers during dev. */
+export async function syncMonopay(): Promise<{ plan: string } | null> {
   const token = await getAccessToken();
   if (!token) return null;
   try {
-    const res = await fetch(`${API_URL}/api/v1/billing/liqpay/checkout`, {
+    const res = await fetch(`${API_URL}/api/v1/billing/monopay/sync`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ plan }),
+      headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
     });
     if (!res.ok) return null;
