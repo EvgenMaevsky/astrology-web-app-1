@@ -1,19 +1,20 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { useTranslations } from "next-intl";
 import { deleteAccount } from "@/app/actions/auth";
 
 export function DangerZone() {
+  const t = useTranslations("account");
   const [confirming, setConfirming] = useState(false);
   const [state, action, pending] = useActionState(deleteAccount, undefined);
 
   return (
     <div className="bg-white rounded-xl border border-red-200 p-6 space-y-4">
       <div>
-        <h2 className="text-sm font-semibold text-red-700 uppercase tracking-wider">Danger zone</h2>
+        <h2 className="text-sm font-semibold text-red-700 uppercase tracking-wider">{t("dangerZone")}</h2>
         <p className="mt-1 text-sm text-stone-500">
-          Deleting your account permanently removes your profiles, saved charts, and
-          subscription history. This cannot be undone.
+          {t("dangerZoneText")}
         </p>
       </div>
 
@@ -23,12 +24,12 @@ export function DangerZone() {
           onClick={() => setConfirming(true)}
           className="rounded-lg border border-red-300 text-red-700 hover:bg-red-50 text-sm font-medium px-4 py-2 transition-colors"
         >
-          Delete account
+          {t("deleteAccount")}
         </button>
       ) : (
         <form action={action} className="space-y-3">
           <label htmlFor="delete-password" className="block text-sm font-medium text-stone-700">
-            Confirm your password to permanently delete your account
+            {t("confirmPasswordLabel")}
           </label>
           <input
             id="delete-password"
@@ -52,7 +53,7 @@ export function DangerZone() {
               disabled={pending}
               className="rounded-lg bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white text-sm font-semibold px-4 py-2 transition-colors"
             >
-              {pending ? "Deleting…" : "Permanently delete my account"}
+              {pending ? t("deleting") : t("permanentlyDelete")}
             </button>
             <button
               type="button"
@@ -60,7 +61,7 @@ export function DangerZone() {
               disabled={pending}
               className="rounded-lg border border-stone-300 text-stone-600 hover:bg-stone-50 text-sm font-medium px-4 py-2 transition-colors"
             >
-              Cancel
+              {t("cancel")}
             </button>
           </div>
         </form>

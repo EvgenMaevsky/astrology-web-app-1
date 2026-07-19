@@ -8,6 +8,10 @@
       "planRequired": "{plan} plan required",
       "defaultMessage": "Upgrade to {plan} to access this feature.",
       "viewPlans": "View plans"
+    },
+    "meta": {
+      "title": "Zorya — Astrology Platform",
+      "description": "Precise natal astrology in your browser: a custom ephemeris engine verified against Swiss Ephemeris, transits, solar returns, synastry."
     }
   },
   "nav": {
@@ -296,9 +300,82 @@
     "separating": "Separating",
     "house": "House {n}"
   },
-  "billing": {},
-  "pricing": {},
-  "account": {},
-  "landing": {},
+  "billing": {
+    "title": "Billing",
+    "subtitle": "Manage your subscription.",
+    "paymentSuccess": "Payment successful! Your plan has been upgraded.",
+    "monopayPending": "We haven't received your monobank payment yet. If you just paid, this can take a moment — refresh to check again. If you canceled or the payment link expired, no charge was made.",
+    "currentPlan": "Current plan",
+    "freeForever": "Free forever",
+    "activeUntil": "Active until {date} — no auto-renewal",
+    "perMonth": "${price}/month",
+    "upgrade": "Upgrade",
+    "manageSubscription": "Manage subscription",
+    "stripePortalUnavailable": "Stripe Customer Portal is not available yet. Contact support.",
+    "renew": "Renew for 30 more days",
+    "usage": "Today's usage",
+    "chartsToday": "charts calculated today",
+    "limitSuffix": "/ {limit} limit",
+    "dailyLimitReached": "Daily limit reached.",
+    "upgradeToPro": "Upgrade to Pro",
+    "forUnlimitedCharts": "for unlimited charts.",
+    "features": {}
+  },
+  "pricing": {
+    "title": "Plans & Pricing",
+    "subtitle": "Choose the plan that fits your practice.",
+    "canceled": "Payment was canceled — you were not charged.",
+    "mostPopular": "Most popular",
+    "free": "Free",
+    "perMonth": "/mo",
+    "approxUah": "≈ {uah} UAH/month",
+    "currentPlanLabel": "Current plan",
+    "upgradeStripe": "Upgrade with Card (Stripe)",
+    "payMonopay": "Pay with monobank (UAH)",
+    "disclaimer": "All prices shown in USD. Card payments (Stripe) renew monthly and can be canceled at any time. Ukrainian users may pay in UAH via monobank — 30 days per payment, no auto-renewal."
+  },
+  "account": {
+    "title": "Account",
+    "subtitle": "Manage your email and account settings.",
+    "email": "Email",
+    "verified": "Verified",
+    "unverified": "Unverified",
+    "resend": "Resend verification email",
+    "sending": "Sending…",
+    "dangerZone": "Danger zone",
+    "dangerZoneText": "Deleting your account permanently removes your profiles, saved charts, and subscription history. This cannot be undone.",
+    "deleteAccount": "Delete account",
+    "confirmPasswordLabel": "Confirm your password to permanently delete your account",
+    "deleting": "Deleting…",
+    "permanentlyDelete": "Permanently delete my account",
+    "cancel": "Cancel"
+  },
+  "landing": {
+    "badge": "Zorya",
+    "heroTitle": "Precise natal astrology in your browser",
+    "heroSubtitle": "Our own ephemeris engine built on JPL data — calculation accuracy verified against Swiss Ephemeris, the same standard professional astrologers use.",
+    "tryFree": "Try for free",
+    "signIn": "Sign in",
+    "features": {
+      "accuracyTitle": "Accuracy",
+      "accuracyBody": "Our own ephemeris engine on JPL DE440s data — planetary positions match Swiss Ephemeris to within 0.003°.",
+      "houseSystemsTitle": "6 house systems",
+      "houseSystemsBody": "Placidus, Koch, Equal, Whole Sign, Regiomontanus, Campanus.",
+      "transitsTitle": "Transits, solar returns, synastry",
+      "transitsBody": "Current transits to a natal chart, solar return for any year, comparison of two charts.",
+      "atlasTitle": "Atlas of 34,000+ cities",
+      "atlasBody": "City search with automatic coordinate lookup and historical timezone.",
+      "savedTitle": "Saved profiles and charts",
+      "savedBody": "Save birth data and calculated charts, return to them anytime.",
+      "aspectsTitle": "Aspects with orbs",
+      "aspectsBody": "Full set of aspects with orbs, terms (bounds), and Arabic parts."
+    },
+    "pricingTitle": "Pricing",
+    "perMonth": "/mo",
+    "startFree": "Start for free",
+    "footerCopyright": "© {year} Zorya",
+    "privacy": "Privacy",
+    "terms": "Terms"
+  },
   "errors": {}
 }

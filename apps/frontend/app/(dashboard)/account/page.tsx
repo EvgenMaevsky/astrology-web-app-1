@@ -1,8 +1,13 @@
+import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { getAccessToken, API_URL } from "@/app/lib/auth";
 import { EmailSection } from "./_EmailSection";
 import { DangerZone } from "./_DangerZone";
 
-export const metadata = { title: "Account — Zorya" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("account");
+  return { title: `${t("title")} — Zorya` };
+}
 
 async function fetchMe(token: string) {
   try {
@@ -18,14 +23,14 @@ async function fetchMe(token: string) {
 }
 
 export default async function AccountPage() {
-  const token = await getAccessToken();
+  const [t, token] = await Promise.all([getTranslations("account"), getAccessToken()]);
   const user = token ? await fetchMe(token) : null;
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <div>
-        <h1 className="text-xl font-semibold text-stone-800">Account</h1>
-        <p className="text-sm text-stone-500 pb-2">Manage your email and account settings.</p>
+        <h1 className="text-xl font-semibold text-stone-800">{t("title")}</h1>
+        <p className="text-sm text-stone-500 pb-2">{t("subtitle")}</p>
       </div>
 
       {user && <EmailSection email={user.email} verified={user.email_verified} />}

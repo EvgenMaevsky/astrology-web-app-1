@@ -1,7 +1,9 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { startStripeCheckout, startMonopayCheckout } from "@/app/actions/billing";
 import { Plan } from "@/app/actions/billing";
+import { useFeatureTranslator } from "@/app/lib/billing-i18n";
 
 interface Props {
   plan: Plan;
@@ -10,6 +12,8 @@ interface Props {
 }
 
 export function PricingCard({ plan, currentPlan, monopayAvailable }: Props) {
+  const t = useTranslations("pricing");
+  const translateFeature = useFeatureTranslator();
   const isCurrent = plan.id === currentPlan;
   const isUpgrade = plan.price_usd > 0 && plan.id !== currentPlan;
 
@@ -39,21 +43,21 @@ export function PricingCard({ plan, currentPlan, monopayAvailable }: Props) {
     >
       {plan.id === "pro" && (
         <span className="self-start rounded-full bg-amber-100 text-amber-800 text-xs font-semibold px-3 py-1">
-          Most popular
+          {t("mostPopular")}
         </span>
       )}
 
       <div>
         <h2 className="text-xl font-bold text-stone-900">{plan.name}</h2>
         {plan.price_usd === 0 ? (
-          <p className="text-3xl font-semibold text-stone-900 mt-2">Free</p>
+          <p className="text-3xl font-semibold text-stone-900 mt-2">{t("free")}</p>
         ) : (
           <div className="mt-2">
             <p className="text-3xl font-semibold text-stone-900">
               ${plan.price_usd}
-              <span className="text-base font-normal text-stone-500">/mo</span>
+              <span className="text-base font-normal text-stone-500">{t("perMonth")}</span>
             </p>
-            <p className="text-sm text-stone-400 mt-0.5">≈ {plan.price_uah} UAH/month</p>
+            <p className="text-sm text-stone-400 mt-0.5">{t("approxUah", { uah: plan.price_uah })}</p>
           </div>
         )}
       </div>
@@ -62,14 +66,14 @@ export function PricingCard({ plan, currentPlan, monopayAvailable }: Props) {
         {plan.features.map((f) => (
           <li key={f} className="flex items-start gap-2 text-sm text-stone-600">
             <span className="text-amber-500 mt-0.5">✓</span>
-            {f}
+            {translateFeature(f)}
           </li>
         ))}
       </ul>
 
       {isCurrent ? (
         <div className="rounded-lg bg-stone-100 text-stone-500 text-sm font-semibold px-4 py-2.5 text-center">
-          Current plan
+          {t("currentPlanLabel")}
         </div>
       ) : isUpgrade ? (
         <div className="flex flex-col gap-2">
@@ -77,14 +81,14 @@ export function PricingCard({ plan, currentPlan, monopayAvailable }: Props) {
             onClick={handleStripe}
             className="rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-sm font-semibold px-4 py-2.5 transition-colors"
           >
-            Upgrade with Card (Stripe)
+            {t("upgradeStripe")}
           </button>
           {monopayAvailable && (
             <button
               onClick={handleMonopay}
               className="rounded-lg border border-green-600 text-green-700 hover:bg-green-50 text-sm font-semibold px-4 py-2.5 transition-colors"
             >
-              Pay with monobank (UAH)
+              {t("payMonopay")}
             </button>
           )}
         </div>

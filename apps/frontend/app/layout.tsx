@@ -2,20 +2,21 @@ import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import Script from "next/script";
 import { NextIntlClientProvider } from "next-intl";
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import "./globals.css";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist" });
 
-export const metadata: Metadata = {
-  title: "Zorya — Astrology Platform",
-  description: "Точна натальна астрологія у браузері: власний ефемеридний рушій, звірений зі Swiss Ephemeris, транзити, соляри, синастрія.",
-  openGraph: {
-    title: "Zorya — Astrology Platform",
-    description: "Точна натальна астрологія у браузері: власний ефемеридний рушій, звірений зі Swiss Ephemeris, транзити, соляри, синастрія.",
-    type: "website",
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("common.meta");
+  const title = t("title");
+  const description = t("description");
+  return {
+    title,
+    description,
+    openGraph: { title, description, type: "website" },
+  };
+}
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const locale = await getLocale();

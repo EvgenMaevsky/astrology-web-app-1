@@ -1,9 +1,15 @@
 import Link from "next/link";
+import type { Metadata } from "next";
+import { getLocale, getTranslations } from "next-intl/server";
 import { getSubscription, getChartUsage, getPlans, syncMonopay } from "@/app/actions/billing";
+import { getFeatureTranslator } from "@/app/lib/billing-i18n";
 import { ManageButton } from "./_components/ManageButton";
 import { RenewButton } from "./_components/RenewButton";
 
-export const metadata = { title: "Billing — Zorya" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("billing");
+  return { title: `${t("title")} — Zorya` };
+}
 
 export default async function BillingPage({
   searchParams,
@@ -11,6 +17,11 @@ export default async function BillingPage({
   searchParams: Promise<{ success?: string; monopay?: string }>;
 }) {
   const { success, monopay } = await searchParams;
+  const [t, locale, translateFeature] = await Promise.all([
+    getTranslations("billing"),
+    getLocale(),
+    getFeatureTranslator(),
+  ]);
   // A localhost webhook URL is unreachable from monobank's servers during
   // dev, and the production webhook can lag — re-check the pending invoice
   // right when the user lands back here from the payment page. The invoice
@@ -34,36 +45,34 @@ export default async function BillingPage({
   return (
     <div className="space-y-6 max-w-2xl">
       <div>
-        <h1 className="text-2xl font-semibold text-stone-900">Billing</h1>
-        <p className="mt-1 text-sm text-stone-500">Manage your subscription.</p>
+        <h1 className="text-2xl font-semibold text-stone-900">{t("title")}</h1>
+        <p className="mt-1 text-sm text-stone-500">{t("subtitle")}</p>
       </div>
 
       {(success || monopayUpgraded) && (
         <div className="rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-700">
-          Payment successful! Your plan has been upgraded.
+          {t("paymentSuccess")}
         </div>
       )}
 
       {monopay && !monopayUpgraded && (
         <div className="rounded-lg bg-stone-50 border border-stone-200 px-4 py-3 text-sm text-stone-600">
-          We haven&apos;t received your monobank payment yet. If you just paid, this
-          can take a moment — refresh to check again. If you canceled or the
-          payment link expired, no charge was made.
+          {t("monopayPending")}
         </div>
       )}
 
       {/* Current plan */}
       <div className="bg-white rounded-xl border border-stone-200 p-6 space-y-4">
-        <h2 className="text-sm font-semibold text-stone-700 uppercase tracking-wider">Current plan</h2>
+        <h2 className="text-sm font-semibold text-stone-700 uppercase tracking-wider">{t("currentPlan")}</h2>
         <div className="flex items-center justify-between">
           <div>
             <p className="text-2xl font-bold text-stone-900">{planDetails?.name ?? "Free"}</p>
             <p className="text-sm text-stone-500 mt-1">
               {planDetails?.price_usd === 0
-                ? "Free forever"
+                ? t("freeForever")
                 : sub?.provider === "monopay" && periodEndDate
-                ? `Active until ${periodEndDate.toLocaleDateString()} — no auto-renewal`
-                : `$${planDetails?.price_usd}/month`}
+                ? t("activeUntil", { date: periodEndDate.toLocaleDateString(locale === "uk" ? "uk-UA" : "en-GB") })
+                : t("perMonth", { price: planDetails?.price_usd ?? 0 })}
             </p>
           </div>
           <div className="flex gap-3">
@@ -76,7 +85,7 @@ export default async function BillingPage({
                 href="/pricing"
                 className="rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-sm font-semibold px-4 py-2 transition-colors"
               >
-                Upgrade
+                {t("upgrade")}
               </Link>
             )}
           </div>
@@ -86,7 +95,7 @@ export default async function BillingPage({
           <ul className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-1.5">
             {planDetails.features.map((f) => (
               <li key={f} className="flex items-start gap-2 text-sm text-stone-600">
-                <span className="text-amber-500 mt-0.5">✓</span>{f}
+                <span className="text-amber-500 mt-0.5">✓</span>{translateFeature(f)}
               </li>
             ))}
           </ul>
@@ -96,12 +105,12 @@ export default async function BillingPage({
       {/* Usage */}
       {usage && (
         <div className="bg-white rounded-xl border border-stone-200 p-6 space-y-3">
-          <h2 className="text-sm font-semibold text-stone-700 uppercase tracking-wider">Today&apos;s usage</h2>
+          <h2 className="text-sm font-semibold text-stone-700 uppercase tracking-wider">{t("usage")}</h2>
           <div className="flex items-center gap-4">
             <div>
               <p className="text-2xl font-bold text-stone-900">{usage.used}</p>
               <p className="text-xs text-stone-500">
-                charts calculated today{usage.limit != null ? ` / ${usage.limit} limit` : ""}
+                {t("chartsToday")}{usage.limit != null ? ` ${t("limitSuffix", { limit: usage.limit })}` : ""}
               </p>
             </div>
             {usage.limit != null && (
@@ -115,9 +124,9 @@ export default async function BillingPage({
           </div>
           {usage.plan === "free" && usage.limit != null && usage.used >= usage.limit && (
             <p className="text-sm text-amber-700 bg-amber-50 rounded-lg px-3 py-2">
-              Daily limit reached.{" "}
-              <Link href="/pricing" className="underline font-medium">Upgrade to Pro</Link>{" "}
-              for unlimited charts.
+              {t("dailyLimitReached")}{" "}
+              <Link href="/pricing" className="underline font-medium">{t("upgradeToPro")}</Link>{" "}
+              {t("forUnlimitedCharts")}
             </p>
           )}
         </div>
