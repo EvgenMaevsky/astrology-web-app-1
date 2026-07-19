@@ -50,6 +50,11 @@ bought, registered, or run against a live VPS/Vercel/Stripe/Sentry account.
   automatically by Vercel.
 - Optionally set `NEXT_PUBLIC_SENTRY_DSN` (step 6) to enable frontend Sentry —
   leaving it unset keeps Sentry fully disabled (no-op).
+- Optionally set `NEXT_PUBLIC_PLAUSIBLE_DOMAIN` to your registered domain
+  (e.g. `zorya.app`) after adding the site in the Plausible dashboard
+  (https://plausible.io) — this is cookie-less analytics, no consent banner
+  needed. Leaving it unset loads no script and makes zero requests to
+  plausible.io.
 - Point the frontend's custom domain at `DOMAIN` (the apex/root domain from
   step 1).
 

@@ -65,6 +65,16 @@ export default function PrivacyPage() {
         </section>
 
         <section className="space-y-2">
+          <h2 className="font-semibold text-stone-900">Аналітика</h2>
+          <p className="text-stone-600">
+            За наявності може бути підключена Plausible Analytics — сервіс без cookies, який
+            не збирає персональні дані й не відстежує користувачів між сайтами. Використовується
+            лише для агрегованої статистики відвідувань (кількість переглядів сторінок, звідки
+            прийшли відвідувачі) — без банера згоди, оскільки персональні дані не обробляються.
+          </p>
+        </section>
+
+        <section className="space-y-2">
           <h2 className="font-semibold text-stone-900">Контакти</h2>
           <p className="text-stone-600">TODO(owner): контактний email власника сервісу.</p>
         </section>

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist" });
@@ -27,6 +28,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-full antialiased font-[family-name:var(--font-geist)]">
         {children}
       </body>
+      {process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN && (
+        <Script
+          defer
+          data-domain={process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN}
+          src="https://plausible.io/js/script.js"
+          strategy="afterInteractive"
+        />
+      )}
     </html>
   );
 }

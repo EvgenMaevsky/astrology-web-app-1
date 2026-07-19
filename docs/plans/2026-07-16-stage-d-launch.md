@@ -113,7 +113,18 @@ tags: [plan, stage-d]
       [[2026-07-18-monopay-migration]]. Рекомендований порядок: Частина 5
       (Plausible) → міграція monopay → Частина 6 (LAUNCH.md пишеться вже
       з monopay, без переписування).
-- [ ] Частина 5 — Plausible analytics (gated на env, без cookie-банера)
+- [x] Частина 5 — Plausible analytics: `app/layout.tsx` рендерить
+      `<Script>` лише коли задано `NEXT_PUBLIC_PLAUSIBLE_DOMAIN` (cookie-less,
+      без банера згоди). `apps/frontend/.env.example` створено (не існував —
+      включає API_URL, NEXT_PUBLIC_SITE_URL, NEXT_PUBLIC_SENTRY_DSN,
+      NEXT_PUBLIC_PLAUSIBLE_DOMAIN); docs/DEPLOY.md доповнено абзацом у
+      кроці 4 (Vercel); `/privacy` — новий розділ «Аналітика». Живо
+      перевірено: без env — `read_network_requests` до plausible.io = 0
+      запитів, тег `<script>` відсутній у DOM; з тимчасовим
+      `NEXT_PUBLIC_PLAUSIBLE_DOMAIN=localhost` (рестарт dev-сервера,
+      .env.local прибрано після перевірки) — тег присутній з правильними
+      атрибутами (`data-domain`, `defer`, коректний `src`). tsc + next
+      build чисті.
 - [ ] Частина 6 — Бета-готовність: feedback-лінк + docs/LAUNCH.md + ROADMAP
 - [ ] DoD 1 — pytest 0 failed (з новими тестами)
 - [ ] DoD 2 — tsc --noEmit + next build чисті
