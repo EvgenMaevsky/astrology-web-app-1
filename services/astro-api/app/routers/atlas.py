@@ -39,6 +39,18 @@ _TZ_SQL = text("""
 """)
 
 
+def _fts5_quote(token: str) -> str:
+    """Wrap a token as a literal FTS5 phrase, doubling embedded quotes.
+
+    FTS5's query grammar treats unquoted text as syntax (colons are column
+    filters, parens group, hyphens are NOT-prefixes, apostrophes are string
+    delimiters, ...), so any unquoted user input can throw a syntax error —
+    this broke real city names like "N'Djamena" or "Wilkes-Barre" with a 500,
+    not just adversarial input. Quoting makes the content fully literal.
+    """
+    return '"' + token.replace('"', '""') + '"'
+
+
 @router.get("/search", response_model=list[CityOut])
 async def search_cities(
     q: str = Query(min_length=2, max_length=100),
@@ -46,8 +58,11 @@ async def search_cities(
     country: str | None = Query(None, min_length=2, max_length=2),
     db: AsyncSession = Depends(get_db),
 ):
-    # Sanitize FTS query — escape special chars
-    q_clean = q.replace('"', "").replace("*", "").strip()
+    q_clean = q.strip()
+    if not q_clean:
+        # min_length=2 counts whitespace, so "  " passes validation but has
+        # nothing left to search for.
+        return []
 
     dialect = db.get_bind().dialect.name
     if dialect == "postgresql":
@@ -56,7 +71,14 @@ async def search_cities(
             {"prefix": q_clean + "%", "q": q_clean, "limit": limit * 3},
         )
     else:
-        fts_query = f'"{q_clean}"* OR {q_clean}*'
+        # Phrase-prefix match (adjacent, in order) OR'd with an AND of each
+        # token individually prefix-matched (any order/position) — the
+        # latter is what finds e.g. "Sącz Nowy" for "Nowy Sącz". Every token
+        # is FTS5-quoted so special characters can never be parsed as query
+        # syntax.
+        tokens = q_clean.split()
+        and_of_prefixes = " ".join(f"{_fts5_quote(t)}*" for t in tokens)
+        fts_query = f"{_fts5_quote(q_clean)}* OR {and_of_prefixes}"
         rows = await db.execute(_SEARCH_SQL, {"q": fts_query, "limit": limit * 3})
     cities = rows.fetchall()
 
