@@ -25,6 +25,12 @@ class Settings(BaseSettings):
     rate_limit_register: str = "3/minute"
     rate_limit_forgot_password: str = "3/minute"
     rate_limit_token_check: str = "10/minute"
+    # Chart calculation is CPU-heavy (Skyfield ephemeris + house/aspect
+    # math); the daily free-tier limit (chart_log-based) doesn't bound
+    # request RATE, only same-day count, and only applies to free-plan
+    # natal charts — nothing else throttled how fast an authenticated user
+    # (any plan) could fire calculation requests.
+    rate_limit_chart_calc: str = "20/minute"
 
     # Resend (https://resend.com) — empty key = dev mode, emails are logged not sent
     resend_api_key: str = ""

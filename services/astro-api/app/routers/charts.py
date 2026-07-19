@@ -1,9 +1,10 @@
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.config import settings
 from app.database import get_db
 from app.dependencies.auth import get_current_user
 from app.dependencies.billing import require_plan
@@ -12,6 +13,7 @@ from app.ephemeris.engine import EphemerisEngine
 from app.ephemeris.terms import add_terms_to_planets
 from app.models.chart_log import ChartLog
 from app.models.user import User
+from app.rate_limit import limiter
 from app.schemas.chart import (
     NatalChartRequest, NatalChartResponse,
     TransitRequest, TransitResponse,
@@ -50,7 +52,9 @@ async def _check_free_limit(user: User, db: AsyncSession) -> None:
 
 
 @router.post("/natal", response_model=NatalChartResponse)
+@limiter.limit(settings.rate_limit_chart_calc)
 async def natal_chart(
+    request: Request,
     body: NatalChartRequest,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
@@ -86,7 +90,9 @@ async def natal_chart(
 
 
 @router.post("/transit", response_model=TransitResponse)
+@limiter.limit(settings.rate_limit_chart_calc)
 async def transit_chart(
+    request: Request,
     body: TransitRequest,
     current_user: User = Depends(require_plan("pro", "expert")),
     db: AsyncSession = Depends(get_db),
@@ -125,7 +131,9 @@ async def transit_chart(
 
 
 @router.post("/solar-return", response_model=SolarReturnResponse)
+@limiter.limit(settings.rate_limit_chart_calc)
 async def solar_return_chart(
+    request: Request,
     body: SolarReturnRequest,
     current_user: User = Depends(require_plan("pro", "expert")),
     db: AsyncSession = Depends(get_db),
@@ -156,7 +164,9 @@ async def solar_return_chart(
 
 
 @router.post("/synastry", response_model=SynastryResponse)
+@limiter.limit(settings.rate_limit_chart_calc)
 async def synastry_chart(
+    request: Request,
     body: SynastryRequest,
     current_user: User = Depends(require_plan("pro", "expert")),
     db: AsyncSession = Depends(get_db),
