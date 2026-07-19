@@ -3,11 +3,113 @@
     "languageSwitcher": {
       "uk": "УКР",
       "en": "ENG"
+    },
+    "upgradePrompt": {
+      "planRequired": "{plan} plan required",
+      "defaultMessage": "Upgrade to {plan} to access this feature.",
+      "viewPlans": "View plans"
     }
   },
-  "nav": {},
-  "auth": {},
-  "dashboard": {},
+  "nav": {
+    "overview": "Overview",
+    "persons": "Persons",
+    "charts": "Charts",
+    "reports": "Reports",
+    "pricing": "Pricing",
+    "billing": "Billing",
+    "account": "Account",
+    "signOut": "Sign out",
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "feedback": "Feedback"
+  },
+  "auth": {
+    "login": {
+      "title": "Sign in",
+      "email": "Email",
+      "password": "Password",
+      "forgotPassword": "Forgot password?",
+      "submit": "Sign in",
+      "submitPending": "Signing in…",
+      "noAccount": "No account?",
+      "createOne": "Create one"
+    },
+    "register": {
+      "title": "Create account",
+      "email": "Email",
+      "password": "Password",
+      "passwordHint": "(min. 8 characters)",
+      "submit": "Create account",
+      "submitPending": "Creating account…",
+      "haveAccount": "Already have an account?",
+      "signIn": "Sign in"
+    },
+    "forgotPassword": {
+      "title": "Reset your password",
+      "subtitle": "Enter your email and we'll send you a reset link.",
+      "email": "Email",
+      "submit": "Send reset link",
+      "submitPending": "Sending…",
+      "backToSignIn": "Back to sign in",
+      "successMessage": "If an account with that email exists, we've sent a reset link."
+    },
+    "resetPassword": {
+      "title": "Set a new password",
+      "newPassword": "New password",
+      "confirmPassword": "Confirm password",
+      "submit": "Update password",
+      "submitPending": "Updating…",
+      "signIn": "Sign in",
+      "successMessage": "Password updated. You can now sign in."
+    },
+    "verifyEmail": {
+      "title": "Confirm your email",
+      "subtitle": "Click below to confirm your email address.",
+      "submit": "Confirm email",
+      "submitPending": "Confirming…",
+      "goToDashboard": "Go to dashboard",
+      "successMessage": "Email confirmed. Thanks!"
+    },
+    "verificationBanner": {
+      "message": "Please confirm your email address.",
+      "resend": "Resend email",
+      "resendPending": "Sending…",
+      "resentMessage": "Verification email sent."
+    },
+    "errors": {
+      "emailPasswordRequired": "Email and password are required",
+      "passwordTooShort": "Password must be at least 8 characters",
+      "cannotConnect": "Cannot connect to server. Please try again.",
+      "emailAlreadyRegistered": "Email is already registered",
+      "registrationFailed": "Registration failed",
+      "invalidCredentials": "Invalid email or password",
+      "loginFailed": "Login failed. Please try again.",
+      "emailRequired": "Email is required",
+      "passwordRequired": "Password is required",
+      "passwordsDoNotMatch": "Passwords do not match",
+      "missingResetLink": "Missing or invalid reset link",
+      "resetLinkInvalid": "This reset link is invalid or has expired.",
+      "notAuthenticated": "Not authenticated",
+      "missingVerificationLink": "Missing or invalid verification link",
+      "verificationLinkInvalid": "This verification link is invalid or has expired.",
+      "incorrectPassword": "Incorrect password.",
+      "deleteAccountFailed": "Could not delete account (error {status})."
+    }
+  },
+  "dashboard": {
+    "overview": "Overview",
+    "subtitle": "Your astrology workspace.",
+    "persons": "Persons",
+    "personsSubtitle": "Saved birth profiles",
+    "charts": "Charts",
+    "chartsSubtitle": "Calculate natal chart",
+    "reports": "Reports",
+    "reportsSubtitle": "Coming soon",
+    "gettingStarted": "Getting started",
+    "step1": "<link>Add a person</link> with their birth data",
+    "step2": "<link>Calculate a natal chart</link> — load a saved person or enter data manually",
+    "step3": "Explore planets, aspects, terms, and Arabic parts"
+  },
   "persons": {},
   "charts": {},
   "astro": {},

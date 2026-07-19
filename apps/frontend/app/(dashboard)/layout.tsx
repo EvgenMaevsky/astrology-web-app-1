@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { logout } from "@/app/actions/auth";
 import { getAccessToken, API_URL } from "@/app/lib/auth";
 import Link from "next/link";
@@ -17,16 +18,6 @@ async function fetchMe(token: string) {
   }
 }
 
-const NAV = [
-  { href: "/dashboard", label: "Overview" },
-  { href: "/persons", label: "Persons" },
-  { href: "/charts", label: "Charts" },
-  { href: "/reports", label: "Reports" },
-  { href: "/pricing", label: "Pricing" },
-  { href: "/billing", label: "Billing" },
-  { href: "/account", label: "Account" },
-];
-
 export default async function DashboardLayout({
   children,
 }: {
@@ -34,6 +25,17 @@ export default async function DashboardLayout({
 }) {
   const token = await getAccessToken();
   const user = token ? await fetchMe(token) : null;
+  const t = await getTranslations("nav");
+
+  const NAV = [
+    { href: "/dashboard", label: t("overview") },
+    { href: "/persons", label: t("persons") },
+    { href: "/charts", label: t("charts") },
+    { href: "/reports", label: t("reports") },
+    { href: "/pricing", label: t("pricing") },
+    { href: "/billing", label: t("billing") },
+    { href: "/account", label: t("account") },
+  ];
 
   return (
     <div className="flex min-h-screen bg-stone-50">
@@ -60,18 +62,18 @@ export default async function DashboardLayout({
               type="submit"
               className="w-full text-left px-3 py-2 text-sm text-stone-500 hover:text-stone-800 hover:bg-stone-100 rounded-lg transition-colors"
             >
-              Sign out
+              {t("signOut")}
             </button>
           </form>
           <div className="flex items-center gap-3 px-3 pt-2 text-xs text-stone-400">
-            <Link href="/privacy" className="hover:text-stone-600">Privacy</Link>
-            <Link href="/terms" className="hover:text-stone-600">Terms</Link>
+            <Link href="/privacy" className="hover:text-stone-600">{t("privacy")}</Link>
+            <Link href="/terms" className="hover:text-stone-600">{t("terms")}</Link>
             {process.env.NEXT_PUBLIC_FEEDBACK_EMAIL && (
               <a
                 href={`mailto:${process.env.NEXT_PUBLIC_FEEDBACK_EMAIL}`}
                 className="hover:text-stone-600"
               >
-                Feedback
+                {t("feedback")}
               </a>
             )}
           </div>
@@ -98,7 +100,7 @@ export default async function DashboardLayout({
             <LanguageSwitcher className="lg:hidden" />
             <form action={logout} className="lg:hidden">
               <button type="submit" className="text-sm text-stone-500 hover:text-stone-900">
-                Sign out
+                {t("signOut")}
               </button>
             </form>
           </div>

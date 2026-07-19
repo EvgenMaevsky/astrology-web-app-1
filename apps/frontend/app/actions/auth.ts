@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { API_URL, clearAuthCookies, getAccessToken, getRefreshToken, setAuthCookies } from "@/app/lib/auth";
 
 type AuthState = { error?: string } | undefined;
@@ -9,11 +10,12 @@ export async function register(
   _state: AuthState,
   formData: FormData
 ): Promise<AuthState> {
+  const t = await getTranslations("auth.errors");
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
 
-  if (!email || !password) return { error: "Email and password are required" };
-  if (password.length < 8) return { error: "Password must be at least 8 characters" };
+  if (!email || !password) return { error: t("emailPasswordRequired") };
+  if (password.length < 8) return { error: t("passwordTooShort") };
 
   let res: Response;
   try {
@@ -23,13 +25,13 @@ export async function register(
       body: JSON.stringify({ email, password }),
     });
   } catch {
-    return { error: "Cannot connect to server. Please try again." };
+    return { error: t("cannotConnect") };
   }
 
-  if (res.status === 409) return { error: "Email is already registered" };
+  if (res.status === 409) return { error: t("emailAlreadyRegistered") };
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
-    return { error: body?.detail ?? "Registration failed" };
+    return { error: body?.detail ?? t("registrationFailed") };
   }
 
   const { access_token, refresh_token } = await res.json();
@@ -41,10 +43,11 @@ export async function login(
   _state: AuthState,
   formData: FormData
 ): Promise<AuthState> {
+  const t = await getTranslations("auth.errors");
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
 
-  if (!email || !password) return { error: "Email and password are required" };
+  if (!email || !password) return { error: t("emailPasswordRequired") };
 
   let res: Response;
   try {
@@ -54,11 +57,11 @@ export async function login(
       body: JSON.stringify({ email, password }),
     });
   } catch {
-    return { error: "Cannot connect to server. Please try again." };
+    return { error: t("cannotConnect") };
   }
 
-  if (res.status === 401) return { error: "Invalid email or password" };
-  if (!res.ok) return { error: "Login failed. Please try again." };
+  if (res.status === 401) return { error: t("invalidCredentials") };
+  if (!res.ok) return { error: t("loginFailed") };
 
   const { access_token, refresh_token } = await res.json();
   await setAuthCookies(access_token, refresh_token);
@@ -84,8 +87,9 @@ export async function forgotPassword(
   _state: MessageState,
   formData: FormData
 ): Promise<MessageState> {
+  const t = await getTranslations("auth");
   const email = formData.get("email") as string;
-  if (!email) return { error: "Email is required" };
+  if (!email) return { error: t("errors.emailRequired") };
 
   try {
     await fetch(`${API_URL}/api/v1/auth/forgot-password`, {
@@ -94,25 +98,26 @@ export async function forgotPassword(
       body: JSON.stringify({ email }),
     });
   } catch {
-    return { error: "Cannot connect to server. Please try again." };
+    return { error: t("errors.cannotConnect") };
   }
 
   // Always show the same message regardless of whether the account exists.
-  return { message: "If an account with that email exists, we've sent a reset link." };
+  return { message: t("forgotPassword.successMessage") };
 }
 
 export async function resetPassword(
   _state: MessageState,
   formData: FormData
 ): Promise<MessageState> {
+  const t = await getTranslations("auth");
   const token = formData.get("token") as string;
   const password = formData.get("password") as string;
   const confirmPassword = formData.get("confirmPassword") as string;
 
-  if (!token) return { error: "Missing or invalid reset link" };
-  if (!password) return { error: "Password is required" };
-  if (password.length < 8) return { error: "Password must be at least 8 characters" };
-  if (password !== confirmPassword) return { error: "Passwords do not match" };
+  if (!token) return { error: t("errors.missingResetLink") };
+  if (!password) return { error: t("errors.passwordRequired") };
+  if (password.length < 8) return { error: t("errors.passwordTooShort") };
+  if (password !== confirmPassword) return { error: t("errors.passwordsDoNotMatch") };
 
   let res: Response;
   try {
@@ -122,19 +127,20 @@ export async function resetPassword(
       body: JSON.stringify({ token, new_password: password }),
     });
   } catch {
-    return { error: "Cannot connect to server. Please try again." };
+    return { error: t("errors.cannotConnect") };
   }
 
-  if (!res.ok) return { error: "This reset link is invalid or has expired." };
-  return { message: "Password updated. You can now sign in." };
+  if (!res.ok) return { error: t("errors.resetLinkInvalid") };
+  return { message: t("resetPassword.successMessage") };
 }
 
 export async function sendVerificationEmail(
   _state: MessageState,
   _formData: FormData
 ): Promise<MessageState> {
+  const t = await getTranslations("auth");
   const token = await getAccessToken();
-  if (!token) return { error: "Not authenticated" };
+  if (!token) return { error: t("errors.notAuthenticated") };
 
   try {
     await fetch(`${API_URL}/api/v1/auth/send-verification`, {
@@ -142,20 +148,21 @@ export async function sendVerificationEmail(
       headers: { Authorization: `Bearer ${token}` },
     });
   } catch {
-    return { error: "Cannot connect to server. Please try again." };
+    return { error: t("errors.cannotConnect") };
   }
-  return { message: "Verification email sent." };
+  return { message: t("verificationBanner.resentMessage") };
 }
 
 export async function deleteAccount(
   _state: MessageState,
   formData: FormData
 ): Promise<MessageState> {
+  const t = await getTranslations("auth");
   const password = formData.get("password") as string;
-  if (!password) return { error: "Password is required" };
+  if (!password) return { error: t("errors.passwordRequired") };
 
   const token = await getAccessToken();
-  if (!token) return { error: "Not authenticated" };
+  if (!token) return { error: t("errors.notAuthenticated") };
 
   let res: Response;
   try {
@@ -165,11 +172,11 @@ export async function deleteAccount(
       body: JSON.stringify({ password }),
     });
   } catch {
-    return { error: "Cannot connect to server. Please try again." };
+    return { error: t("errors.cannotConnect") };
   }
 
-  if (res.status === 403) return { error: "Incorrect password." };
-  if (!res.ok) return { error: `Could not delete account (error ${res.status}).` };
+  if (res.status === 403) return { error: t("errors.incorrectPassword") };
+  if (!res.ok) return { error: t("errors.deleteAccountFailed", { status: res.status }) };
 
   await clearAuthCookies();
   redirect("/login");
@@ -179,8 +186,9 @@ export async function verifyEmail(
   _state: MessageState,
   formData: FormData
 ): Promise<MessageState> {
+  const t = await getTranslations("auth");
   const token = formData.get("token") as string;
-  if (!token) return { error: "Missing or invalid verification link" };
+  if (!token) return { error: t("errors.missingVerificationLink") };
 
   let res: Response;
   try {
@@ -190,9 +198,9 @@ export async function verifyEmail(
       body: JSON.stringify({ token }),
     });
   } catch {
-    return { error: "Cannot connect to server. Please try again." };
+    return { error: t("errors.cannotConnect") };
   }
 
-  if (!res.ok) return { error: "This verification link is invalid or has expired." };
-  return { message: "Email confirmed. Thanks!" };
+  if (!res.ok) return { error: t("errors.verificationLinkInvalid") };
+  return { message: t("verifyEmail.successMessage") };
 }

@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { VerifyEmailAction } from "./_VerifyEmailAction";
 
 export default async function VerifyEmailPage({
@@ -6,6 +7,7 @@ export default async function VerifyEmailPage({
   searchParams: Promise<{ token?: string }>;
 }) {
   const { token } = await searchParams;
+  const t = await getTranslations("auth.verifyEmail");
 
   return (
     <div className="w-full max-w-md">
@@ -14,9 +16,9 @@ export default async function VerifyEmailPage({
           <p className="text-xs font-semibold tracking-widest text-amber-700 uppercase mb-2">
             Zorya
           </p>
-          <h1 className="text-2xl font-semibold text-stone-900">Confirm your email</h1>
+          <h1 className="text-2xl font-semibold text-stone-900">{t("title")}</h1>
           <p className="mt-2 text-sm text-stone-500">
-            Click below to confirm your email address.
+            {t("subtitle")}
           </p>
         </div>
         <VerifyEmailAction token={token ?? ""} />

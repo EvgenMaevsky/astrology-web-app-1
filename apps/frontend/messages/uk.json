@@ -3,11 +3,113 @@
     "languageSwitcher": {
       "uk": "УКР",
       "en": "ENG"
+    },
+    "upgradePrompt": {
+      "planRequired": "Потрібен план {plan}",
+      "defaultMessage": "Оновіть до {plan}, щоб отримати доступ до цієї функції.",
+      "viewPlans": "Переглянути тарифи"
     }
   },
-  "nav": {},
-  "auth": {},
-  "dashboard": {},
+  "nav": {
+    "overview": "Огляд",
+    "persons": "Персони",
+    "charts": "Карти",
+    "reports": "Звіти",
+    "pricing": "Тарифи",
+    "billing": "Оплата",
+    "account": "Акаунт",
+    "signOut": "Вийти",
+    "privacy": "Конфіденційність",
+    "terms": "Умови",
+    "feedback": "Зворотний зв'язок"
+  },
+  "auth": {
+    "login": {
+      "title": "Увійти",
+      "email": "Email",
+      "password": "Пароль",
+      "forgotPassword": "Забули пароль?",
+      "submit": "Увійти",
+      "submitPending": "Вхід…",
+      "noAccount": "Немає акаунта?",
+      "createOne": "Створити"
+    },
+    "register": {
+      "title": "Створити акаунт",
+      "email": "Email",
+      "password": "Пароль",
+      "passwordHint": "(мінімум 8 символів)",
+      "submit": "Створити акаунт",
+      "submitPending": "Створення акаунта…",
+      "haveAccount": "Вже є акаунт?",
+      "signIn": "Увійти"
+    },
+    "forgotPassword": {
+      "title": "Відновлення пароля",
+      "subtitle": "Введіть email — надішлемо посилання для скидання пароля.",
+      "email": "Email",
+      "submit": "Надіслати посилання",
+      "submitPending": "Надсилання…",
+      "backToSignIn": "Повернутися до входу",
+      "successMessage": "Якщо акаунт із такою поштою існує, ми надіслали посилання для скидання пароля."
+    },
+    "resetPassword": {
+      "title": "Новий пароль",
+      "newPassword": "Новий пароль",
+      "confirmPassword": "Підтвердіть пароль",
+      "submit": "Оновити пароль",
+      "submitPending": "Оновлення…",
+      "signIn": "Увійти",
+      "successMessage": "Пароль оновлено. Тепер ви можете увійти."
+    },
+    "verifyEmail": {
+      "title": "Підтвердження email",
+      "subtitle": "Натисніть нижче, щоб підтвердити вашу email-адресу.",
+      "submit": "Підтвердити email",
+      "submitPending": "Підтвердження…",
+      "goToDashboard": "До дашборда",
+      "successMessage": "Email підтверджено. Дякуємо!"
+    },
+    "verificationBanner": {
+      "message": "Будь ласка, підтвердьте вашу email-адресу.",
+      "resend": "Надіслати повторно",
+      "resendPending": "Надсилання…",
+      "resentMessage": "Лист із підтвердженням надіслано."
+    },
+    "errors": {
+      "emailPasswordRequired": "Вкажіть email і пароль",
+      "passwordTooShort": "Пароль має містити щонайменше 8 символів",
+      "cannotConnect": "Не вдалося з'єднатися з сервером. Спробуйте ще раз.",
+      "emailAlreadyRegistered": "Ця email-адреса вже зареєстрована",
+      "registrationFailed": "Не вдалося зареєструватися",
+      "invalidCredentials": "Невірний email або пароль",
+      "loginFailed": "Не вдалося увійти. Спробуйте ще раз.",
+      "emailRequired": "Вкажіть email",
+      "passwordRequired": "Вкажіть пароль",
+      "passwordsDoNotMatch": "Паролі не збігаються",
+      "missingResetLink": "Посилання для скидання пароля відсутнє або недійсне",
+      "resetLinkInvalid": "Це посилання недійсне або застаріле.",
+      "notAuthenticated": "Ви не авторизовані",
+      "missingVerificationLink": "Посилання для підтвердження відсутнє або недійсне",
+      "verificationLinkInvalid": "Це посилання недійсне або застаріле.",
+      "incorrectPassword": "Невірний пароль.",
+      "deleteAccountFailed": "Не вдалося видалити акаунт (помилка {status})."
+    }
+  },
+  "dashboard": {
+    "overview": "Огляд",
+    "subtitle": "Ваш астрологічний робочий простір.",
+    "persons": "Персони",
+    "personsSubtitle": "Збережені профілі народження",
+    "charts": "Карти",
+    "chartsSubtitle": "Розрахувати натальну карту",
+    "reports": "Звіти",
+    "reportsSubtitle": "Скоро",
+    "gettingStarted": "Початок роботи",
+    "step1": "<link>Додайте персону</link> з даними народження",
+    "step2": "<link>Розрахуйте натальну карту</link> — завантажте збережену персону або введіть дані вручну",
+    "step3": "Досліджуйте планети, аспекти, терміни та арабські частини"
+  },
   "persons": {},
   "charts": {},
   "astro": {},

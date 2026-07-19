@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 import { useActionState } from "react";
+import { useTranslations } from "next-intl";
 import { forgotPassword } from "@/app/actions/auth";
 
 export default function ForgotPasswordPage() {
   const [state, action, pending] = useActionState(forgotPassword, undefined);
+  const t = useTranslations("auth.forgotPassword");
 
   return (
     <div className="w-full max-w-md">
@@ -14,9 +16,9 @@ export default function ForgotPasswordPage() {
           <p className="text-xs font-semibold tracking-widest text-amber-700 uppercase mb-2">
             Zorya
           </p>
-          <h1 className="text-2xl font-semibold text-stone-900">Reset your password</h1>
+          <h1 className="text-2xl font-semibold text-stone-900">{t("title")}</h1>
           <p className="mt-2 text-sm text-stone-500">
-            Enter your email and we&apos;ll send you a reset link.
+            {t("subtitle")}
           </p>
         </div>
 
@@ -28,7 +30,7 @@ export default function ForgotPasswordPage() {
           <form action={action} className="space-y-5">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-stone-700 mb-1.5">
-                Email
+                {t("email")}
               </label>
               <input
                 id="email"
@@ -52,14 +54,14 @@ export default function ForgotPasswordPage() {
               disabled={pending}
               className="w-full rounded-lg bg-stone-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-stone-900 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
             >
-              {pending ? "Sending…" : "Send reset link"}
+              {pending ? t("submitPending") : t("submit")}
             </button>
           </form>
         )}
 
         <p className="mt-6 text-center text-sm text-stone-500">
           <Link href="/login" className="font-medium text-amber-700 hover:text-amber-800">
-            Back to sign in
+            {t("backToSignIn")}
           </Link>
         </p>
       </div>
