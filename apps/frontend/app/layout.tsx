@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import Script from "next/script";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale } from "next-intl/server";
 import "./globals.css";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist" });
@@ -15,9 +17,11 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const locale = await getLocale();
+
   return (
-    <html lang="uk" className={`${geist.variable} h-full`}>
+    <html lang={locale} className={`${geist.variable} h-full`}>
       <head>
         <link
           rel="stylesheet"
@@ -26,7 +30,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className="min-h-full antialiased font-[family-name:var(--font-geist)]">
-        {children}
+        <NextIntlClientProvider>{children}</NextIntlClientProvider>
       </body>
       {process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN && (
         <Script

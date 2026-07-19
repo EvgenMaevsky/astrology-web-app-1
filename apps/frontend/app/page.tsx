@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getPlans } from "@/app/actions/billing";
+import { LanguageSwitcher } from "@/app/_components/LanguageSwitcher";
 
 const FEATURES = [
   {
@@ -33,8 +34,11 @@ export default async function LandingPage() {
 
   return (
     <div className="min-h-screen bg-[radial-gradient(ellipse_at_top,#f5e6c8_0%,#ede0cc_50%,#e5d5b8_100%)]">
+      <div className="max-w-5xl mx-auto px-6 pt-6 flex justify-end">
+        <LanguageSwitcher />
+      </div>
       {/* Hero */}
-      <header className="max-w-5xl mx-auto px-6 pt-20 pb-16 text-center">
+      <header className="max-w-5xl mx-auto px-6 pt-14 pb-16 text-center">
         <p className="text-xs font-semibold tracking-widest text-amber-700 uppercase mb-4">
           Zorya
         </p>

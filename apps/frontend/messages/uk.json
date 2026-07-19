@@ -1,0 +1,19 @@
+{
+  "common": {
+    "languageSwitcher": {
+      "uk": "УКР",
+      "en": "ENG"
+    }
+  },
+  "nav": {},
+  "auth": {},
+  "dashboard": {},
+  "persons": {},
+  "charts": {},
+  "astro": {},
+  "billing": {},
+  "pricing": {},
+  "account": {},
+  "landing": {},
+  "errors": {}
+}

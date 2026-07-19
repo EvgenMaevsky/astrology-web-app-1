@@ -2,6 +2,7 @@ import { logout } from "@/app/actions/auth";
 import { getAccessToken, API_URL } from "@/app/lib/auth";
 import Link from "next/link";
 import { EmailVerificationBanner } from "./_EmailVerificationBanner";
+import { LanguageSwitcher } from "@/app/_components/LanguageSwitcher";
 
 async function fetchMe(token: string) {
   try {
@@ -74,6 +75,9 @@ export default async function DashboardLayout({
               </a>
             )}
           </div>
+          <div className="px-3 pt-2">
+            <LanguageSwitcher />
+          </div>
         </div>
       </aside>
 
@@ -91,6 +95,7 @@ export default async function DashboardLayout({
                 </span>
               </>
             )}
+            <LanguageSwitcher className="lg:hidden" />
             <form action={logout} className="lg:hidden">
               <button type="submit" className="text-sm text-stone-500 hover:text-stone-900">
                 Sign out
