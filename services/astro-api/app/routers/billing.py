@@ -417,7 +417,14 @@ async def _apply_monopay_status(inv: dict, db: AsyncSession) -> None:
     mono_status = inv.get("status")
 
     if mono_status == "success":
-        if sub.status != "active":
+        # Only pending -> active. A "success" webhook payload has no
+        # nonce/expiry, so an attacker who captured a validly-signed old
+        # payload (e.g. from a since-reversed payment) could replay it —
+        # gating on the current status being "pending" means a replay
+        # against an already-canceled/failed/merged row is a no-op instead
+        # of resurrecting it. `!= "active"` alone (the previous check) also
+        # accepted "canceled"/"failed" as reactivatable, which is the gap.
+        if sub.status == "pending":
             now = datetime.now(timezone.utc)
             # Renewal: if the user already has a different active monopay
             # subscription, extend ITS period instead of activating this

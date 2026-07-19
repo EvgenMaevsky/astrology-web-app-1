@@ -349,6 +349,51 @@ async def test_monopay_webhook_reversed_downgrades_to_free(client: AsyncClient, 
         assert sub.status == "canceled"
 
 
+async def test_monopay_webhook_replayed_success_does_not_reactivate_reversed_subscription(
+    client: AsyncClient, monkeypatch
+):
+    # Regression for a C3 security-review finding: the "success" transition
+    # used to fire for any non-active status, so replaying an old,
+    # validly-signed "success" payload (e.g. captured before a chargeback)
+    # against an already-reversed subscription would resurrect it. It must
+    # now only ever transition pending -> active.
+    async def fake_verify(raw_body: bytes, x_sign: str) -> bool:
+        return True
+
+    monkeypatch.setattr("app.monopay.verify_webhook_signature", fake_verify)
+
+    token = await _register(client, "monopay-replay@example.com")
+    user = await _get_user("monopay-replay@example.com")
+
+    async with TestSession() as session:
+        session.add(Subscription(
+            id=str(uuid.uuid4()), user_id=user.id, plan="pro", status="canceled",
+            monopay_invoice_id="inv_replay_1",
+            period_start=datetime.now(timezone.utc) - timedelta(days=40),
+            period_end=datetime.now(timezone.utc) - timedelta(days=10),
+        ))
+        await session.commit()
+
+    # The original "success" payload, replayed after the subscription was
+    # already reversed.
+    body = json.dumps({"invoiceId": "inv_replay_1", "status": "success", "amount": 35000}).encode()
+    r = await client.post(
+        "/api/v1/billing/monopay/webhook", content=body,
+        headers={"X-Sign": "irrelevant", "Content-Type": "application/json"},
+    )
+    assert r.status_code == 200
+
+    updated = await _get_user("monopay-replay@example.com")
+    assert updated.plan == "free"
+
+    async with TestSession() as session:
+        result = await session.execute(
+            select(Subscription).where(Subscription.monopay_invoice_id == "inv_replay_1")
+        )
+        sub = result.scalar_one()
+        assert sub.status == "canceled"
+
+
 async def test_monopay_webhook_failure_marks_pending_failed(client: AsyncClient, monkeypatch):
     async def fake_verify(raw_body: bytes, x_sign: str) -> bool:
         return True

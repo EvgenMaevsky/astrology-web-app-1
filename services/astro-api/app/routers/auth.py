@@ -39,6 +39,14 @@ def _verify_password(plain: str, hashed: str) -> bool:
     return bcrypt.checkpw(plain.encode(), hashed.encode())
 
 
+# bcrypt.checkpw is the dominant cost in a login attempt (tens of ms); only
+# running it when a user exists makes "no such account" measurably faster
+# than "wrong password", leaking account existence via response timing even
+# though both return the same 401. Hashing against this fixed dummy value
+# when there's no real user keeps the two cases' timing indistinguishable.
+_DUMMY_PASSWORD_HASH = bcrypt.hashpw(b"no-such-user-timing-normalization", bcrypt.gensalt()).decode()
+
+
 def _make_access_token(user_id: str) -> str:
     expire = datetime.now(timezone.utc) + timedelta(minutes=settings.access_token_expire_minutes)
     return jwt.encode(
@@ -99,13 +107,19 @@ def _reset_password_html(link: str) -> str:
 
 
 async def _consume_email_token(db: AsyncSession, raw_token: str, purpose: str) -> EmailToken | None:
-    h = _token_hash(raw_token)
+    # An atomic UPDATE...WHERE used=false (not a SELECT followed by a later
+    # commit) so two concurrent requests for the same token can't both pass
+    # the "not used yet" check — the second one's WHERE simply matches zero
+    # rows once the first has flipped the flag, even before either commits.
     result = await db.execute(
-        select(EmailToken).where(
-            EmailToken.token_hash == h,
+        update(EmailToken)
+        .where(
+            EmailToken.token_hash == _token_hash(raw_token),
             EmailToken.purpose == purpose,
             EmailToken.used.is_(False),
         )
+        .values(used=True)
+        .returning(EmailToken)
     )
     token = result.scalar_one_or_none()
     if token is None or token.expires_at.replace(tzinfo=timezone.utc) < datetime.now(timezone.utc):
@@ -152,7 +166,11 @@ async def register(request: Request, body: RegisterRequest, db: AsyncSession = D
 async def login(request: Request, body: LoginRequest, db: AsyncSession = Depends(get_db)) -> TokenResponse:
     result = await db.execute(select(User).where(User.email == body.email))
     user = result.scalar_one_or_none()
-    if user is None or not _verify_password(body.password, user.password_hash):
+    # Always run bcrypt, even for a nonexistent user — see _DUMMY_PASSWORD_HASH.
+    password_ok = _verify_password(
+        body.password, user.password_hash if user is not None else _DUMMY_PASSWORD_HASH
+    )
+    if user is None or not password_ok:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
     if not user.is_active:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Account disabled")
@@ -266,7 +284,6 @@ async def reset_password(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired token")
 
     user.password_hash = _hash_password(body.new_password)
-    token.used = True
     # A password reset must invalidate any session an attacker may hold.
     await db.execute(
         update(RefreshToken).where(RefreshToken.user_id == user.id).values(revoked=True)
@@ -307,5 +324,4 @@ async def verify_email(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired token")
 
     user.email_verified = True
-    token.used = True
     await db.commit()

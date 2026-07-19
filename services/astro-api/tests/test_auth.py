@@ -36,6 +36,38 @@ async def test_login_wrong_password(client: AsyncClient):
     assert r.status_code == 401
 
 
+async def test_login_nonexistent_email_same_response_as_wrong_password(client: AsyncClient):
+    r = await client.post(
+        "/api/v1/auth/login", json={"email": "nobody@example.com", "password": "whatever123"}
+    )
+    assert r.status_code == 401
+    assert r.json()["detail"] == "Invalid credentials"
+
+
+async def test_login_nonexistent_email_still_runs_bcrypt(client: AsyncClient, monkeypatch):
+    # Regression for a C3 security-review finding: bcrypt.checkpw used to be
+    # skipped entirely for a nonexistent email (short-circuit `or`), making
+    # that case measurably faster than "wrong password" and leaking account
+    # existence via response timing. It must now always run.
+    import app.routers.auth as auth_module
+
+    calls = []
+    real_checkpw = auth_module.bcrypt.checkpw
+
+    def spy_checkpw(password: bytes, hashed: bytes) -> bool:
+        calls.append((password, hashed))
+        return real_checkpw(password, hashed)
+
+    monkeypatch.setattr(auth_module.bcrypt, "checkpw", spy_checkpw)
+
+    r = await client.post(
+        "/api/v1/auth/login", json={"email": "still-nobody@example.com", "password": "whatever123"}
+    )
+    assert r.status_code == 401
+    assert len(calls) == 1
+    assert calls[0][1] == auth_module._DUMMY_PASSWORD_HASH.encode()
+
+
 async def test_me(client: AsyncClient):
     reg = await client.post("/api/v1/auth/register", json={"email": "me@example.com", "password": "password123"})
     token = reg.json()["access_token"]
