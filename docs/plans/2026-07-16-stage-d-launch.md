@@ -1,5 +1,5 @@
 ---
-status: in-progress
+status: done
 created: 2026-07-16
 updated: 2026-07-19
 related: "[[ROADMAP]]"
@@ -147,7 +147,8 @@ tags: [plan, stage-d]
 - [x] DoD 6 — без NEXT_PUBLIC_PLAUSIBLE_DOMAIN нуль запитів до plausible.io
       (живо перевірено Частина 5)
 - [x] DoD 7 — docs/LAUNCH.md існує; ROADMAP.md оновлено
-- [ ] DoD 8 — синк main + зелений CI (gh run watch, всі 3 job) — наступний крок
+- [x] DoD 8 — синк main + зелений CI (run 29684799684 — frontend,
+      backend, backend-postgres, всі 3 job)
 
 ---
 
