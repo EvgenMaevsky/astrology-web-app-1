@@ -125,15 +125,29 @@ tags: [plan, stage-d]
       .env.local прибрано після перевірки) — тег присутній з правильними
       атрибутами (`data-domain`, `defer`, коректний `src`). tsc + next
       build чисті.
-- [ ] Частина 6 — Бета-готовність: feedback-лінк + docs/LAUNCH.md + ROADMAP
-- [ ] DoD 1 — pytest 0 failed (з новими тестами)
-- [ ] DoD 2 — tsc --noEmit + next build чисті
-- [ ] DoD 3 — 5 security-заголовків присутні; Leaflet-мапа з OSM-тайлами працює
-- [ ] DoD 4 — /billing/plans: 2 тарифи, жодної нереалізованої фічі; landing/pricing відповідають
-- [ ] DoD 5 — живий Stripe-цикл checkout → webhook → pro → cancel → free зафіксований
-- [ ] DoD 6 — без NEXT_PUBLIC_PLAUSIBLE_DOMAIN нуль запитів до plausible.io
-- [ ] DoD 7 — docs/LAUNCH.md існує; ROADMAP.md оновлено
-- [ ] DoD 8 — синк main + зелений CI (gh run watch, всі 3 job)
+- [x] Частина 6 — Бета-готовність: feedback-лінк у `(dashboard)/layout.tsx`
+      (поруч із Privacy/Terms, gated на `NEXT_PUBLIC_FEEDBACK_EMAIL`,
+      без нього не рендериться — живо перевірено обидва стани); нова змінна
+      в `apps/frontend/.env.example`. `docs/LAUNCH.md` (NEW) — чекліст
+      ручних кроків власника: домен, деплой, Stripe live-ключі + вебхук
+      у Dashboard, monopay live-токен + попередження про обов'язковий
+      ручний прогін живою оплатою (наслідок обмеження з Частини 6
+      monopay-плану), Sentry, Plausible, uptime, feedback-email, юридичне
+      рев'ю privacy/terms, закрита бета, публічний запуск. ROADMAP.md —
+      Етап D оновлено: чесний статус кожного пункту (done/частково/не
+      зроблено), посилання на LAUNCH.md.
+- [x] DoD 1 — pytest 0 failed (107 passed, 2 skipped)
+- [x] DoD 2 — tsc --noEmit + next build чисті
+- [x] DoD 3 — 5 security-заголовків присутні (curl -sI); Leaflet-мапа з
+      OSM-тайлами працює (Частина 3)
+- [x] DoD 4 — /billing/plans: рівно 2 тарифи (free, pro), жодної
+      нереалізованої фічі; landing/pricing відповідають (Частина 1)
+- [x] DoD 5 — живий Stripe-цикл checkout → webhook → pro → cancel → free
+      зафіксований (Частина 4); monopay-цикл частковий — див. окремий план
+- [x] DoD 6 — без NEXT_PUBLIC_PLAUSIBLE_DOMAIN нуль запитів до plausible.io
+      (живо перевірено Частина 5)
+- [x] DoD 7 — docs/LAUNCH.md існує; ROADMAP.md оновлено
+- [ ] DoD 8 — синк main + зелений CI (gh run watch, всі 3 job) — наступний крок
 
 ---
 

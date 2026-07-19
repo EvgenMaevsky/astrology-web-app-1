@@ -65,6 +65,14 @@ export default async function DashboardLayout({
           <div className="flex items-center gap-3 px-3 pt-2 text-xs text-stone-400">
             <Link href="/privacy" className="hover:text-stone-600">Privacy</Link>
             <Link href="/terms" className="hover:text-stone-600">Terms</Link>
+            {process.env.NEXT_PUBLIC_FEEDBACK_EMAIL && (
+              <a
+                href={`mailto:${process.env.NEXT_PUBLIC_FEEDBACK_EMAIL}`}
+                className="hover:text-stone-600"
+              >
+                Feedback
+              </a>
+            )}
           </div>
         </div>
       </aside>
