@@ -13,9 +13,13 @@ export default async function BillingPage({
   const { success, monopay } = await searchParams;
   // A localhost webhook URL is unreachable from monobank's servers during
   // dev, and the production webhook can lag — re-check the pending invoice
-  // right when the user lands back here from the payment page.
+  // right when the user lands back here from the payment page. The invoice
+  // may not actually be paid yet (canceled, still pending, or expired), so
+  // the banner below reflects the real sync result, not just the redirect.
+  let monopayUpgraded = false;
   if (monopay) {
-    await syncMonopay();
+    const result = await syncMonopay();
+    monopayUpgraded = !!result && result.plan !== "free";
   }
   const [sub, usage, plans] = await Promise.all([
     getSubscription(),
@@ -34,9 +38,17 @@ export default async function BillingPage({
         <p className="mt-1 text-sm text-stone-500">Manage your subscription.</p>
       </div>
 
-      {(success || monopay) && (
+      {(success || monopayUpgraded) && (
         <div className="rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-700">
           Payment successful! Your plan has been upgraded.
+        </div>
+      )}
+
+      {monopay && !monopayUpgraded && (
+        <div className="rounded-lg bg-stone-50 border border-stone-200 px-4 py-3 text-sm text-stone-600">
+          We haven&apos;t received your monobank payment yet. If you just paid, this
+          can take a moment — refresh to check again. If you canceled or the
+          payment link expired, no charge was made.
         </div>
       )}
 
