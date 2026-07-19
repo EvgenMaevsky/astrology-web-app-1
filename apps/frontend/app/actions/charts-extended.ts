@@ -1,5 +1,6 @@
 "use server";
 
+import { getTranslations } from "next-intl/server";
 import { API_URL, getAccessToken } from "@/app/lib/auth";
 import { NatalChartResult } from "@/app/actions/charts";
 
@@ -83,8 +84,9 @@ export async function calcTransit(
   _prev: ExtendedChartState<TransitResult>,
   formData: FormData
 ): Promise<ExtendedChartState<TransitResult>> {
+  const t = await getTranslations("charts.errors");
   const token = await getAccessToken();
-  if (!token) return { status: "error", error: "Not authenticated" };
+  if (!token) return { status: "error", error: t("notAuthenticated") };
 
   const natal_dt = formData.get("natal_dt") as string;
   const natal_tz = tzField(formData, "natal_tz");
@@ -97,7 +99,7 @@ export async function calcTransit(
   const house_system = (formData.get("house_system") as string) || "placidus";
 
   if (!natal_dt || !transit_dt || isNaN(natal_lat) || isNaN(natal_lon) || isNaN(transit_lat) || isNaN(transit_lon)) {
-    return { status: "error", error: "Please fill in all fields" };
+    return { status: "error", error: t("fillAllFields") };
   }
 
   let res: Response;
@@ -107,7 +109,7 @@ export async function calcTransit(
       transit_dt, transit_tz, transit_lat, transit_lon, house_system,
     });
   } catch {
-    return { status: "error", error: "Cannot connect to server" };
+    return { status: "error", error: t("cannotConnect") };
   }
 
   if (!res.ok) {
@@ -125,8 +127,9 @@ export async function calcSolarReturn(
   _prev: ExtendedChartState<SolarReturnResult>,
   formData: FormData
 ): Promise<ExtendedChartState<SolarReturnResult>> {
+  const t = await getTranslations("charts.errors");
   const token = await getAccessToken();
-  if (!token) return { status: "error", error: "Not authenticated" };
+  if (!token) return { status: "error", error: t("notAuthenticated") };
 
   const birth_dt = formData.get("birth_dt") as string;
   const timezone = tzField(formData, "timezone");
@@ -136,14 +139,14 @@ export async function calcSolarReturn(
   const house_system = (formData.get("house_system") as string) || "placidus";
 
   if (!birth_dt || isNaN(year) || isNaN(lat) || isNaN(lon)) {
-    return { status: "error", error: "Please fill in all fields" };
+    return { status: "error", error: t("fillAllFields") };
   }
 
   let res: Response;
   try {
     res = await authFetch("/api/v1/charts/solar-return", { birth_dt, timezone, year, lat, lon, house_system });
   } catch {
-    return { status: "error", error: "Cannot connect to server" };
+    return { status: "error", error: t("cannotConnect") };
   }
 
   if (!res.ok) {
@@ -161,8 +164,9 @@ export async function calcSynastry(
   _prev: ExtendedChartState<SynastryResult>,
   formData: FormData
 ): Promise<ExtendedChartState<SynastryResult>> {
+  const t = await getTranslations("charts.errors");
   const token = await getAccessToken();
-  if (!token) return { status: "error", error: "Not authenticated" };
+  if (!token) return { status: "error", error: t("notAuthenticated") };
 
   const dt1 = formData.get("dt1") as string;
   const tz1 = tzField(formData, "tz1");
@@ -175,14 +179,14 @@ export async function calcSynastry(
   const house_system = (formData.get("house_system") as string) || "placidus";
 
   if (!dt1 || !dt2 || isNaN(lat1) || isNaN(lon1) || isNaN(lat2) || isNaN(lon2)) {
-    return { status: "error", error: "Please fill in all fields" };
+    return { status: "error", error: t("fillAllFields") };
   }
 
   let res: Response;
   try {
     res = await authFetch("/api/v1/charts/synastry", { dt1, tz1, lat1, lon1, dt2, tz2, lat2, lon2, house_system });
   } catch {
-    return { status: "error", error: "Cannot connect to server" };
+    return { status: "error", error: t("cannotConnect") };
   }
 
   if (!res.ok) {

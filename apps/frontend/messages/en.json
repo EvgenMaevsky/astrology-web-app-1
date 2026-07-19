@@ -110,9 +110,192 @@
     "step2": "<link>Calculate a natal chart</link> — load a saved person or enter data manually",
     "step3": "Explore planets, aspects, terms, and Arabic parts"
   },
-  "persons": {},
-  "charts": {},
-  "astro": {},
+  "persons": {
+    "title": "Persons",
+    "subtitle": "Saved birth profiles for chart calculations.",
+    "addNew": "Add New Person",
+    "savedCount": "Saved ({count})",
+    "form": {
+      "fullName": "Full Name",
+      "fullNamePlaceholder": "e.g. John Smith",
+      "city": "City",
+      "searchCityPlaceholder": "Search city…",
+      "dateTime": "Date & Time (local)",
+      "latitude": "Latitude",
+      "longitude": "Longitude",
+      "timezone": "Timezone",
+      "save": "Save Person",
+      "saving": "Saving…",
+      "savedMessage": "Saved: <b>{name}</b>"
+    },
+    "list": {
+      "empty": "No persons yet — add one to get started.",
+      "chart": "Chart",
+      "delete": "Delete",
+      "confirmDelete": "Delete \"{name}\"?"
+    },
+    "errors": {
+      "notAuthenticated": "Not authenticated",
+      "nameRequired": "Name is required",
+      "birthDateRequired": "Birth date/time is required",
+      "timezoneRequired": "Timezone is required",
+      "invalidCoordinates": "Invalid coordinates",
+      "cannotConnect": "Cannot connect to server"
+    }
+  },
+  "charts": {
+    "pageTitle": "Charts",
+    "pageSubtitle": "Natal, transit, solar return, and synastry charts.",
+    "tabs": {
+      "natal": "Natal",
+      "transit": "Transit",
+      "solarReturn": "Solar Return",
+      "synastry": "Synastry",
+      "saved": "Saved"
+    },
+    "form": {
+      "loadSavedPerson": "Load saved person",
+      "enterManually": "— Enter manually —",
+      "city": "City",
+      "dateTime": "Date & Time (local)",
+      "latitude": "Latitude",
+      "longitude": "Longitude",
+      "houseSystem": "House System",
+      "timezone": "Timezone",
+      "timezonePlaceholder": "e.g. Europe/Kyiv",
+      "calculate": "Calculate",
+      "calculating": "Calculating…",
+      "selectCityHint": "Select a city to auto-fill coordinates and timezone"
+    },
+    "natal": {
+      "title": "Natal Chart",
+      "cityPlaceholder": "Search city (e.g. Kyiv, London, New York)…"
+    },
+    "transit": {
+      "title": "Transit Chart",
+      "natalData": "Natal Data",
+      "natalCity": "Natal city",
+      "searchNatalCity": "Search natal city…",
+      "birthDateTime": "Birth date & time (local)",
+      "birthTimezone": "Birth timezone (IANA)",
+      "transitDate": "Transit Date",
+      "transitLocation": "Transit location (city)",
+      "searchTransitCity": "Search transit city…",
+      "transitDateTime": "Transit date & time",
+      "transitTimezone": "Transit timezone (IANA)",
+      "calculateButton": "Calculate Transit",
+      "transitPlanets": "Transit Planets",
+      "transitAspects": "Transit → Natal Aspects"
+    },
+    "solarReturn": {
+      "title": "Solar Return Chart",
+      "subtitle": "Find the moment the Sun returns to its natal position in a given year.",
+      "location": "Location for return chart",
+      "birthDateTime": "Birth date & time (local)",
+      "birthTimezone": "Birth timezone (IANA)",
+      "returnYear": "Return year",
+      "calculateButton": "Calculate Solar Return",
+      "returnMoment": "Solar Return moment: "
+    },
+    "synastry": {
+      "title": "Synastry Chart",
+      "person1": "Person 1",
+      "person2": "Person 2",
+      "birthDateTime": "Birth date & time",
+      "timezoneIana": "Timezone (IANA)",
+      "calculateButton": "Calculate Synastry",
+      "planets": "Planets",
+      "interAspects": "Inter-Aspects"
+    },
+    "table": {
+      "planet": "Planet",
+      "sign": "Sign",
+      "degree": "Degree",
+      "house": "House",
+      "term": "Term",
+      "part": "Part",
+      "planet1": "Planet 1",
+      "planet2": "Planet 2",
+      "aspect": "Aspect",
+      "asp": "Asp",
+      "orb": "Orb",
+      "appSep": "App/Sep",
+      "natal": "Natal",
+      "transit": "Transit",
+      "arabicParts": "Arabic Parts"
+    },
+    "saved": {
+      "title": "Title",
+      "type": "Type",
+      "savedDate": "Saved",
+      "actions": "Actions",
+      "delete": "Delete",
+      "loading": "Loading…",
+      "empty": "No saved charts yet. Calculate a natal or solar return chart and click \"Save chart\".",
+      "natal": "Natal",
+      "solarReturn": "Solar Return"
+    },
+    "save": {
+      "button": "Save chart",
+      "saving": "Saving…",
+      "saved": "Saved ✓"
+    },
+    "errors": {
+      "notAuthenticated": "Not authenticated",
+      "fillAllFields": "Please fill in all fields",
+      "latRange": "Latitude must be between -90 and 90",
+      "lonRange": "Longitude must be between -180 and 180",
+      "cannotConnect": "Cannot connect to server"
+    }
+  },
+  "astro": {
+    "planets": {
+      "sun": "Sun",
+      "moon": "Moon",
+      "mercury": "Mercury",
+      "venus": "Venus",
+      "mars": "Mars",
+      "jupiter": "Jupiter",
+      "saturn": "Saturn",
+      "uranus": "Uranus",
+      "neptune": "Neptune",
+      "pluto": "Pluto",
+      "true_node": "N. Node",
+      "lilith": "Lilith",
+      "chiron": "Chiron"
+    },
+    "signs": {
+      "aries": "Aries",
+      "taurus": "Taurus",
+      "gemini": "Gemini",
+      "cancer": "Cancer",
+      "leo": "Leo",
+      "virgo": "Virgo",
+      "libra": "Libra",
+      "scorpio": "Scorpio",
+      "sagittarius": "Sagittarius",
+      "capricorn": "Capricorn",
+      "aquarius": "Aquarius",
+      "pisces": "Pisces"
+    },
+    "aspects": {
+      "conjunction": "Conjunction",
+      "opposition": "Opposition",
+      "trine": "Trine",
+      "square": "Square",
+      "sextile": "Sextile",
+      "semisextile": "Semisextile",
+      "semisquare": "Semisquare",
+      "sesquisquare": "Sesquisquare",
+      "quincunx": "Quincunx",
+      "quintile": "Quintile",
+      "biquintile": "Biquintile"
+    },
+    "retrograde": "Retrograde",
+    "applying": "Applying",
+    "separating": "Separating",
+    "house": "House {n}"
+  },
   "billing": {},
   "pricing": {},
   "account": {},

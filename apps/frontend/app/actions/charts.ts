@@ -1,5 +1,6 @@
 "use server";
 
+import { getTranslations } from "next-intl/server";
 import { API_URL, getAccessToken } from "@/app/lib/auth";
 
 export interface NatalChartResult {
@@ -40,8 +41,9 @@ export async function calcNatalChart(
   _prev: ChartState,
   formData: FormData
 ): Promise<ChartState> {
+  const t = await getTranslations("charts.errors");
   const token = await getAccessToken();
-  if (!token) return { status: "error", error: "Not authenticated" };
+  if (!token) return { status: "error", error: t("notAuthenticated") };
 
   const birth_dt = formData.get("datetime") as string;
   const timezone = (formData.get("timezone") as string)?.trim() || null;
@@ -50,10 +52,10 @@ export async function calcNatalChart(
   const house_system = (formData.get("house_system") as string) || "placidus";
 
   if (!birth_dt || isNaN(lat) || isNaN(lon)) {
-    return { status: "error", error: "Please fill in all fields" };
+    return { status: "error", error: t("fillAllFields") };
   }
-  if (lat < -90 || lat > 90) return { status: "error", error: "Latitude must be between -90 and 90" };
-  if (lon < -180 || lon > 180) return { status: "error", error: "Longitude must be between -180 and 180" };
+  if (lat < -90 || lat > 90) return { status: "error", error: t("latRange") };
+  if (lon < -180 || lon > 180) return { status: "error", error: t("lonRange") };
 
   let res: Response;
   try {
@@ -67,7 +69,7 @@ export async function calcNatalChart(
       cache: "no-store",
     });
   } catch {
-    return { status: "error", error: "Cannot connect to server" };
+    return { status: "error", error: t("cannotConnect") };
   }
 
   if (!res.ok) {

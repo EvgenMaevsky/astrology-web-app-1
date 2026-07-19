@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import {
   deleteSavedChart,
   getSavedChart,
@@ -12,16 +13,19 @@ import { NatalChartResult } from "@/app/actions/charts";
 import { ChartWheel } from "@/app/_components/chart-wheel/ChartWheel";
 import { PlanetTable, AspectTable, ArabicPartsTable } from "./ResultTables";
 
-const CHART_TYPE_LABELS: Record<string, string> = {
-  natal: "Natal",
-  solar_return: "Solar Return",
-};
-
 export function SavedChartsTab() {
   const [charts, setCharts] = useState<SavedChartSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<SavedChartFull | null>(null);
   const [pending, startTransition] = useTransition();
+  const locale = useLocale();
+  const t = useTranslations("charts.saved");
+  const ts = useTranslations("charts.solarReturn");
+
+  const CHART_TYPE_LABELS: Record<string, string> = {
+    natal: t("natal"),
+    solar_return: t("solarReturn"),
+  };
 
   useEffect(() => {
     listSavedCharts().then((data) => {
@@ -48,13 +52,13 @@ export function SavedChartsTab() {
   };
 
   if (loading) {
-    return <div className="text-sm text-stone-400">Loading…</div>;
+    return <div className="text-sm text-stone-400">{t("loading")}</div>;
   }
 
   if (charts.length === 0) {
     return (
       <div className="bg-white rounded-xl border border-stone-200 p-6 text-sm text-stone-500">
-        No saved charts yet. Calculate a natal or solar return chart and click &quot;Save chart&quot;.
+        {t("empty")}
       </div>
     );
   }
@@ -66,10 +70,10 @@ export function SavedChartsTab() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-stone-100 bg-stone-50">
-                <th className="text-left px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">Title</th>
-                <th className="text-left px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">Type</th>
-                <th className="text-left px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">Saved</th>
-                <th className="text-right px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">Actions</th>
+                <th className="text-left px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">{t("title")}</th>
+                <th className="text-left px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">{t("type")}</th>
+                <th className="text-left px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">{t("savedDate")}</th>
+                <th className="text-right px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">{t("actions")}</th>
               </tr>
             </thead>
             <tbody>
@@ -81,14 +85,14 @@ export function SavedChartsTab() {
                     </button>
                   </td>
                   <td className="px-4 py-2 text-stone-600">{CHART_TYPE_LABELS[c.chart_type] ?? c.chart_type}</td>
-                  <td className="px-4 py-2 text-stone-500">{new Date(c.created_at).toLocaleDateString()}</td>
+                  <td className="px-4 py-2 text-stone-500">{new Date(c.created_at).toLocaleDateString(locale === "uk" ? "uk-UA" : "en-GB")}</td>
                   <td className="px-4 py-2 text-right">
                     <button
                       onClick={() => handleDelete(c.id)}
                       disabled={pending}
                       className="text-red-600 hover:text-red-800 text-xs disabled:opacity-50"
                     >
-                      Delete
+                      {t("delete")}
                     </button>
                   </td>
                 </tr>
@@ -107,8 +111,8 @@ export function SavedChartsTab() {
             <h3 className="text-sm font-semibold text-stone-700">{selected.title}</h3>
             {selected.chart_type === "solar_return" && result.return_dt && (
               <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-sm text-amber-800">
-                <span className="font-semibold">Solar Return moment: </span>
-                {new Date(result.return_dt).toLocaleString(undefined, {
+                <span className="font-semibold">{ts("returnMoment")}</span>
+                {new Date(result.return_dt).toLocaleString(locale === "uk" ? "uk-UA" : "en-GB", {
                   dateStyle: "full", timeStyle: "short", timeZone: "UTC",
                 })} UTC
               </div>

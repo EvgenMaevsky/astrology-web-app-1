@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { getTranslations } from "next-intl/server";
 import { API_URL, getAccessToken } from "@/app/lib/auth";
 
 export interface Person {
@@ -62,8 +63,9 @@ export async function createPerson(
   _prev: PersonFormState,
   formData: FormData
 ): Promise<PersonFormState> {
+  const t = await getTranslations("persons.errors");
   const token = await getAccessToken();
-  if (!token) return { status: "error", error: "Not authenticated" };
+  if (!token) return { status: "error", error: t("notAuthenticated") };
 
   const name = (formData.get("name") as string)?.trim();
   const birth_dt = formData.get("birth_dt") as string;
@@ -73,10 +75,10 @@ export async function createPerson(
   const city_label = (formData.get("city_label") as string) || null;
   const notes = (formData.get("notes") as string) || null;
 
-  if (!name) return { status: "error", error: "Name is required" };
-  if (!birth_dt) return { status: "error", error: "Birth date/time is required" };
-  if (!timezone) return { status: "error", error: "Timezone is required" };
-  if (isNaN(lat) || isNaN(lon)) return { status: "error", error: "Invalid coordinates" };
+  if (!name) return { status: "error", error: t("nameRequired") };
+  if (!birth_dt) return { status: "error", error: t("birthDateRequired") };
+  if (!timezone) return { status: "error", error: t("timezoneRequired") };
+  if (isNaN(lat) || isNaN(lon)) return { status: "error", error: t("invalidCoordinates") };
 
   try {
     const res = await fetch(`${API_URL}/api/v1/persons`, {
@@ -93,7 +95,7 @@ export async function createPerson(
     revalidatePath("/dashboard");
     return { status: "ok", person: await res.json() };
   } catch {
-    return { status: "error", error: "Cannot connect to server" };
+    return { status: "error", error: t("cannotConnect") };
   }
 }
 

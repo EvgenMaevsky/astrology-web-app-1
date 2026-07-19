@@ -110,9 +110,192 @@
     "step2": "<link>Розрахуйте натальну карту</link> — завантажте збережену персону або введіть дані вручну",
     "step3": "Досліджуйте планети, аспекти, терміни та арабські частини"
   },
-  "persons": {},
-  "charts": {},
-  "astro": {},
+  "persons": {
+    "title": "Персони",
+    "subtitle": "Збережені профілі народження для розрахунку карт.",
+    "addNew": "Додати нову персону",
+    "savedCount": "Збережено ({count})",
+    "form": {
+      "fullName": "Повне ім'я",
+      "fullNamePlaceholder": "напр. Іван Петренко",
+      "city": "Місто",
+      "searchCityPlaceholder": "Пошук міста…",
+      "dateTime": "Дата й час (місцевий)",
+      "latitude": "Широта",
+      "longitude": "Довгота",
+      "timezone": "Часовий пояс",
+      "save": "Зберегти персону",
+      "saving": "Збереження…",
+      "savedMessage": "Збережено: <b>{name}</b>"
+    },
+    "list": {
+      "empty": "Персон ще немає — додайте першу, щоб почати.",
+      "chart": "Карта",
+      "delete": "Видалити",
+      "confirmDelete": "Видалити «{name}»?"
+    },
+    "errors": {
+      "notAuthenticated": "Ви не авторизовані",
+      "nameRequired": "Вкажіть ім'я",
+      "birthDateRequired": "Вкажіть дату й час народження",
+      "timezoneRequired": "Вкажіть часовий пояс",
+      "invalidCoordinates": "Недійсні координати",
+      "cannotConnect": "Не вдалося з'єднатися з сервером"
+    }
+  },
+  "charts": {
+    "pageTitle": "Карти",
+    "pageSubtitle": "Натальні, транзитні, соляр та синастрійні карти.",
+    "tabs": {
+      "natal": "Натальна",
+      "transit": "Транзит",
+      "solarReturn": "Соляр",
+      "synastry": "Синастрія",
+      "saved": "Збережені"
+    },
+    "form": {
+      "loadSavedPerson": "Завантажити збережену персону",
+      "enterManually": "— Ввести вручну —",
+      "city": "Місто",
+      "dateTime": "Дата й час (місцевий)",
+      "latitude": "Широта",
+      "longitude": "Довгота",
+      "houseSystem": "Система будинків",
+      "timezone": "Часовий пояс",
+      "timezonePlaceholder": "напр. Europe/Kyiv",
+      "calculate": "Розрахувати",
+      "calculating": "Розрахунок…",
+      "selectCityHint": "Виберіть місто, щоб автоматично заповнити координати й часовий пояс"
+    },
+    "natal": {
+      "title": "Натальна карта",
+      "cityPlaceholder": "Пошук міста (напр. Київ, Лондон, Нью-Йорк)…"
+    },
+    "transit": {
+      "title": "Транзитна карта",
+      "natalData": "Натальні дані",
+      "natalCity": "Натальне місто",
+      "searchNatalCity": "Пошук натального міста…",
+      "birthDateTime": "Дата й час народження (місцевий)",
+      "birthTimezone": "Часовий пояс народження (IANA)",
+      "transitDate": "Дата транзиту",
+      "transitLocation": "Місце транзиту (місто)",
+      "searchTransitCity": "Пошук міста транзиту…",
+      "transitDateTime": "Дата й час транзиту",
+      "transitTimezone": "Часовий пояс транзиту (IANA)",
+      "calculateButton": "Розрахувати транзит",
+      "transitPlanets": "Транзитні планети",
+      "transitAspects": "Аспекти транзит → натал"
+    },
+    "solarReturn": {
+      "title": "Соляр (Solar Return)",
+      "subtitle": "Знайти момент повернення Сонця на натальну позицію у вказаному році.",
+      "location": "Місце для карти соляра",
+      "birthDateTime": "Дата й час народження (місцевий)",
+      "birthTimezone": "Часовий пояс народження (IANA)",
+      "returnYear": "Рік соляра",
+      "calculateButton": "Розрахувати соляр",
+      "returnMoment": "Момент соляра: "
+    },
+    "synastry": {
+      "title": "Синастрія",
+      "person1": "Персона 1",
+      "person2": "Персона 2",
+      "birthDateTime": "Дата й час народження",
+      "timezoneIana": "Часовий пояс (IANA)",
+      "calculateButton": "Розрахувати синастрію",
+      "planets": "Планети",
+      "interAspects": "Міжаспекти"
+    },
+    "table": {
+      "planet": "Планета",
+      "sign": "Знак",
+      "degree": "Градус",
+      "house": "Дім",
+      "term": "Термін",
+      "part": "Частина",
+      "planet1": "Планета 1",
+      "planet2": "Планета 2",
+      "aspect": "Аспект",
+      "asp": "Асп.",
+      "orb": "Орб",
+      "appSep": "Сх./Розх.",
+      "natal": "Натал",
+      "transit": "Транзит",
+      "arabicParts": "Арабські частини"
+    },
+    "saved": {
+      "title": "Назва",
+      "type": "Тип",
+      "savedDate": "Збережено",
+      "actions": "Дії",
+      "delete": "Видалити",
+      "loading": "Завантаження…",
+      "empty": "Збережених карт ще немає. Розрахуйте натальну карту або соляр і натисніть «Зберегти карту».",
+      "natal": "Натальна",
+      "solarReturn": "Соляр"
+    },
+    "save": {
+      "button": "Зберегти карту",
+      "saving": "Збереження…",
+      "saved": "Збережено ✓"
+    },
+    "errors": {
+      "notAuthenticated": "Ви не авторизовані",
+      "fillAllFields": "Заповніть усі поля",
+      "latRange": "Широта має бути від -90 до 90",
+      "lonRange": "Довгота має бути від -180 до 180",
+      "cannotConnect": "Не вдалося з'єднатися з сервером"
+    }
+  },
+  "astro": {
+    "planets": {
+      "sun": "Сонце",
+      "moon": "Місяць",
+      "mercury": "Меркурій",
+      "venus": "Венера",
+      "mars": "Марс",
+      "jupiter": "Юпітер",
+      "saturn": "Сатурн",
+      "uranus": "Уран",
+      "neptune": "Нептун",
+      "pluto": "Плутон",
+      "true_node": "Пн. вузол",
+      "lilith": "Ліліт",
+      "chiron": "Хірон"
+    },
+    "signs": {
+      "aries": "Овен",
+      "taurus": "Телець",
+      "gemini": "Близнюки",
+      "cancer": "Рак",
+      "leo": "Лев",
+      "virgo": "Діва",
+      "libra": "Терези",
+      "scorpio": "Скорпіон",
+      "sagittarius": "Стрілець",
+      "capricorn": "Козеріг",
+      "aquarius": "Водолій",
+      "pisces": "Риби"
+    },
+    "aspects": {
+      "conjunction": "з'єднання",
+      "opposition": "опозиція",
+      "trine": "тригон",
+      "square": "квадрат",
+      "sextile": "секстиль",
+      "semisextile": "півсекстиль",
+      "semisquare": "півквадрат",
+      "sesquisquare": "сесквіквадрат",
+      "quincunx": "квінконс",
+      "quintile": "квінтиль",
+      "biquintile": "біквінтиль"
+    },
+    "retrograde": "Ретроградний",
+    "applying": "Сходиться",
+    "separating": "Розходиться",
+    "house": "Дім {n}"
+  },
   "billing": {},
   "pricing": {},
   "account": {},

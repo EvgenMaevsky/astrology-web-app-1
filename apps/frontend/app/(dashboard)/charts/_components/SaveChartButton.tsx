@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { saveChart } from "@/app/actions/saved-charts";
 
 interface Props {
@@ -14,6 +15,7 @@ export function SaveChartButton({ chartType, defaultTitle, requestPayload, resul
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const t = useTranslations("charts.save");
 
   const handleClick = () => {
     setError(null);
@@ -30,7 +32,7 @@ export function SaveChartButton({ chartType, defaultTitle, requestPayload, resul
   if (saved) {
     return (
       <span className="text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-1.5">
-        Saved ✓
+        {t("saved")}
       </span>
     );
   }
@@ -44,7 +46,7 @@ export function SaveChartButton({ chartType, defaultTitle, requestPayload, resul
         disabled={pending}
         className="rounded-lg border border-stone-300 bg-white hover:bg-stone-50 disabled:opacity-50 text-stone-700 text-sm font-medium px-3.5 py-1.5 transition-colors"
       >
-        {pending ? "Saving…" : "Save chart"}
+        {pending ? t("saving") : t("button")}
       </button>
     </div>
   );

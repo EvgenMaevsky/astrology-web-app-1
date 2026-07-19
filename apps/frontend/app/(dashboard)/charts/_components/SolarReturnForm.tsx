@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useActionState, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { calcSolarReturn, ExtendedChartState, SolarReturnResult } from "@/app/actions/charts-extended";
 import { Person } from "@/app/actions/persons";
 import { City } from "@/app/actions/atlas";
@@ -25,6 +26,9 @@ interface Props {
 
 export function SolarReturnForm({ persons = [] }: Props) {
   const [state, action, pending] = useActionState(calcSolarReturn, initialState);
+  const tf = useTranslations("charts.form");
+  const ts = useTranslations("charts.solarReturn");
+  const locale = useLocale();
 
   const [lat, setLat] = useState(50.45);
   const [lon, setLon] = useState(30.52);
@@ -49,18 +53,18 @@ export function SolarReturnForm({ persons = [] }: Props) {
   return (
     <div className="space-y-8">
       <form action={action} className="bg-white rounded-xl border border-stone-200 p-6 space-y-5">
-        <h2 className="text-sm font-semibold text-stone-700 uppercase tracking-wider">Solar Return Chart</h2>
-        <p className="text-xs text-stone-400">Find the moment the Sun returns to its natal position in a given year.</p>
+        <h2 className="text-sm font-semibold text-stone-700 uppercase tracking-wider">{ts("title")}</h2>
+        <p className="text-xs text-stone-400">{ts("subtitle")}</p>
 
         {persons.length > 0 && (
           <div>
-            <label className="block text-xs font-medium text-stone-500 mb-1">Load saved person</label>
+            <label className="block text-xs font-medium text-stone-500 mb-1">{tf("loadSavedPerson")}</label>
             <select
               defaultValue=""
               onChange={handlePersonSelect}
               className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white"
             >
-              <option value="">— Enter manually —</option>
+              <option value="">{tf("enterManually")}</option>
               {persons.map((p) => (
                 <option key={p.id} value={p.id}>{p.name}</option>
               ))}
@@ -69,15 +73,15 @@ export function SolarReturnForm({ persons = [] }: Props) {
         )}
 
         <div>
-          <label className="block text-xs font-medium text-stone-500 mb-1">Location for return chart</label>
-          <CityAutocomplete onSelect={handleCitySelect} placeholder="Search city…" />
+          <label className="block text-xs font-medium text-stone-500 mb-1">{ts("location")}</label>
+          <CityAutocomplete onSelect={handleCitySelect} placeholder={tf("city")} />
         </div>
 
         <CoordMap lat={lat} lon={lon} onChange={(la, lo) => { setLat(la); setLon(lo); }} />
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
-            <label className="block text-xs font-medium text-stone-500 mb-1">Birth date &amp; time (local)</label>
+            <label className="block text-xs font-medium text-stone-500 mb-1">{ts("birthDateTime")}</label>
             <input
               type="datetime-local"
               name="birth_dt"
@@ -88,13 +92,13 @@ export function SolarReturnForm({ persons = [] }: Props) {
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-stone-500 mb-1">Birth timezone (IANA)</label>
+            <label className="block text-xs font-medium text-stone-500 mb-1">{ts("birthTimezone")}</label>
             <input type="text" name="timezone" value={birthTz}
-              onChange={e => setBirthTz(e.target.value)} placeholder="e.g. Europe/Kyiv"
+              onChange={e => setBirthTz(e.target.value)} placeholder={tf("timezonePlaceholder")}
               className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400" />
           </div>
           <div>
-            <label className="block text-xs font-medium text-stone-500 mb-1">Return year</label>
+            <label className="block text-xs font-medium text-stone-500 mb-1">{ts("returnYear")}</label>
             <input
               type="number"
               name="year"
@@ -107,20 +111,20 @@ export function SolarReturnForm({ persons = [] }: Props) {
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-stone-500 mb-1">House System</label>
+            <label className="block text-xs font-medium text-stone-500 mb-1">{tf("houseSystem")}</label>
             <select name="house_system" defaultValue="placidus"
               className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white">
               {HOUSE_SYSTEMS.map(hs => <option key={hs.value} value={hs.value}>{hs.label}</option>)}
             </select>
           </div>
           <div>
-            <label className="block text-xs font-medium text-stone-500 mb-1">Latitude</label>
+            <label className="block text-xs font-medium text-stone-500 mb-1">{tf("latitude")}</label>
             <input type="number" name="lat" step="0.0001" min="-90" max="90"
               value={lat} onChange={e => setLat(parseFloat(e.target.value) || 0)} required
               className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400" />
           </div>
           <div>
-            <label className="block text-xs font-medium text-stone-500 mb-1">Longitude</label>
+            <label className="block text-xs font-medium text-stone-500 mb-1">{tf("longitude")}</label>
             <input type="number" name="lon" step="0.0001" min="-180" max="180"
               value={lon} onChange={e => setLon(parseFloat(e.target.value) || 0)} required
               className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400" />
@@ -136,7 +140,7 @@ export function SolarReturnForm({ persons = [] }: Props) {
 
         <button type="submit" disabled={pending}
           className="rounded-lg bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-white text-sm font-semibold px-5 py-2 transition-colors">
-          {pending ? "Calculating…" : "Calculate Solar Return"}
+          {pending ? tf("calculating") : ts("calculateButton")}
         </button>
       </form>
 
@@ -144,8 +148,8 @@ export function SolarReturnForm({ persons = [] }: Props) {
         <div className="space-y-4">
           <div className="flex items-center justify-between gap-4 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-sm text-amber-800">
             <div>
-              <span className="font-semibold">Solar Return moment: </span>
-              {new Date(state.data.return_dt).toLocaleString(undefined, {
+              <span className="font-semibold">{ts("returnMoment")}</span>
+              {new Date(state.data.return_dt).toLocaleString(locale === "uk" ? "uk-UA" : "en-GB", {
                 dateStyle: "full", timeStyle: "short", timeZone: "UTC",
               })} UTC
             </div>

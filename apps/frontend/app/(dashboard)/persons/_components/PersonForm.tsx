@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useActionState, useState } from "react";
+import { useTranslations } from "next-intl";
 import { createPerson, PersonFormState } from "@/app/actions/persons";
 import { City } from "@/app/actions/atlas";
 import { CityAutocomplete } from "@/app/_components/CityAutocomplete";
@@ -19,6 +20,7 @@ interface Props {
 
 export function PersonForm({ onCreated }: Props) {
   const [state, action, pending] = useActionState(createPerson, initialState);
+  const t = useTranslations("persons.form");
   const [lat, setLat] = useState(50.45);
   const [lon, setLon] = useState(30.52);
   const [timezone, setTimezone] = useState("Europe/Kyiv");
@@ -43,26 +45,26 @@ export function PersonForm({ onCreated }: Props) {
   return (
     <form action={action} className="space-y-4">
       <div>
-        <label className="block text-xs font-medium text-stone-500 mb-1">Full Name</label>
+        <label className="block text-xs font-medium text-stone-500 mb-1">{t("fullName")}</label>
         <input
           type="text"
           name="name"
           required
-          placeholder="e.g. John Smith"
+          placeholder={t("fullNamePlaceholder")}
           className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400"
         />
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-stone-500 mb-1">City</label>
-        <CityAutocomplete onSelect={handleCitySelect} placeholder="Search city…" />
+        <label className="block text-xs font-medium text-stone-500 mb-1">{t("city")}</label>
+        <CityAutocomplete onSelect={handleCitySelect} placeholder={t("searchCityPlaceholder")} />
       </div>
 
       <CoordMap lat={lat} lon={lon} onChange={handleMapChange} />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="sm:col-span-2">
-          <label className="block text-xs font-medium text-stone-500 mb-1">Date &amp; Time (local)</label>
+          <label className="block text-xs font-medium text-stone-500 mb-1">{t("dateTime")}</label>
           <input
             type="datetime-local"
             name="birth_dt"
@@ -73,7 +75,7 @@ export function PersonForm({ onCreated }: Props) {
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-stone-500 mb-1">Latitude</label>
+          <label className="block text-xs font-medium text-stone-500 mb-1">{t("latitude")}</label>
           <input
             type="number"
             name="lat"
@@ -88,7 +90,7 @@ export function PersonForm({ onCreated }: Props) {
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-stone-500 mb-1">Longitude</label>
+          <label className="block text-xs font-medium text-stone-500 mb-1">{t("longitude")}</label>
           <input
             type="number"
             name="lon"
@@ -103,7 +105,7 @@ export function PersonForm({ onCreated }: Props) {
         </div>
 
         <div className="sm:col-span-2">
-          <label className="block text-xs font-medium text-stone-500 mb-1">Timezone</label>
+          <label className="block text-xs font-medium text-stone-500 mb-1">{t("timezone")}</label>
           <input
             type="text"
             name="timezone"
@@ -122,7 +124,7 @@ export function PersonForm({ onCreated }: Props) {
       )}
       {state.status === "ok" && (
         <p className="text-sm text-green-700 bg-green-50 rounded-lg px-3 py-2">
-          Saved: <strong>{state.person.name}</strong>
+          {t.rich("savedMessage", { name: state.person.name, b: (chunks) => <strong>{chunks}</strong> })}
         </p>
       )}
 
@@ -131,7 +133,7 @@ export function PersonForm({ onCreated }: Props) {
         disabled={pending}
         className="rounded-lg bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-white text-sm font-semibold px-5 py-2 transition-colors"
       >
-        {pending ? "Saving…" : "Save Person"}
+        {pending ? t("saving") : t("save")}
       </button>
     </form>
   );

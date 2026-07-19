@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useActionState, useState } from "react";
+import { useTranslations } from "next-intl";
 import { calcNatalChart, ChartState } from "@/app/actions/charts";
 import { City } from "@/app/actions/atlas";
 import { Person } from "@/app/actions/persons";
@@ -27,6 +28,8 @@ interface Props {
 
 export function ChartForm({ persons = [], selectedPerson = null }: Props) {
   const [state, action, pending] = useActionState(calcNatalChart, initialState);
+  const t = useTranslations("charts");
+  const tf = useTranslations("charts.form");
 
   const initLat = selectedPerson?.lat ?? 50.45;
   const initLon = selectedPerson?.lon ?? 30.52;
@@ -63,18 +66,18 @@ export function ChartForm({ persons = [], selectedPerson = null }: Props) {
   return (
     <div className="space-y-8">
       <form action={action} className="bg-white rounded-xl border border-stone-200 p-6 space-y-5">
-        <h2 className="text-sm font-semibold text-stone-700 uppercase tracking-wider">Natal Chart</h2>
+        <h2 className="text-sm font-semibold text-stone-700 uppercase tracking-wider">{t("natal.title")}</h2>
 
         {/* Saved persons selector */}
         {persons.length > 0 && (
           <div>
-            <label className="block text-xs font-medium text-stone-500 mb-1">Load saved person</label>
+            <label className="block text-xs font-medium text-stone-500 mb-1">{tf("loadSavedPerson")}</label>
             <select
               defaultValue={selectedPerson?.id ?? ""}
               onChange={handlePersonSelect}
               className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white"
             >
-              <option value="">— Enter manually —</option>
+              <option value="">{tf("enterManually")}</option>
               {persons.map((p) => (
                 <option key={p.id} value={p.id}>{p.name}</option>
               ))}
@@ -84,9 +87,9 @@ export function ChartForm({ persons = [], selectedPerson = null }: Props) {
 
         {/* City search */}
         <div>
-          <label className="block text-xs font-medium text-stone-500 mb-1">City</label>
-          <CityAutocomplete onSelect={handleCitySelect} placeholder="Search city (e.g. Kyiv, London, New York)…" />
-          <p className="text-xs text-stone-400 mt-1">Select a city to auto-fill coordinates and timezone</p>
+          <label className="block text-xs font-medium text-stone-500 mb-1">{tf("city")}</label>
+          <CityAutocomplete onSelect={handleCitySelect} placeholder={t("natal.cityPlaceholder")} />
+          <p className="text-xs text-stone-400 mt-1">{tf("selectCityHint")}</p>
         </div>
 
         {/* Map */}
@@ -95,7 +98,7 @@ export function ChartForm({ persons = [], selectedPerson = null }: Props) {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="sm:col-span-2">
             <label className="block text-xs font-medium text-stone-500 mb-1">
-              Date &amp; Time (local)
+              {tf("dateTime")}
             </label>
             <input
               type="datetime-local"
@@ -108,7 +111,7 @@ export function ChartForm({ persons = [], selectedPerson = null }: Props) {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-stone-500 mb-1">Latitude</label>
+            <label className="block text-xs font-medium text-stone-500 mb-1">{tf("latitude")}</label>
             <input
               type="number"
               name="lat"
@@ -123,7 +126,7 @@ export function ChartForm({ persons = [], selectedPerson = null }: Props) {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-stone-500 mb-1">Longitude</label>
+            <label className="block text-xs font-medium text-stone-500 mb-1">{tf("longitude")}</label>
             <input
               type="number"
               name="lon"
@@ -138,7 +141,7 @@ export function ChartForm({ persons = [], selectedPerson = null }: Props) {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-stone-500 mb-1">House System</label>
+            <label className="block text-xs font-medium text-stone-500 mb-1">{tf("houseSystem")}</label>
             <select
               name="house_system"
               defaultValue="placidus"
@@ -151,13 +154,13 @@ export function ChartForm({ persons = [], selectedPerson = null }: Props) {
           </div>
 
           <div className="sm:col-span-2">
-            <label className="block text-xs font-medium text-stone-500 mb-1">Timezone</label>
+            <label className="block text-xs font-medium text-stone-500 mb-1">{tf("timezone")}</label>
             <input
               type="text"
               name="timezone"
               value={timezone}
               onChange={e => setTimezone(e.target.value)}
-              placeholder="e.g. Europe/Kyiv"
+              placeholder={tf("timezonePlaceholder")}
               className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400"
             />
           </div>
@@ -175,7 +178,7 @@ export function ChartForm({ persons = [], selectedPerson = null }: Props) {
           disabled={pending}
           className="rounded-lg bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-white text-sm font-semibold px-5 py-2 transition-colors"
         >
-          {pending ? "Calculating…" : "Calculate"}
+          {pending ? tf("calculating") : tf("calculate")}
         </button>
       </form>
 

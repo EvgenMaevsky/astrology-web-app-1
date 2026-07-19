@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   ASPECT_COLORS,
   ASPECT_GLYPHS,
@@ -10,6 +11,7 @@ import {
   SIGN_GLYPHS,
 } from "./constants";
 import { eclToSvg, formatLon, polar, sectorPath, spreadAngles } from "./utils";
+import { useAstroTranslator } from "@/app/lib/astro-i18n";
 
 // ── Geometry ──────────────────────────────────────────────────────────────────
 const CX = 300, CY = 300;
@@ -166,8 +168,6 @@ const BADGE_ASPECTS = new Set([
   "conjunction", "sextile", "square", "trine", "opposition",
 ]);
 
-const _cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
-
 /** Mouse position in viewBox units (viewBox="-32 -32 664 664", responsive width). */
 function svgTipPos(e: React.MouseEvent<Element>): { x: number; y: number } {
   const rect = (e.currentTarget as Element).closest("svg")!.getBoundingClientRect();
@@ -188,6 +188,10 @@ function AspectLines({
   asc: number;
   onHover: (tip: Tooltip | null) => void;
 }) {
+  const astro = useAstroTranslator();
+  const ta = useTranslations("astro");
+  const th = useTranslations("charts.table");
+
   return (
     <g>
       {aspects.map((asp, i) => {
@@ -214,10 +218,10 @@ function AspectLines({
           onHover({
             ...svgTipPos(e),
             text: [
-              `${_cap(asp.planet1)} ${ASPECT_GLYPHS[asp.aspect] ?? ""} ${_cap(asp.planet2)}`,
-              `${_cap(asp.aspect)} (${asp.angle}°)`,
-              `Orb ${asp.orb.toFixed(2)}°`,
-              asp.applying ? "Applying" : "Separating",
+              `${astro("planets", asp.planet1)} ${ASPECT_GLYPHS[asp.aspect] ?? ""} ${astro("planets", asp.planet2)}`,
+              `${astro("aspects", asp.aspect)} (${asp.angle}°)`,
+              `${th("orb")} ${asp.orb.toFixed(2)}°`,
+              asp.applying ? ta("applying") : ta("separating"),
             ],
           });
         };
@@ -270,6 +274,9 @@ function PlanetLayer({
   asc: number;
   onHover: (tip: Tooltip | null) => void;
 }) {
+  const astro = useAstroTranslator();
+  const ta = useTranslations("astro");
+
   // Glyphs of tightly conjunct planets are fanned out; dots stay exact.
   const displayLon = spreadAngles(
     Object.entries(planets).map(([name, p]) => ({ name, lon: p.longitude }))
@@ -295,10 +302,10 @@ function PlanetLayer({
               onHover({
                 ...svgTipPos(e),
                 text: [
-                  _cap(name),
+                  astro("planets", name),
                   formatLon(p.longitude),
-                  `House ${p.house}`,
-                  p.retrograde ? "℞ Retrograde" : "",
+                  ta("house", { n: p.house }),
+                  p.retrograde ? `℞ ${ta("retrograde")}` : "",
                 ].filter(Boolean),
               });
             }}

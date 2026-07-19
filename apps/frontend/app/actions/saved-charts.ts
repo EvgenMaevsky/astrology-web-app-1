@@ -1,5 +1,6 @@
 "use server";
 
+import { getTranslations } from "next-intl/server";
 import { API_URL, getAccessToken } from "@/app/lib/auth";
 
 export interface SavedChartSummary {
@@ -62,8 +63,9 @@ export async function saveChart(
   requestPayload: object,
   result: object
 ): Promise<SaveChartResult> {
+  const t = await getTranslations("charts.errors");
   const token = await getAccessToken();
-  if (!token) return { ok: false, error: "Not authenticated" };
+  if (!token) return { ok: false, error: t("notAuthenticated") };
 
   try {
     const res = await fetch(`${API_URL}/api/v1/saved-charts`, {
@@ -84,7 +86,7 @@ export async function saveChart(
     const data = await res.json();
     return { ok: true, id: data.id };
   } catch {
-    return { ok: false, error: "Cannot connect to server" };
+    return { ok: false, error: t("cannotConnect") };
   }
 }
 
