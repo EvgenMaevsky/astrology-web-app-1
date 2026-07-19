@@ -28,5 +28,5 @@ status: reference
 - [2026-07-16 — Stage D Launch](2026-07-16-stage-d-launch.md) — `done` (усі 6 частин + 8 пунктів DoD; 4б superseded → monopay, окремий план ще in-progress)
 - [2026-07-18 — MonoPay Migration](2026-07-18-monopay-migration.md) — `in-progress` (код+тести done; живий цикл оплати картою не пройдено — немає тестових номерів карток monobank)
 - [2026-07-19 — C2: i18n UA/EN](2026-07-19-c2-i18n-ua-en.md) — `done` (next-intl без URL-роутингу, дефолт uk; перед security-рев'ю)
-- [2026-07-19 — C3: Security-рев'ю](2026-07-19-c3-security-review.md) — `planned` (повний прохід гілки: authn/authz/IDOR, платежі, ін'єкції, PII; останній launch-блокер Етапу D)
+- [2026-07-19 — C3: Security-рев'ю](2026-07-19-c3-security-review.md) — `done` (7 знахідок, 5 виправлено з тестами / 2 прийнято як ризик; останній launch-блокер Етапу D)
 - [2026-07-19 — Деплой: Contabo VPS + Vercel](2026-07-19-deploy-contabo-vercel.md) — `planned` (покроковий runbook для молодшої моделі; бекенд у Docker Compose на Contabo, фронтенд на Vercel; адаптація DEPLOY.md під Contabo + перевірки ресурсів/портів)

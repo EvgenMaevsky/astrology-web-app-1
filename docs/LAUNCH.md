@@ -16,6 +16,12 @@ are already done (or does alongside).
 
 - Follow [DEPLOY.md](DEPLOY.md) start to finish: Hetzner VPS + Docker Compose
   for the backend, Vercel for the frontend, DNS pointed at both.
+- **`CORS_ORIGINS` in `infra/.env` must be set to the real frontend
+  domain(s)** (e.g. `["https://zorya.app"]`) — `allow_credentials=True` in
+  `app/main.py` means this can never be `*` (browsers reject that
+  combination outright, but don't leave it as the localhost default either).
+  Flagged during the C3 security review as a required-before-launch env,
+  not something with a safe fallback.
 
 ## 3. Stripe — go live
 
