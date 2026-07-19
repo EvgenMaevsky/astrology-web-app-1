@@ -8,6 +8,22 @@ HouseSystem = Literal[
     "placidus", "equal", "whole_sign", "koch", "regiomontanus", "campanus"
 ]
 
+# de440s.bsp (the loaded ephemeris kernel) only covers 1849-12-26 through
+# 2150-01-22 — Skyfield raises an EphemerisRangeError for dates outside
+# that, which nothing catches, so it would otherwise surface as an
+# unhandled 500. Padded a day inward on both ends to stay clear of the
+# exact kernel boundary.
+EPHEMERIS_MIN_YEAR = 1850
+EPHEMERIS_MAX_YEAR = 2149
+
+
+def _check_ephemeris_range(dt: datetime, field: str) -> None:
+    if not (EPHEMERIS_MIN_YEAR <= dt.year <= EPHEMERIS_MAX_YEAR):
+        raise ValueError(
+            f"{field} must be between {EPHEMERIS_MIN_YEAR} and {EPHEMERIS_MAX_YEAR} "
+            "(outside the loaded ephemeris data range)"
+        )
+
 
 def to_utc(dt: datetime, tz_name: str | None) -> datetime:
     """Interpret a naive datetime as local wall time in tz_name and convert to UTC.
@@ -36,6 +52,7 @@ class NatalChartRequest(BaseModel):
     @model_validator(mode="after")
     def _localize(self) -> "NatalChartRequest":
         self.birth_dt = to_utc(self.birth_dt, self.timezone)
+        _check_ephemeris_range(self.birth_dt, "birth_dt")
         return self
 
 
@@ -108,6 +125,8 @@ class TransitRequest(BaseModel):
     def _localize(self) -> "TransitRequest":
         self.natal_dt = to_utc(self.natal_dt, self.natal_tz)
         self.transit_dt = to_utc(self.transit_dt, self.transit_tz)
+        _check_ephemeris_range(self.natal_dt, "natal_dt")
+        _check_ephemeris_range(self.transit_dt, "transit_dt")
         return self
 
 
@@ -139,6 +158,12 @@ class SolarReturnRequest(BaseModel):
     @model_validator(mode="after")
     def _localize(self) -> "SolarReturnRequest":
         self.birth_dt = to_utc(self.birth_dt, self.timezone)
+        _check_ephemeris_range(self.birth_dt, "birth_dt")
+        if not (EPHEMERIS_MIN_YEAR <= self.year <= EPHEMERIS_MAX_YEAR):
+            raise ValueError(
+                f"year must be between {EPHEMERIS_MIN_YEAR} and {EPHEMERIS_MAX_YEAR} "
+                "(outside the loaded ephemeris data range)"
+            )
         return self
 
 
@@ -171,6 +196,8 @@ class SynastryRequest(BaseModel):
     def _localize(self) -> "SynastryRequest":
         self.dt1 = to_utc(self.dt1, self.tz1)
         self.dt2 = to_utc(self.dt2, self.tz2)
+        _check_ephemeris_range(self.dt1, "dt1")
+        _check_ephemeris_range(self.dt2, "dt2")
         return self
 
 
