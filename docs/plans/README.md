@@ -27,3 +27,4 @@ status: reference
 - [2026-07-16 — Stage C Product Readiness](2026-07-16-stage-c-product-readiness.md) — `done`
 - [2026-07-16 — Stage D Launch](2026-07-16-stage-d-launch.md) — `done` (усі 6 частин + 8 пунктів DoD; 4б superseded → monopay, окремий план ще in-progress)
 - [2026-07-18 — MonoPay Migration](2026-07-18-monopay-migration.md) — `in-progress` (код+тести done; живий цикл оплати картою не пройдено — немає тестових номерів карток monobank)
+- [2026-07-19 — C2: i18n UA/EN](2026-07-19-c2-i18n-ua-en.md) — `planned` (next-intl без URL-роутингу, дефолт uk; перед security-рев'ю)
