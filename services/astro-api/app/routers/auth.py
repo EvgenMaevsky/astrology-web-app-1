@@ -72,6 +72,32 @@ async def _issue_email_token(db: AsyncSession, user_id: str, purpose: str, ttl: 
     return raw
 
 
+VERIFY_EMAIL_SUBJECT = "Підтвердіть акаунт Zorya / Confirm your Zorya account"
+RESET_PASSWORD_SUBJECT = "Скидання пароля Zorya / Reset your Zorya password"
+
+
+def _verify_email_html(link: str) -> str:
+    # Bilingual (uk block, then en) — the backend doesn't know the user's
+    # frontend locale, and persisting it is out of scope for this change.
+    return (
+        f"<p>Підтвердіть свій email: <a href='{link}'>{link}</a></p>"
+        f"<p>Посилання дійсне 24 години.</p>"
+        f"<hr>"
+        f"<p>Confirm your email: <a href='{link}'>{link}</a></p>"
+        f"<p>This link is valid for 24 hours.</p>"
+    )
+
+
+def _reset_password_html(link: str) -> str:
+    return (
+        f"<p>Скиньте пароль: <a href='{link}'>{link}</a></p>"
+        f"<p>Посилання дійсне 1 годину.</p>"
+        f"<hr>"
+        f"<p>Reset your password: <a href='{link}'>{link}</a></p>"
+        f"<p>This link is valid for 1 hour.</p>"
+    )
+
+
 async def _consume_email_token(db: AsyncSession, raw_token: str, purpose: str) -> EmailToken | None:
     h = _token_hash(raw_token)
     result = await db.execute(
@@ -111,10 +137,7 @@ async def register(request: Request, body: RegisterRequest, db: AsyncSession = D
 
     try:
         link = f"{settings.frontend_url}/verify-email?token={verify_raw}"
-        await email_module.send_email(
-            user.email, "Confirm your Zorya account",
-            f"<p>Confirm your email: <a href='{link}'>{link}</a></p>",
-        )
+        await email_module.send_email(user.email, VERIFY_EMAIL_SUBJECT, _verify_email_html(link))
     except Exception:
         log.exception("Failed to send verification email to %s", user.email)
 
@@ -223,10 +246,7 @@ async def forgot_password(
         await db.commit()
         try:
             link = f"{settings.frontend_url}/reset-password?token={raw}"
-            await email_module.send_email(
-                user.email, "Reset your Zorya password",
-                f"<p>Reset your password: <a href='{link}'>{link}</a></p>",
-            )
+            await email_module.send_email(user.email, RESET_PASSWORD_SUBJECT, _reset_password_html(link))
         except Exception:
             log.exception("Failed to send reset email to %s", user.email)
 
@@ -267,10 +287,7 @@ async def send_verification(
     await db.commit()
     try:
         link = f"{settings.frontend_url}/verify-email?token={raw}"
-        await email_module.send_email(
-            current_user.email, "Confirm your Zorya account",
-            f"<p>Confirm your email: <a href='{link}'>{link}</a></p>",
-        )
+        await email_module.send_email(current_user.email, VERIFY_EMAIL_SUBJECT, _verify_email_html(link))
     except Exception:
         log.exception("Failed to send verification email to %s", current_user.email)
 
