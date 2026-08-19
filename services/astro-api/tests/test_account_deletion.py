@@ -1,8 +1,11 @@
+from datetime import date
+
 from httpx import AsyncClient
 from sqlalchemy import select
 
 from app.models.chart import Chart
 from app.models.chart_log import ChartLog
+from app.models.chart_quota import ChartQuota
 from app.models.person import Person
 from app.models.user import User
 from tests.conftest import TestSession
@@ -54,6 +57,7 @@ async def test_delete_account_removes_everything(client: AsyncClient):
         user_result = await session.execute(select(User).where(User.email == "del2@example.com"))
         user_id = user_result.scalar_one().id
         session.add(ChartLog(user_id=user_id, chart_type="natal"))
+        session.add(ChartQuota(user_id=user_id, usage_date=date(1990, 1, 1), used=1))
         await session.commit()
 
     r = await client.request(
@@ -78,3 +82,4 @@ async def test_delete_account_removes_everything(client: AsyncClient):
         assert (await session.execute(select(Person).where(Person.user_id == user_id))).scalar_one_or_none() is None
         assert (await session.execute(select(Chart).where(Chart.user_id == user_id))).scalar_one_or_none() is None
         assert (await session.execute(select(ChartLog).where(ChartLog.user_id == user_id))).scalar_one_or_none() is None
+        assert (await session.execute(select(ChartQuota).where(ChartQuota.user_id == user_id))).scalar_one_or_none() is None

@@ -25,7 +25,9 @@ from datetime import datetime, timedelta, timezone
 import stripe
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel
-from sqlalchemy import select, update
+from sqlalchemy import func, select, update
+from sqlalchemy.dialects.postgresql import insert as pg_insert
+from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import monopay
@@ -249,26 +251,61 @@ async def _upsert_subscription(
     db: AsyncSession, user_id: str, plan: str, status_: str,
     stripe_sub_id: str | None, period_start=None, period_end=None,
 ) -> None:
-    existing = None
-    if stripe_sub_id:
-        result = await db.execute(select(Subscription).where(Subscription.stripe_sub_id == stripe_sub_id))
-        existing = result.scalar_one_or_none()
-    if existing:
-        existing.plan = plan
-        existing.status = status_
-        # checkout.session.completed calls this without period dates (Stripe
-        # doesn't send them on that event); don't let it blank out real
-        # values a subscription.created/updated event may have set earlier —
-        # event delivery order isn't guaranteed.
-        if period_start is not None:
-            existing.period_start = period_start
-        if period_end is not None:
-            existing.period_end = period_end
-    else:
+    if not stripe_sub_id:
         db.add(Subscription(
             id=str(uuid.uuid4()), user_id=user_id, plan=plan, status=status_,
             stripe_sub_id=stripe_sub_id, period_start=period_start, period_end=period_end,
         ))
+        return
+
+    insert = pg_insert if db.get_bind().dialect.name == "postgresql" else sqlite_insert
+    statement = insert(Subscription).values(
+        id=str(uuid.uuid4()), user_id=user_id, plan=plan, status=status_,
+        stripe_sub_id=stripe_sub_id, period_start=period_start, period_end=period_end,
+    )
+    statement = statement.on_conflict_do_update(
+        index_elements=["stripe_sub_id"],
+        set_={
+            "plan": statement.excluded.plan,
+            "status": statement.excluded.status,
+            "period_start": func.coalesce(statement.excluded.period_start, Subscription.period_start),
+            "period_end": func.coalesce(statement.excluded.period_end, Subscription.period_end),
+        },
+    )
+    await db.execute(statement)
+
+
+async def _record_payment(
+    db: AsyncSession,
+    *,
+    user_id: str,
+    amount_cents: int,
+    currency: str,
+    provider: str,
+    provider_payment_id: str,
+) -> None:
+    insert = pg_insert if db.get_bind().dialect.name == "postgresql" else sqlite_insert
+    statement = insert(Payment).values(
+        id=str(uuid.uuid4()), user_id=user_id, amount_cents=amount_cents,
+        currency=currency, provider=provider, provider_payment_id=provider_payment_id,
+        status="succeeded",
+    ).on_conflict_do_nothing(index_elements=["provider_payment_id"])
+    await db.execute(statement)
+
+
+async def _sync_user_plan(db: AsyncSession, user_id: str) -> None:
+    result = await db.execute(
+        select(Subscription)
+        .where(
+            Subscription.user_id == user_id,
+            Subscription.status.in_(("active", "trialing")),
+        )
+        .order_by(Subscription.created_at.desc())
+    )
+    active_sub = result.scalars().first()
+    await db.execute(
+        update(User).where(User.id == user_id).values(plan=active_sub.plan if active_sub else "free")
+    )
 
 
 async def _handle_stripe_event(event: dict, db: AsyncSession) -> None:
@@ -286,11 +323,10 @@ async def _handle_stripe_event(event: dict, db: AsyncSession) -> None:
         sub_id = data.get("subscription")
         if user_id:
             await db.execute(
-                update(User).where(User.id == user_id).values(plan=plan, stripe_customer_id=customer_id)
+                update(User).where(User.id == user_id).values(stripe_customer_id=customer_id)
             )
-            await _upsert_subscription(db, user_id, plan, "active", sub_id)
             await db.commit()
-            log.info("Checkout completed: user %s -> plan %s", user_id, plan)
+            log.info("Checkout completed: user %s", user_id)
 
     elif etype in ("customer.subscription.created", "customer.subscription.updated"):
         meta = data.get("metadata") or {}
@@ -299,16 +335,13 @@ async def _handle_stripe_event(event: dict, db: AsyncSession) -> None:
         sub_status = data.get("status", "")
         sub_id = data.get("id")
         if user_id:
-            if sub_status in ("active", "trialing"):
-                await db.execute(
-                    update(User).where(User.id == user_id).values(plan=plan)
-                )
             period_start, period_end = _subscription_period(data)
             await _upsert_subscription(
                 db, user_id, plan, sub_status, sub_id,
                 period_start=period_start,
                 period_end=period_end,
             )
+            await _sync_user_plan(db, user_id)
             await db.commit()
             log.info("Subscription %s for user %s: status=%s plan=%s", sub_id, user_id, sub_status, plan)
 
@@ -329,6 +362,7 @@ async def _handle_stripe_event(event: dict, db: AsyncSession) -> None:
                 sub = result.scalar_one_or_none()
                 if sub:
                     sub.status = "canceled"
+            await _sync_user_plan(db, user_id)
             await db.commit()
             log.info("Downgraded user %s to free", user_id)
 
@@ -339,19 +373,16 @@ async def _handle_stripe_event(event: dict, db: AsyncSession) -> None:
             result = await db.execute(select(User).where(User.stripe_customer_id == customer_id))
             user = result.scalar_one_or_none()
             if user:
-                existing = await db.execute(
-                    select(Payment).where(Payment.provider_payment_id == invoice_id)
+                await _record_payment(
+                    db,
+                    user_id=user.id,
+                    amount_cents=data.get("amount_paid", 0),
+                    currency=data.get("currency", "usd"),
+                    provider="stripe",
+                    provider_payment_id=invoice_id,
                 )
-                if existing.scalar_one_or_none() is None:
-                    db.add(Payment(
-                        id=str(uuid.uuid4()), user_id=user.id,
-                        amount_cents=data.get("amount_paid", 0),
-                        currency=data.get("currency", "usd"),
-                        provider="stripe", provider_payment_id=invoice_id,
-                        status="succeeded",
-                    ))
-                    await db.commit()
-                    log.info("Recorded Stripe payment %s for user %s", invoice_id, user.id)
+                await db.commit()
+                log.info("Recorded Stripe payment %s for user %s", invoice_id, user.id)
             else:
                 log.warning("invoice.payment_succeeded for unknown Stripe customer %s", customer_id)
 
@@ -454,17 +485,14 @@ async def _apply_monopay_status(inv: dict, db: AsyncSession) -> None:
             if user:
                 user.plan = sub.plan
 
-        existing_payment = await db.execute(
-            select(Payment).where(Payment.provider_payment_id == invoice_id)
+        await _record_payment(
+            db,
+            user_id=sub.user_id,
+            amount_cents=inv.get("amount", 0),
+            currency="UAH",
+            provider="monopay",
+            provider_payment_id=invoice_id,
         )
-        if existing_payment.scalar_one_or_none() is None:
-            db.add(Payment(
-                id=str(uuid.uuid4()), user_id=sub.user_id,
-                amount_cents=inv.get("amount", 0),
-                currency="UAH",
-                provider="monopay", provider_payment_id=invoice_id,
-                status="succeeded",
-            ))
         await db.commit()
         log.info("monopay: invoice %s succeeded for user %s -> plan %s", invoice_id, sub.user_id, sub.plan)
 

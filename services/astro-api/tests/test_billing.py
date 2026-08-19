@@ -72,7 +72,7 @@ async def test_stripe_webhook_malformed_payload_rejected(client: AsyncClient):
 
 # ── Stripe checkout.session.completed ───────────────────────────────────────
 
-async def test_checkout_session_completed_upgrades_plan(client: AsyncClient):
+async def test_checkout_session_completed_records_customer_without_granting_access(client: AsyncClient):
     await _register(client, "stripe1@example.com")
     user = await _get_user("stripe1@example.com")
 
@@ -91,14 +91,12 @@ async def test_checkout_session_completed_upgrades_plan(client: AsyncClient):
     assert r.status_code == 200
 
     updated = await _get_user("stripe1@example.com")
-    assert updated.plan == "pro"
+    assert updated.plan == "free"
     assert updated.stripe_customer_id == "cus_test123"
 
     async with TestSession() as session:
         result = await session.execute(select(Subscription).where(Subscription.user_id == user.id))
-        sub = result.scalar_one()
-        assert sub.status == "active"
-        assert sub.stripe_sub_id == "sub_test123"
+        assert result.scalars().all() == []
 
 
 # ── Stripe customer.subscription.created/updated ────────────────────────────
@@ -137,6 +135,69 @@ async def test_subscription_created_reads_period_from_items(client: AsyncClient)
         assert sub.period_start is not None
         assert sub.period_end is not None
         assert sub.period_start < sub.period_end
+
+    updated = await _get_user("stripe-period@example.com")
+    assert updated.plan == "pro"
+
+
+async def test_incomplete_stripe_subscription_does_not_grant_access(client: AsyncClient):
+    await _register(client, "stripe-incomplete@example.com")
+    user = await _get_user("stripe-incomplete@example.com")
+
+    event = {
+        "type": "customer.subscription.created",
+        "data": {"object": {
+            "id": "sub_incomplete_test",
+            "status": "incomplete",
+            "metadata": {"user_id": user.id, "plan": "pro"},
+            "items": {"data": []},
+        }},
+    }
+    payload, sig = _stripe_signed_payload(event)
+    r = await client.post(
+        "/api/v1/billing/stripe/webhook", content=payload, headers={"stripe-signature": sig}
+    )
+    assert r.status_code == 200
+
+    updated = await _get_user("stripe-incomplete@example.com")
+    assert updated.plan == "free"
+
+
+async def test_stripe_cancellation_preserves_other_active_subscription(client: AsyncClient):
+    await _register(client, "stripe-cancel@example.com")
+    user = await _get_user("stripe-cancel@example.com")
+    async with TestSession() as session:
+        db_user = await session.get(User, user.id)
+        db_user.plan = "pro"
+        session.add_all([
+            Subscription(
+                id=str(uuid.uuid4()), user_id=user.id, plan="pro", status="active",
+                stripe_sub_id="sub_cancel_test",
+            ),
+            Subscription(
+                id=str(uuid.uuid4()), user_id=user.id, plan="pro", status="active",
+                monopay_invoice_id="inv_still_active",
+                period_start=datetime.now(timezone.utc),
+                period_end=datetime.now(timezone.utc) + timedelta(days=30),
+            ),
+        ])
+        await session.commit()
+
+    event = {
+        "type": "customer.subscription.deleted",
+        "data": {"object": {
+            "id": "sub_cancel_test",
+            "metadata": {"user_id": user.id},
+        }},
+    }
+    payload, sig = _stripe_signed_payload(event)
+    r = await client.post(
+        "/api/v1/billing/stripe/webhook", content=payload, headers={"stripe-signature": sig}
+    )
+    assert r.status_code == 200
+
+    updated = await _get_user("stripe-cancel@example.com")
+    assert updated.plan == "pro"
 
 
 # ── Stripe invoice.payment_succeeded ────────────────────────────────────────

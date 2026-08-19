@@ -6,6 +6,7 @@ from app.database import get_db
 from app.dependencies.auth import get_current_user
 from app.models.chart import Chart
 from app.models.chart_log import ChartLog
+from app.models.chart_quota import ChartQuota
 from app.models.person import Person
 from app.models.user import EmailToken, User
 from app.routers.auth import _verify_password
@@ -30,6 +31,7 @@ async def delete_account(
     await db.execute(delete(Chart).where(Chart.user_id == current_user.id))
     await db.execute(delete(Person).where(Person.user_id == current_user.id))
     await db.execute(delete(ChartLog).where(ChartLog.user_id == current_user.id))
+    await db.execute(delete(ChartQuota).where(ChartQuota.user_id == current_user.id))
     await db.execute(delete(EmailToken).where(EmailToken.user_id == current_user.id))
     await db.delete(current_user)
     await db.commit()

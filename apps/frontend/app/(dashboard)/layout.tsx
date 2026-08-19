@@ -31,7 +31,6 @@ export default async function DashboardLayout({
     { href: "/dashboard", label: t("overview") },
     { href: "/persons", label: t("persons") },
     { href: "/charts", label: t("charts") },
-    { href: "/reports", label: t("reports") },
     { href: "/pricing", label: t("pricing") },
     { href: "/billing", label: t("billing") },
     { href: "/account", label: t("account") },

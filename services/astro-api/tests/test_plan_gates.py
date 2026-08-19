@@ -1,6 +1,9 @@
+from datetime import datetime, timezone
+
 from httpx import AsyncClient
 from sqlalchemy import select
 
+from app.models.chart_quota import ChartQuota
 from app.models.user import User
 from tests.conftest import TestSession
 
@@ -11,6 +14,13 @@ TRANSIT_BODY = {
     "transit_dt": "2026-01-01T12:00:00",
     "transit_lat": 50.45,
     "transit_lon": 30.52,
+}
+
+NATAL_BODY = {
+    "birth_dt": "1990-01-01T12:00:00",
+    "timezone": "Europe/Kyiv",
+    "lat": 50.45,
+    "lon": 30.52,
 }
 
 
@@ -46,3 +56,26 @@ async def test_pro_user_can_use_transit(client: AsyncClient):
     )
     assert r.status_code == 200
     assert "natal" in r.json()
+
+
+async def test_free_natal_chart_quota_is_reserved_atomically(client: AsyncClient):
+    reg = await client.post(
+        "/api/v1/auth/register", json={"email": "free-quota@example.com", "password": "password123"}
+    )
+    token = reg.json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    for _ in range(3):
+        r = await client.post("/api/v1/charts/natal", json=NATAL_BODY, headers=headers)
+        assert r.status_code == 200
+
+    r = await client.post("/api/v1/charts/natal", json=NATAL_BODY, headers=headers)
+    assert r.status_code == 403
+    assert r.json()["detail"]["code"] == "plan_limit"
+
+    async with TestSession() as session:
+        user_result = await session.execute(select(User).where(User.email == "free-quota@example.com"))
+        user = user_result.scalar_one()
+        quota = await session.get(ChartQuota, (user.id, datetime.now(timezone.utc).date()))
+        assert quota is not None
+        assert quota.used == 3

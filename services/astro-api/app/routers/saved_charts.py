@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import func, select
+from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
@@ -31,6 +31,9 @@ async def create_saved_chart(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> Chart:
+    await db.execute(
+        update(User).where(User.id == current_user.id).values(plan=User.plan)
+    )
     count_result = await db.execute(
         select(func.count()).where(Chart.user_id == current_user.id).select_from(Chart)
     )

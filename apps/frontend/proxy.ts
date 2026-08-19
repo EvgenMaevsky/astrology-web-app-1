@@ -10,6 +10,13 @@ const PUBLIC_PATHS = [
 const AUTH_REDIRECT_PATHS = ["/login", "/register"];
 const API_URL = process.env.API_URL ?? "http://127.0.0.1:8000";
 
+type RefreshedTokens = {
+  accessToken: string;
+  refreshToken: string;
+};
+
+const refreshFlights = new Map<string, Promise<RefreshedTokens | null>>();
+
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   // "/" is matched exactly, never as a startsWith() prefix — a prefix match
@@ -45,31 +52,9 @@ async function tryRefresh(
   request: NextRequest,
   refreshToken: string
 ): Promise<NextResponse | null> {
-  // The backend rotates + revokes the refresh token on every call. If two
-  // requests race here with no access-token cookie (e.g. two tabs), the
-  // second call reuses an already-revoked token and gets 401 → the user is
-  // bounced to /login even though the first refresh succeeded. Acceptable
-  // for now (rare, self-heals on next login); no grace-window implemented.
-  let accessToken: string;
-  let newRefreshToken: string | undefined;
-  try {
-    const res = await fetch(`${API_URL}/api/v1/auth/refresh`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ refresh_token: refreshToken }),
-      cache: "no-store",
-    });
-    if (!res.ok) return null;
-    const body = await res.json();
-    accessToken = body.access_token;
-    newRefreshToken = body.refresh_token;
-    // Backend rotates refresh tokens on every use; without the new one we
-    // can't renew the cookie and the client would be stuck re-using a
-    // revoked token on its next expiry.
-    if (!accessToken || !newRefreshToken) return null;
-  } catch {
-    return null;
-  }
+  const tokens = await refreshAccessTokens(refreshToken);
+  if (!tokens) return null;
+  const { accessToken, refreshToken: newRefreshToken } = tokens;
 
   // Forward the new token to this request's server components/actions too,
   // not just to the browser via Set-Cookie.
@@ -98,6 +83,33 @@ async function tryRefresh(
     path: "/",
   });
   return response;
+}
+
+async function refreshAccessTokens(refreshToken: string): Promise<RefreshedTokens | null> {
+  const existing = refreshFlights.get(refreshToken);
+  if (existing) return existing;
+
+  const refresh = (async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/v1/auth/refresh`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refresh_token: refreshToken }),
+        cache: "no-store",
+      });
+      if (!res.ok) return null;
+      const body = await res.json();
+      if (!body.access_token || !body.refresh_token) return null;
+      return { accessToken: body.access_token, refreshToken: body.refresh_token };
+    } catch {
+      return null;
+    } finally {
+      refreshFlights.delete(refreshToken);
+    }
+  })();
+
+  refreshFlights.set(refreshToken, refresh);
+  return refresh;
 }
 
 export const config = {

@@ -25,7 +25,7 @@ class User(Base):
     plan: Mapped[str] = mapped_column(String(32), nullable=False, default="free")
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     email_verified: Mapped[bool] = mapped_column(Boolean, default=False)
-    stripe_customer_id: Mapped[str | None] = mapped_column(String(256), nullable=True, index=True)
+    stripe_customer_id: Mapped[str | None] = mapped_column(String(256), nullable=True, unique=True, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
     settings: Mapped["UserSettings"] = relationship(back_populates="user", uselist=False, cascade="all, delete-orphan")
@@ -55,9 +55,9 @@ class Subscription(Base):
     user_id: Mapped[str] = mapped_column(String(36), ForeignKey("users.id"), nullable=False)
     plan: Mapped[str] = mapped_column(String(32), nullable=False)
     status: Mapped[str] = mapped_column(String(32), nullable=False)  # active|canceled|past_due
-    stripe_sub_id: Mapped[str | None] = mapped_column(String(256), nullable=True)
+    stripe_sub_id: Mapped[str | None] = mapped_column(String(256), nullable=True, unique=True)
     liqpay_order_id: Mapped[str | None] = mapped_column(String(256), nullable=True)
-    monopay_invoice_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    monopay_invoice_id: Mapped[str | None] = mapped_column(String(64), nullable=True, unique=True, index=True)
     period_start: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     period_end: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
@@ -73,7 +73,7 @@ class Payment(Base):
     amount_cents: Mapped[int] = mapped_column(Integer, nullable=False)
     currency: Mapped[str] = mapped_column(String(8), nullable=False)
     provider: Mapped[str] = mapped_column(String(16), nullable=False)  # stripe|monopay
-    provider_payment_id: Mapped[str | None] = mapped_column(String(256), nullable=True, index=True)
+    provider_payment_id: Mapped[str | None] = mapped_column(String(256), nullable=True, unique=True, index=True)
     status: Mapped[str] = mapped_column(String(32), nullable=False)  # pending|succeeded|failed
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
