@@ -26,6 +26,11 @@ services:
     image: caddy:2-alpine
     restart: unless-stopped
     ports: ["80:80", "443:443"]
+    # Caddyfile reads {$API_DOMAIN}; without this the container doesn't see
+    # it and silently falls back to the `api.localhost` default, issuing a
+    # self-signed local cert instead of a real Let's Encrypt one.
+    environment:
+      API_DOMAIN: ${API_DOMAIN:?set in .env}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddydata:/data
