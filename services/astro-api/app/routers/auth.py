@@ -80,8 +80,8 @@ async def _issue_email_token(db: AsyncSession, user_id: str, purpose: str, ttl: 
     return raw
 
 
-VERIFY_EMAIL_SUBJECT = "Підтвердіть акаунт Zorya / Confirm your Zorya account"
-RESET_PASSWORD_SUBJECT = "Скидання пароля Zorya / Reset your Zorya password"
+VERIFY_EMAIL_SUBJECT = "Підтвердіть акаунт Astrodite / Confirm your Astrodite account"
+RESET_PASSWORD_SUBJECT = "Скидання пароля Astrodite / Reset your Astrodite password"
 
 
 def _verify_email_html(link: str) -> str:

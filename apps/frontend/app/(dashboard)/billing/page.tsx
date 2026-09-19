@@ -8,7 +8,7 @@ import { RenewButton } from "./_components/RenewButton";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("billing");
-  return { title: `${t("title")} — Zorya` };
+  return { title: `${t("title")} — Astrodite` };
 }
 
 export default async function BillingPage({

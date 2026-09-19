@@ -1,6 +1,6 @@
 # Deploy checklist (manual steps)
 
-This is a checklist of **human actions** required to take Zorya to production.
+This is a checklist of **human actions** required to take Astrodite to production.
 The executor agent does not perform any of these — nothing here has been
 bought, registered, or run against a live VPS/Vercel/Stripe/Sentry account.
 

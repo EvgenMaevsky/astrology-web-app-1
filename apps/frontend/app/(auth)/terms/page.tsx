@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-export const metadata = { title: "Terms — Zorya" };
+export const metadata = { title: "Terms — Astrodite" };
 
 export default function TermsPage() {
   return (
@@ -9,7 +9,7 @@ export default function TermsPage() {
       <div className="rounded-2xl bg-white/80 backdrop-blur shadow-xl shadow-amber-900/10 border border-stone-200 p-8 space-y-6 text-sm text-stone-700">
         <div>
           <p className="text-xs font-semibold tracking-widest text-amber-700 uppercase mb-2">
-            Zorya
+            Astrodite
           </p>
           <h1 className="text-2xl font-semibold text-stone-900">Умови користування</h1>
           <p className="mt-2 text-xs text-stone-400">Чернетка. Останнє оновлення: 2026-07-16.</p>
@@ -18,7 +18,7 @@ export default function TermsPage() {
         <section className="space-y-2">
           <h2 className="font-semibold text-stone-900">Опис сервісу</h2>
           <p className="text-stone-600">
-            Zorya — веб-сервіс для розрахунку натальних, транзитних, соляр- та синастрійних
+            Astrodite — веб-сервіс для розрахунку натальних, транзитних, соляр- та синастрійних
             астрологічних карт. Доступ надається на умовах, викладених нижче.
           </p>
         </section>

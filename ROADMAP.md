@@ -1,4 +1,4 @@
-# Zorya — план розвитку та виходу в продакшен
+# Astrodite — план розвитку та виходу в продакшен
 
 > Оновлено: 2026-07-15
 > Стан на момент написання: робочий прототип — auth із refresh-flow, рушій на Swiss Ephemeris
@@ -31,9 +31,11 @@
 Pro-план зараз обіцяє **PDF export, custom orbs, progressions** — жодного немає в коді.
 До першого платежу: реалізувати або прибрати з опису тарифу.
 
-### 3. Назва
-«Zorya» обрана як робоча, але домен і торгова марка **не перевірені**.
-Перевірити zorya.app / zorya.com.ua та збіги в App Store перед брендингом.
+### 3. Назва — ✅ ВИРІШЕНО: Astrodite
+Робочу назву «Zorya» змінено на **Astrodite** (2026-09-19). Домен
+`astrodite.cc` куплено й розгорнуто: фронтенд на Vercel, бекенд на
+`api.astrodite.cc`. Торгова марка й збіги в App Store **досі не
+перевірені** — це лишається дією власника перед публічним запуском.
 
 ---
 
@@ -74,7 +76,8 @@ Docker на dev-машині відсутній — усе, що потребу�
 - [x] **Хостинг**: `infra/docker-compose.yml` (db + api + Caddy) готовий до
       Hetzner VPS; фронтенд на Vercel — розгортання ще не виконане (ручний крок,
       див. docs/DEPLOY.md)
-- [ ] **Домен**: перевірити та купити (див. блокер №3) — не зроблено, ручна дія
+- [x] **Домен**: `astrodite.cc` куплено, DNS в adm.tools, розгорнуто
+      2026-09-19 (apex+www → Vercel, `api` → VPS)
 - [x] **Операційка**:
   - [x] Sentry: backend gated на `SENTRY_DSN`, frontend (instrumentation.ts +
         instrumentation-client.ts) gated на `NEXT_PUBLIC_SENTRY_DSN` — обидва

@@ -5,7 +5,7 @@ import { PricingCard } from "./_components/PricingCard";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("pricing");
-  return { title: `${t("title")} — Zorya` };
+  return { title: `${t("title")} — Astrodite` };
 }
 
 export default async function PricingPage({

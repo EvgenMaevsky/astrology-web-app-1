@@ -1,23 +1,23 @@
 # Launch checklist (manual steps)
 
-Everything here is a **human action** the owner needs to take before Zorya
+Everything here is a **human action** the owner needs to take before Astrodite
 is live for real users. Nothing here has been done by the executor agent —
 no domain bought, no live keys generated, no beta invites sent. See
 [DEPLOY.md](DEPLOY.md) for the technical deploy steps this checklist assumes
 are already done (or does alongside).
 
-## 1. Domain
+## 1. Domain — done
 
-- Check availability / buy a domain (ROADMAP blocker #3 — `zorya.app`,
-  `zorya.com.ua`, or similar were proposed but never verified against a
-  registrar or trademark search).
+- `astrodite.cc` is bought and live (DNS at adm.tools): apex + `www` point
+  at Vercel, `api.astrodite.cc` at the VPS. Still outstanding: a trademark
+  check on the name, which nobody has done.
 
 ## 2. Deploy
 
 - Follow [DEPLOY.md](DEPLOY.md) start to finish: Hetzner VPS + Docker Compose
   for the backend, Vercel for the frontend, DNS pointed at both.
 - **`CORS_ORIGINS` in `infra/.env` must be set to the real frontend
-  domain(s)** (e.g. `["https://zorya.app"]`) — `allow_credentials=True` in
+  domain(s)** (e.g. `["https://astrodite.cc"]`) — `allow_credentials=True` in
   `app/main.py` means this can never be `*` (browsers reject that
   combination outright, but don't leave it as the localhost default either).
   Flagged during the C3 security review as a required-before-launch env,

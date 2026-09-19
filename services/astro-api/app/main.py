@@ -44,7 +44,7 @@ if settings.sentry_dsn:
     )
 
 app = FastAPI(
-    title="Zorya Astro API",
+    title="Astrodite Astro API",
     version="0.2.0",
     summary="Astrology web platform — backend with auth and ephemeris engine.",
     lifespan=lifespan,

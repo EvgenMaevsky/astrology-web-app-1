@@ -6,7 +6,7 @@ import { DangerZone } from "./_DangerZone";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("account");
-  return { title: `${t("title")} — Zorya` };
+  return { title: `${t("title")} — Astrodite` };
 }
 
 async function fetchMe(token: string) {

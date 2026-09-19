@@ -412,7 +412,7 @@ async def monopay_checkout(
     invoice = await monopay.create_invoice(
         amount_kopecks=plan_cfg["price_uah"] * 100,
         reference=f"{current_user.id}-{body.plan}-{uuid.uuid4().hex[:8]}",
-        destination=f"Zorya {plan_cfg['name']} — 30 days",
+        destination=f"Astrodite {plan_cfg['name']} — 30 days",
         redirect_url=f"{settings.frontend_url}/billing?monopay=1",
         webhook_url=f"{settings.api_public_url}/api/v1/billing/monopay/webhook",
     )

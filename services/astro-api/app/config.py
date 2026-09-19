@@ -34,7 +34,7 @@ class Settings(BaseSettings):
 
     # Resend (https://resend.com) — empty key = dev mode, emails are logged not sent
     resend_api_key: str = ""
-    email_from: str = "Zorya <noreply@example.com>"
+    email_from: str = "Astrodite <noreply@example.com>"
 
     max_saved_charts: int = 50
 

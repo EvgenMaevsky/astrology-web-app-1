@@ -1,6 +1,6 @@
-# Zorya
+# Astrodite
 
-Zorya — web rewrite of the ZET9 Geo astrology desktop app.
+Astrodite — web rewrite of the ZET9 Geo astrology desktop app.
 Stack: Next.js 16 + FastAPI + SQLite (dev) / PostgreSQL (prod).
 Ephemeris: **own license-clean engine** — Skyfield (MIT) + JPL DE440s (public
 domain), the same raw data Swiss Ephemeris is built on. Every change is

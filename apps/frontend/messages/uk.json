@@ -10,7 +10,7 @@
       "viewPlans": "Переглянути тарифи"
     },
     "meta": {
-      "title": "Zorya — платформа астрології",
+      "title": "Astrodite — платформа астрології",
       "description": "Точна натальна астрологія у браузері: власний ефемеридний рушій, звірений зі Swiss Ephemeris, транзити, соляри, синастрія."
     }
   },
@@ -368,7 +368,7 @@
     "cancel": "Скасувати"
   },
   "landing": {
-    "badge": "Zorya",
+    "badge": "Astrodite",
     "heroTitle": "Точна натальна астрологія у браузері",
     "heroSubtitle": "Власний ефемеридний рушій на даних JPL — точність розрахунків звірена зі Swiss Ephemeris, тим самим стандартом, яким користуються професійні астрологи.",
     "tryFree": "Спробувати безкоштовно",
@@ -390,7 +390,7 @@
     "pricingTitle": "Тарифи",
     "perMonth": "/міс",
     "startFree": "Почати безкоштовно",
-    "footerCopyright": "© {year} Zorya",
+    "footerCopyright": "© {year} Astrodite",
     "privacy": "Конфіденційність",
     "terms": "Умови"
   },

@@ -10,7 +10,7 @@
       "viewPlans": "View plans"
     },
     "meta": {
-      "title": "Zorya — Astrology Platform",
+      "title": "Astrodite — Astrology Platform",
       "description": "Precise natal astrology in your browser: a custom ephemeris engine verified against Swiss Ephemeris, transits, solar returns, synastry."
     }
   },
@@ -351,7 +351,7 @@
     "cancel": "Cancel"
   },
   "landing": {
-    "badge": "Zorya",
+    "badge": "Astrodite",
     "heroTitle": "Precise natal astrology in your browser",
     "heroSubtitle": "Our own ephemeris engine built on JPL data — calculation accuracy verified against Swiss Ephemeris, the same standard professional astrologers use.",
     "tryFree": "Try for free",
@@ -373,7 +373,7 @@
     "pricingTitle": "Pricing",
     "perMonth": "/mo",
     "startFree": "Start for free",
-    "footerCopyright": "© {year} Zorya",
+    "footerCopyright": "© {year} Astrodite",
     "privacy": "Privacy",
     "terms": "Terms"
   },

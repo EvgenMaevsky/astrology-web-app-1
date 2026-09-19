@@ -5,7 +5,7 @@ import { ChartTabs } from "./_components/ChartTabs";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("charts");
-  return { title: `${t("pageTitle")} — Zorya` };
+  return { title: `${t("pageTitle")} — Astrodite` };
 }
 
 export default async function ChartsPage({

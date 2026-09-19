@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-export const metadata = { title: "Privacy — Zorya" };
+export const metadata = { title: "Privacy — Astrodite" };
 
 export default function PrivacyPage() {
   return (
@@ -9,7 +9,7 @@ export default function PrivacyPage() {
       <div className="rounded-2xl bg-white/80 backdrop-blur shadow-xl shadow-amber-900/10 border border-stone-200 p-8 space-y-6 text-sm text-stone-700">
         <div>
           <p className="text-xs font-semibold tracking-widest text-amber-700 uppercase mb-2">
-            Zorya
+            Astrodite
           </p>
           <h1 className="text-2xl font-semibold text-stone-900">Політика конфіденційності</h1>
           <p className="mt-2 text-xs text-stone-400">Чернетка. Останнє оновлення: 2026-07-16.</p>
