@@ -14,3 +14,7 @@ class City(Base):
     lon = Column(Float, nullable=False)
     timezone = Column(String, nullable=False)
     population = Column(Integer, default=0)
+    # GeoNames "alternatenames" (comma-separated, ~142 chars/city). Holds the
+    # local-script spellings — without it a Ukrainian user searching "Київ"
+    # gets nothing, since name/ascii_name are Latin only.
+    alt_names = Column(Text, nullable=True)

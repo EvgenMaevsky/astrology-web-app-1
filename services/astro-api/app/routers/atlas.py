@@ -25,6 +25,7 @@ _SEARCH_SQL_PG = text("""
     FROM cities c
     WHERE c.name ILIKE :prefix OR c.ascii_name ILIKE :prefix
        OR similarity(c.ascii_name, :q) > 0.35
+       OR c.alt_names ILIKE :contains
     ORDER BY (c.ascii_name ILIKE :prefix) DESC, c.population DESC
     LIMIT :limit
 """)
@@ -68,7 +69,14 @@ async def search_cities(
     if dialect == "postgresql":
         rows = await db.execute(
             _SEARCH_SQL_PG,
-            {"prefix": q_clean + "%", "q": q_clean, "limit": limit * 3},
+            {
+                "prefix": q_clean + "%",
+                # alt_names is one comma-separated blob per city, so a
+                # local-script name can sit anywhere inside it.
+                "contains": f"%{q_clean}%",
+                "q": q_clean,
+                "limit": limit * 3,
+            },
         )
     else:
         # Phrase-prefix match (adjacent, in order) OR'd with an AND of each

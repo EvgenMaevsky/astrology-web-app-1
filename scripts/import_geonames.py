@@ -31,7 +31,7 @@ from app.models.city import City  # noqa: E402
 URL = "https://download.geonames.org/export/dump/cities15000.zip"
 
 COLS = {
-    0: "geonameid",  1: "name",      2: "ascii_name",
+    0: "geonameid",  1: "name",      2: "ascii_name",  3: "alt_names",
     4: "lat",        5: "lon",       8: "country",
     10: "region",    14: "population", 17: "timezone",
 }
@@ -81,7 +81,10 @@ def parse(raw: bytes):
             lat, lon,
             fields[17],              # timezone (IANA)
             pop,
-            f"{fields[2]} {fields[8]}".lower(),  # search_text
+            # alternatenames — the local-script spellings ("Київ", "Киев").
+            # name/ascii_name are Latin only, so without this a Cyrillic
+            # search finds nothing.
+            fields[3],
         ))
     return rows
 
@@ -108,6 +111,7 @@ async def import_db(rows):
                 "lon": r[6],
                 "timezone": r[7],
                 "population": r[8],
+                "alt_names": r[9],
             }
             for r in rows
         ]
@@ -120,18 +124,19 @@ async def import_db(rows):
                 CREATE VIRTUAL TABLE cities_fts USING fts5(
                     city_id UNINDEXED,
                     name,
-                    ascii_name
+                    ascii_name,
+                    alt_names
                 )
             """))
             fts_rows = [
-                {"city_id": r[0], "name": r[1], "ascii_name": r[2]}
+                {"city_id": r[0], "name": r[1], "ascii_name": r[2], "alt_names": r[9] or ""}
                 for r in rows
             ]
             for i in range(0, len(fts_rows), 5000):
                 await conn.execute(
                     text(
-                        "INSERT INTO cities_fts(city_id, name, ascii_name) "
-                        "VALUES (:city_id, :name, :ascii_name)"
+                        "INSERT INTO cities_fts(city_id, name, ascii_name, alt_names) "
+                        "VALUES (:city_id, :name, :ascii_name, :alt_names)"
                     ),
                     fts_rows[i:i + 5000],
                 )

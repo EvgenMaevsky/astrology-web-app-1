@@ -20,32 +20,39 @@ async def _seed_cities(rows: list[dict]) -> None:
         await conn.execute(
             text(
                 "INSERT INTO cities "
-                "(id, name, ascii_name, country, region, lat, lon, timezone, population) "
-                "VALUES (:id, :name, :ascii_name, :country, :region, :lat, :lon, :timezone, :population)"
+                "(id, name, ascii_name, country, region, lat, lon, timezone, population, alt_names) "
+                "VALUES (:id, :name, :ascii_name, :country, :region, :lat, :lon, :timezone, :population, :alt_names)"
             ),
             rows,
         )
         await conn.execute(text("DROP TABLE IF EXISTS cities_fts"))
         await conn.execute(text("""
             CREATE VIRTUAL TABLE cities_fts USING fts5(
-                city_id UNINDEXED, name, ascii_name
+                city_id UNINDEXED, name, ascii_name, alt_names
             )
         """))
         await conn.execute(
-            text("INSERT INTO cities_fts(city_id, name, ascii_name) VALUES (:id, :name, :ascii_name)"),
-            [{"id": r["id"], "name": r["name"], "ascii_name": r["ascii_name"]} for r in rows],
+            text(
+                "INSERT INTO cities_fts(city_id, name, ascii_name, alt_names) "
+                "VALUES (:id, :name, :ascii_name, :alt_names)"
+            ),
+            [{"id": r["id"], "name": r["name"], "ascii_name": r["ascii_name"],
+              "alt_names": r["alt_names"] or ""} for r in rows],
         )
 
 
 CITIES = [
     {"id": 1, "name": "Kyiv", "ascii_name": "Kyiv", "country": "UA", "region": "",
-     "lat": 50.45, "lon": 30.52, "timezone": "Europe/Kyiv", "population": 2884000},
+     "lat": 50.45, "lon": 30.52, "timezone": "Europe/Kyiv", "population": 2884000,
+     "alt_names": "Kiev,Kiew,Київ,Киев"},
     {"id": 2, "name": "N'Djamena", "ascii_name": "N'Djamena", "country": "TD", "region": "",
-     "lat": 12.11, "lon": 15.05, "timezone": "Africa/Ndjamena", "population": 1000000},
+     "lat": 12.11, "lon": 15.05, "timezone": "Africa/Ndjamena", "population": 1000000,
+     "alt_names": "Ndjamena,Нджамена"},
     {"id": 3, "name": "Wilkes-Barre", "ascii_name": "Wilkes-Barre", "country": "US", "region": "PA",
-     "lat": 41.25, "lon": -75.88, "timezone": "America/New_York", "population": 40000},
+     "lat": 41.25, "lon": -75.88, "timezone": "America/New_York", "population": 40000, "alt_names": None},
     {"id": 4, "name": "New York", "ascii_name": "New York", "country": "US", "region": "NY",
-     "lat": 40.71, "lon": -74.01, "timezone": "America/New_York", "population": 8400000},
+     "lat": 40.71, "lon": -74.01, "timezone": "America/New_York", "population": 8400000,
+     "alt_names": "New York City,Нью-Йорк"},
 ]
 
 
@@ -87,3 +94,21 @@ async def test_search_whitespace_only_query_returns_empty(client: AsyncClient):
     r = await client.get("/api/v1/atlas/search", params={"q": "  "})
     assert r.status_code == 200
     assert r.json() == []
+
+
+@pytest.mark.parametrize("q,expected_name", [
+    ("Київ", "Kyiv"),
+    ("Киев", "Kyiv"),
+    ("Нью-Йорк", "New York"),
+])
+async def test_search_finds_cities_by_local_script_name(
+    client: AsyncClient, q: str, expected_name: str
+):
+    # Regression: name/ascii_name from GeoNames are Latin only, so a
+    # Ukrainian user typing "Київ" used to get nothing — even though the UI
+    # placeholder suggests exactly that. The local spellings live in
+    # GeoNames' alternatenames column, now imported into cities.alt_names
+    # and indexed.
+    r = await client.get("/api/v1/atlas/search", params={"q": q})
+    assert r.status_code == 200
+    assert expected_name in [c["name"] for c in r.json()]
