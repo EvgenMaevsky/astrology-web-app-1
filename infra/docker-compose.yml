@@ -18,6 +18,10 @@ services:
     environment:
       DATABASE_URL: postgresql+asyncpg://zorya:${POSTGRES_PASSWORD}@db:5432/zorya
       ENVIRONMENT: production
+      # On the apidata volume, so admin-uploaded images survive an image
+      # rebuild. Note they are NOT covered by backup_db.sh, which dumps
+      # Postgres only.
+      UPLOADS_DIR: /data/uploads
     volumes: ["apidata:/data"]
     depends_on:
       db:
