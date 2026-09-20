@@ -35,6 +35,9 @@ class Settings(BaseSettings):
     # Resend (https://resend.com) — empty key = dev mode, emails are logged not sent
     resend_api_key: str = ""
     email_from: str = "Astrodite <noreply@example.com>"
+    # Where replies to transactional email go. Empty = no Reply-To header, in
+    # which case replies land on the unroutable sending subdomain and vanish.
+    email_reply_to: str = ""
 
     max_saved_charts: int = 50
 

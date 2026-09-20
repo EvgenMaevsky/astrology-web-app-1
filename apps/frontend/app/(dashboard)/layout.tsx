@@ -5,6 +5,11 @@ import Link from "next/link";
 import { EmailVerificationBanner } from "./_EmailVerificationBanner";
 import { LanguageSwitcher } from "@/app/_components/LanguageSwitcher";
 
+// The service's public contact address, also printed in /privacy and /terms.
+// The env var stays an override so a fork or a staging deploy can point
+// elsewhere, but the default means the link is never silently missing.
+const FEEDBACK_EMAIL = process.env.NEXT_PUBLIC_FEEDBACK_EMAIL || "info@astrodite.cc";
+
 async function fetchMe(token: string) {
   try {
     const res = await fetch(`${API_URL}/api/v1/auth/me`, {
@@ -75,14 +80,9 @@ export default async function DashboardLayout({
           <div className="flex items-center gap-3 px-3 pt-2 text-xs text-stone-400">
             <Link href="/privacy" className="hover:text-stone-600">{t("privacy")}</Link>
             <Link href="/terms" className="hover:text-stone-600">{t("terms")}</Link>
-            {process.env.NEXT_PUBLIC_FEEDBACK_EMAIL && (
-              <a
-                href={`mailto:${process.env.NEXT_PUBLIC_FEEDBACK_EMAIL}`}
-                className="hover:text-stone-600"
-              >
-                {t("feedback")}
-              </a>
-            )}
+            <a href={`mailto:${FEEDBACK_EMAIL}`} className="hover:text-stone-600">
+              {t("feedback")}
+            </a>
           </div>
           <div className="px-3 pt-2">
             <LanguageSwitcher />

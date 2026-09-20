@@ -64,7 +64,13 @@ export default function TermsPage() {
 
         <section className="space-y-2">
           <h2 className="font-semibold text-stone-900">Контакти</h2>
-          <p className="text-stone-600">TODO(owner): контактний email власника сервісу.</p>
+          <p className="text-stone-600">
+            З питань щодо цих умов пишіть на{" "}
+            <a href="mailto:info@astrodite.cc" className="text-amber-700 hover:text-amber-800">
+              info@astrodite.cc
+            </a>
+            .
+          </p>
         </section>
 
         <p className="pt-4 border-t border-stone-100 text-center">
