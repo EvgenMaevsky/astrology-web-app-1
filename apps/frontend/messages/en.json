@@ -25,7 +25,8 @@
     "signOut": "Sign out",
     "privacy": "Privacy",
     "terms": "Terms",
-    "feedback": "Feedback"
+    "feedback": "Feedback",
+    "seo": "SEO"
   },
   "auth": {
     "login": {
@@ -377,5 +378,39 @@
     "privacy": "Privacy",
     "terms": "Terms"
   },
-  "errors": {}
+  "errors": {},
+  "admin": {
+    "seo": {
+      "title": "SEO settings",
+      "subtitle": "Title, description, favicon and social preview image. The same on every page.",
+      "ukrainian": "Українська",
+      "english": "English",
+      "images": "Images",
+      "indexing": "Indexing",
+      "metaTitle": "Page title",
+      "metaTitleHint": "Shown in the browser tab and as the link in search results. Up to 60 characters.",
+      "metaDescription": "Page description",
+      "metaDescriptionHint": "The text under the link in search results. Up to 160 characters.",
+      "placeholderDefault": "Leave blank to use the default",
+      "favicon": "Favicon",
+      "faviconHint": "The browser tab icon. PNG, ICO, JPEG or WebP, up to 256 KB. Square, 32×32 or larger.",
+      "ogImage": "Social preview image",
+      "ogImageHint": "Shown when the link is shared. PNG, JPEG or WebP, up to 1 MB. 1200×630 recommended.",
+      "removeImage": "Remove",
+      "noindex": "Hide the site from search engines",
+      "noindexHint": "Google and others will not index the site. Useful while the content is still in progress.",
+      "save": "Save",
+      "saving": "Saving…",
+      "saved": "Saved",
+      "removed": "Removed",
+      "errors": {
+        "notAuthenticated": "You need to sign in.",
+        "notAdmin": "Administrator access required.",
+        "cannotConnect": "Could not reach the server.",
+        "saveFailed": "Could not save. Please try again.",
+        "fileTooLarge": "File is too large. Favicon up to 256 KB, social image up to 1 MB.",
+        "unsupportedImage": "Unsupported format. Use PNG, JPEG, ICO or WebP."
+      }
+    }
+  }
 }

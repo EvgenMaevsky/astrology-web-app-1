@@ -41,5 +41,6 @@ class UserOut(BaseModel):
     email: str
     plan: str
     email_verified: bool
+    is_admin: bool
 
     model_config = {"from_attributes": True}

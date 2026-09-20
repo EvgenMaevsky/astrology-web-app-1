@@ -38,6 +38,10 @@ class Settings(BaseSettings):
 
     max_saved_charts: int = 50
 
+    # Where admin-uploaded site images (favicon, OG card) are stored. Must be
+    # on a persistent volume — rebuilding the image would otherwise wipe them.
+    uploads_dir: str = "./uploads"
+
     # Directory for JPL ephemeris files (de440s.bsp auto-downloads there, ~32 MB).
     skyfield_dir: str = "./skyfield-data"
     # Optional SPK file with 2060 Chiron from JPL Horizons (see scripts/fetch_chiron_spk.py).

@@ -114,6 +114,11 @@ async function refreshAccessTokens(refreshToken: string): Promise<RefreshedToken
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|fonts/|api/).*)",
+    // robots.txt and sitemap.xml must be excluded, not merely listed in
+    // PUBLIC_PATHS: crawlers arrive with no cookies, and anything this
+    // matcher covers gets redirected to /login for them. Until this was
+    // added, both files answered search engines with a 307 to the login
+    // page, so neither was ever readable.
+    "/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|fonts/|api/).*)",
   ],
 };

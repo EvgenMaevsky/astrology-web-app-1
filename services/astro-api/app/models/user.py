@@ -25,6 +25,10 @@ class User(Base):
     plan: Mapped[str] = mapped_column(String(32), nullable=False, default="free")
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     email_verified: Mapped[bool] = mapped_column(Boolean, default=False)
+    # Grants access to the admin area (site SEO settings). Deliberately a
+    # column rather than an env-var allowlist, so admins can be granted
+    # without a redeploy.
+    is_admin: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     stripe_customer_id: Mapped[str | None] = mapped_column(String(256), nullable=True, unique=True, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 

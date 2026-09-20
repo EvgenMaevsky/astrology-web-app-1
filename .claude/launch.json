@@ -7,6 +7,13 @@
       "runtimeArgs": ["run", "dev"],
       "cwd": "apps/frontend",
       "port": 3000
+    },
+    {
+      "name": "backend",
+      "runtimeExecutable": ".venv/bin/python",
+      "runtimeArgs": ["-m", "uvicorn", "app.main:app", "--reload", "--port", "8000"],
+      "cwd": "services/astro-api",
+      "port": 8000
     }
   ]
 }

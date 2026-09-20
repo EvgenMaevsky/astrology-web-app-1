@@ -12,7 +12,12 @@ async function fetchMe(token: string) {
       cache: "no-store",
     });
     if (!res.ok) return null;
-    return res.json() as Promise<{ email: string; plan: string; email_verified: boolean }>;
+    return res.json() as Promise<{
+      email: string;
+      plan: string;
+      email_verified: boolean;
+      is_admin: boolean;
+    }>;
   } catch {
     return null;
   }
@@ -34,6 +39,9 @@ export default async function DashboardLayout({
     { href: "/pricing", label: t("pricing") },
     { href: "/billing", label: t("billing") },
     { href: "/account", label: t("account") },
+    // Hiding this is a convenience, not a control: the page and the API both
+    // check is_admin themselves.
+    ...(user?.is_admin ? [{ href: "/admin/seo", label: t("seo") }] : []),
   ];
 
   return (
