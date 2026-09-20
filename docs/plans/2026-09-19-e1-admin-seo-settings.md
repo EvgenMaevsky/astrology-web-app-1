@@ -1,5 +1,5 @@
 ---
-status: in-progress
+status: done
 created: 2026-09-19
 updated: 2026-09-20
 related: "[[2026-09-20-e2-google-oauth]]"
@@ -60,8 +60,28 @@ description, фавікон і OG-картинку без редеплою — �
 - [x] Частина 2 — Завантаження й віддача файлів (з валідацією)
 - [x] Частина 3 — Адмін-сторінка у фронтенді
 - [x] Частина 4 — Підключення до метаданих (title/description/OG/favicon)
-- [~] Частина 5 — Тести й локальна перевірка ✅; деплой на VPS/Vercel ⏳
-- [ ] DoD — див. внизу
+- [x] Частина 5 — Тести, деплой, перевірка живцем
+- [x] DoD — див. внизу
+
+## Деплой (2026-09-20)
+
+Коміти `3919be4` + `51516ca`, запушені у `feature/phase-1-auth` і `main`.
+
+- VPS: `sudo docker compose up -d --build api` (без `--build` образ
+  лишився б старим), `alembic current` → `a7c3f81d2e64 (head)`.
+  Примітка: `deploy` не в групі `docker`, всі команди через `sudo`.
+- `UPLOADS_DIR=/data/uploads` видно в контейнері, том `apidata` змонтовано.
+- `is_admin = true` для `killallunihornes@gmail.com` (plan `pro`).
+- Vercel підхопив `main` автоматично.
+
+Перевірено на проді: `GET /api/v1/site-settings` → 200; анонімний PUT →
+401; не-адмін PUT і upload → 403 `admin_required`; `/me` віддає
+`is_admin`; path traversal → 404; `https://astrodite.cc/robots.txt` і
+`/sitemap.xml` → **200** (до цього 307 на `/login`). Тимчасовий акаунт,
+створений для перевірки гейта, видалено з бази.
+
+**Лишився борг:** том `apidata` не входить у `backup_db.sh` — завантажені
+фавікон і OG-картинка не бекапляться. Не вирішується в межах цього плану.
 
 ## Знайдено по дорозі (2026-09-20)
 
