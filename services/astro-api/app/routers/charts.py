@@ -5,12 +5,14 @@ from sqlalchemy import func, select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 from sqlalchemy.ext.asyncio import AsyncSession
+from starlette.concurrency import run_in_threadpool
 
 from app.config import settings
 from app.database import get_db
 from app.dependencies.auth import get_current_user
 from app.dependencies.billing import require_plan
 from app.ephemeris.arabic_parts import compute_arabic_parts
+from app.ephemeris.cache import ResultCache
 from app.ephemeris.engine import EphemerisEngine
 from app.ephemeris.terms import add_terms_to_planets
 from app.models.chart_log import ChartLog
@@ -27,6 +29,12 @@ from app.schemas.chart import (
 router = APIRouter(prefix="/api/v1/charts", tags=["charts"])
 
 _engine = EphemerisEngine()
+
+# Natal only, on purpose: it is the one that repeats — the same well-known
+# birth data, a page reloaded, and (once the public page lands) whatever a
+# script decides to send over and over. Transits and synastry carry a second
+# varying date, so they would mostly miss and only cost memory.
+_natal_cache = ResultCache(settings.chart_cache_size) if settings.chart_cache_size else None
 
 FREE_DAILY_LIMIT = 3
 
@@ -62,33 +70,62 @@ async def _reserve_free_chart(user: User, db: AsyncSession) -> None:
     await db.commit()
 
 
-@router.post("/natal", response_model=NatalChartResponse)
-@limiter.limit(settings.rate_limit_chart_calc)
-async def natal_chart(
-    request: Request,
-    body: NatalChartRequest,
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
-) -> NatalChartResponse:
-    await _reserve_free_chart(current_user, db)
+# ── Pure computation ─────────────────────────────────────────────────────────
+#
+# These are deliberately plain synchronous functions with no database or
+# network access, so the endpoints below can hand them to run_in_threadpool in
+# one hop. Called directly from an `async def` they would block the event
+# loop for their whole duration (18-40 ms measured), during which the worker
+# serves nothing at all — not a login, not a city search, not /health.
+#
+# To be clear about what this does and does not buy: it fixes RESPONSIVENESS,
+# not throughput. The GIL still serialises the pure-Python parts (the
+# iterative Placidus house solver above all), so total charts per second
+# barely moves. Real parallelism needs multiple worker processes.
+
+
+def _calc_natal_cached(body: NatalChartRequest) -> dict:
+    """calc_natal() with an in-process cache in front of it.
+
+    The key must contain everything that changes the astronomical result and
+    nothing that does not. `bodies` is sorted because ["sun","moon"] and
+    ["moon","sun"] ask the same question, and birth_dt is already normalised
+    to UTC by the request validator, so two clients in different timezones
+    asking about the same instant share an entry.
+    """
+    if _natal_cache is None:
+        return _engine.calc_natal(
+            dt=body.birth_dt, lat=body.lat, lon=body.lon,
+            house_system=body.house_system, bodies=body.bodies,
+        )
+
+    key = (
+        body.birth_dt,
+        body.lat,
+        body.lon,
+        body.house_system,
+        tuple(sorted(body.bodies)) if body.bodies else None,
+    )
+    cached = _natal_cache.get(key)
+    if cached is not None:
+        return cached
 
     data = _engine.calc_natal(
-        dt=body.birth_dt,
-        lat=body.lat,
-        lon=body.lon,
-        house_system=body.house_system,
-        bodies=body.bodies,
+        dt=body.birth_dt, lat=body.lat, lon=body.lon,
+        house_system=body.house_system, bodies=body.bodies,
     )
+    _natal_cache.put(key, data)
+    return data
+
+
+def _compute_natal(body: NatalChartRequest) -> NatalChartResponse:
+    data = _calc_natal_cached(body)
     planets = data["planets"]
     houses = data["houses"]
 
     add_terms_to_planets(planets)
     aspects = _engine.calc_aspects(planets)
     arabic_parts = compute_arabic_parts(planets, houses)
-
-    # Log this calculation for rate limiting
-    db.add(ChartLog(user_id=current_user.id, chart_type="natal"))
-    await db.commit()
 
     return NatalChartResponse(
         planets=planets,
@@ -100,14 +137,7 @@ async def natal_chart(
     )
 
 
-@router.post("/transit", response_model=TransitResponse)
-@limiter.limit(settings.rate_limit_chart_calc)
-async def transit_chart(
-    request: Request,
-    body: TransitRequest,
-    current_user: User = Depends(require_plan("pro", "expert")),
-    db: AsyncSession = Depends(get_db),
-) -> TransitResponse:
+def _compute_transit(body: TransitRequest) -> TransitResponse:
     data = _engine.calc_transit(
         natal_dt=body.natal_dt, natal_lat=body.natal_lat, natal_lon=body.natal_lon,
         transit_dt=body.transit_dt, transit_lat=body.transit_lat, transit_lon=body.transit_lon,
@@ -131,9 +161,6 @@ async def transit_chart(
     transit_planets = data["transit"]
     add_terms_to_planets(transit_planets)
 
-    db.add(ChartLog(user_id=current_user.id, chart_type="transit"))
-    await db.commit()
-
     return TransitResponse(
         natal=natal_resp,
         transit=transit_planets,
@@ -141,14 +168,7 @@ async def transit_chart(
     )
 
 
-@router.post("/solar-return", response_model=SolarReturnResponse)
-@limiter.limit(settings.rate_limit_chart_calc)
-async def solar_return_chart(
-    request: Request,
-    body: SolarReturnRequest,
-    current_user: User = Depends(require_plan("pro", "expert")),
-    db: AsyncSession = Depends(get_db),
-) -> SolarReturnResponse:
+def _compute_solar_return(body: SolarReturnRequest) -> SolarReturnResponse:
     data = _engine.calc_solar_return(
         birth_dt=body.birth_dt, year=body.year,
         lat=body.lat, lon=body.lon, house_system=body.house_system,
@@ -158,9 +178,6 @@ async def solar_return_chart(
     add_terms_to_planets(planets)
     aspects = _engine.calc_aspects(planets)
     arabic_parts = compute_arabic_parts(planets, data["houses"])
-
-    db.add(ChartLog(user_id=current_user.id, chart_type="solar_return"))
-    await db.commit()
 
     return SolarReturnResponse(
         return_dt=data["return_dt"],
@@ -174,14 +191,7 @@ async def solar_return_chart(
     )
 
 
-@router.post("/synastry", response_model=SynastryResponse)
-@limiter.limit(settings.rate_limit_chart_calc)
-async def synastry_chart(
-    request: Request,
-    body: SynastryRequest,
-    current_user: User = Depends(require_plan("pro", "expert")),
-    db: AsyncSession = Depends(get_db),
-) -> SynastryResponse:
+def _compute_synastry(body: SynastryRequest) -> SynastryResponse:
     data = _engine.calc_synastry(
         dt1=body.dt1, lat1=body.lat1, lon1=body.lon1,
         dt2=body.dt2, lat2=body.lat2, lon2=body.lon2,
@@ -198,9 +208,6 @@ async def synastry_chart(
     p1_arabic = compute_arabic_parts(p1_planets, data["person1"]["houses"])
     p2_arabic = compute_arabic_parts(p2_planets, data["person2"]["houses"])
 
-    db.add(ChartLog(user_id=current_user.id, chart_type="synastry"))
-    await db.commit()
-
     return SynastryResponse(
         person1=NatalChartResponse(
             planets=p1_planets, houses=data["person1"]["houses"],
@@ -214,6 +221,76 @@ async def synastry_chart(
         ),
         inter_aspects=data["inter_aspects"],
     )
+
+
+# ── Endpoints ────────────────────────────────────────────────────────────────
+
+
+@router.post("/natal", response_model=NatalChartResponse)
+@limiter.limit(settings.rate_limit_chart_calc)
+async def natal_chart(
+    request: Request,
+    body: NatalChartRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> NatalChartResponse:
+    await _reserve_free_chart(current_user, db)
+
+    response = await run_in_threadpool(_compute_natal, body)
+
+    # Log this calculation for rate limiting
+    db.add(ChartLog(user_id=current_user.id, chart_type="natal"))
+    await db.commit()
+
+    return response
+
+
+@router.post("/transit", response_model=TransitResponse)
+@limiter.limit(settings.rate_limit_chart_calc)
+async def transit_chart(
+    request: Request,
+    body: TransitRequest,
+    current_user: User = Depends(require_plan("pro", "expert")),
+    db: AsyncSession = Depends(get_db),
+) -> TransitResponse:
+    response = await run_in_threadpool(_compute_transit, body)
+
+    db.add(ChartLog(user_id=current_user.id, chart_type="transit"))
+    await db.commit()
+
+    return response
+
+
+@router.post("/solar-return", response_model=SolarReturnResponse)
+@limiter.limit(settings.rate_limit_chart_calc)
+async def solar_return_chart(
+    request: Request,
+    body: SolarReturnRequest,
+    current_user: User = Depends(require_plan("pro", "expert")),
+    db: AsyncSession = Depends(get_db),
+) -> SolarReturnResponse:
+    response = await run_in_threadpool(_compute_solar_return, body)
+
+    db.add(ChartLog(user_id=current_user.id, chart_type="solar_return"))
+    await db.commit()
+
+    return response
+
+
+@router.post("/synastry", response_model=SynastryResponse)
+@limiter.limit(settings.rate_limit_chart_calc)
+async def synastry_chart(
+    request: Request,
+    body: SynastryRequest,
+    current_user: User = Depends(require_plan("pro", "expert")),
+    db: AsyncSession = Depends(get_db),
+) -> SynastryResponse:
+    response = await run_in_threadpool(_compute_synastry, body)
+
+    db.add(ChartLog(user_id=current_user.id, chart_type="synastry"))
+    await db.commit()
+
+    return response
 
 
 @router.get("/usage")

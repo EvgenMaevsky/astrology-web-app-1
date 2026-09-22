@@ -41,6 +41,10 @@ class Settings(BaseSettings):
 
     max_saved_charts: int = 50
 
+    # In-process cache of raw natal calculations. 0 disables it. Bounded on
+    # purpose — an unbounded cache is a memory leak with a friendly name.
+    chart_cache_size: int = 512
+
     # Where admin-uploaded site images (favicon, OG card) are stored. Must be
     # on a persistent volume — rebuilding the image would otherwise wipe them.
     uploads_dir: str = "./uploads"
