@@ -49,7 +49,7 @@ PLANS = [
         "price_uah": 0,
         "features": [
             "Unlimited natal charts",
-            "5 major aspects",
+            "Major aspects",
             "2 advanced charts per day",
             "City search & map",
             "Arabic parts",
@@ -65,7 +65,7 @@ PLANS = [
         "price_uah": 350,
         "features": [
             "Everything in Free",
-            "Minor aspects",
+            "All aspects, major and minor",
             "Unlimited transits, solar returns & synastry",
             "Unlimited saved charts",
             "Priority support",

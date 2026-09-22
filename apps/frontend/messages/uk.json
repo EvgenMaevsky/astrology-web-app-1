@@ -338,13 +338,13 @@
       "Primary directions & Horary": "Первинні директиви й горарна астрологія",
       "Astrocartography (ACG)": "Астрокартографія (ACG)",
       "API access": "Доступ до API",
-      "5 major aspects": "5 основних аспектів",
       "2 advanced charts per day": "2 просунуті карти на добу",
       "5 saved charts": "5 збережених карт",
       "Everything in Free": "Усе з тарифу Free",
-      "Minor aspects": "Другорядні аспекти",
       "Unlimited transits, solar returns & synastry": "Необмежені транзити, соляри й синастрія",
-      "Unlimited saved charts": "Необмежене збереження карт"
+      "Unlimited saved charts": "Необмежене збереження карт",
+      "Major aspects": "Мажорні аспекти",
+      "All aspects, major and minor": "Усі аспекти — мажорні й мінорні"
     }
   },
   "pricing": {

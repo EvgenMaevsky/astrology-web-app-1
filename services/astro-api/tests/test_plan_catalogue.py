@@ -25,17 +25,28 @@ def _plan(plan_id: str) -> dict:
     return next(p for p in PLANS if p["id"] == plan_id)
 
 
-def test_aspect_counts_quoted_in_the_catalogue_are_real():
-    # "5 major aspects" has to mean five, in the engine, not in the copy.
+def test_no_plan_quotes_a_number_of_aspects():
+    # Neither plan caps how many aspects a chart returns — only WHICH TYPES
+    # are included. An earlier wording, "5 major aspects", was read as a
+    # per-chart quota by the product owner, so it would certainly be read
+    # that way by a customer, and it made Free look artificially crippled.
+    for plan in PLANS:
+        for feature in plan["features"]:
+            if "aspect" in feature.lower():
+                assert not any(ch.isdigit() for ch in feature), (
+                    f"{plan['id']}: {feature!r} reads as a quantity limit"
+                )
+
+
+def test_the_aspect_split_is_what_the_engine_actually_has():
     assert len(MAJOR_ASPECT_DEFS) == 5
-    assert "5 major aspects" in _plan("free")["features"]
-    assert not any("7 major" in f for p in PLANS for f in p["features"])
+    assert len(MINOR_ASPECT_DEFS) == 6
+    assert not (set(MAJOR_ASPECT_DEFS) & set(MINOR_ASPECT_DEFS))
 
 
 def test_minor_aspects_are_sold_by_pro_and_not_by_free():
-    assert len(MINOR_ASPECT_DEFS) == 6
-    assert "Minor aspects" in _plan("pro")["features"]
-    assert not any("inor aspect" in f for f in _plan("free")["features"])
+    assert any("minor" in f.lower() for f in _plan("pro")["features"])
+    assert not any("minor" in f.lower() for f in _plan("free")["features"])
 
 
 def test_advertised_daily_allowance_matches_the_enforced_one():
