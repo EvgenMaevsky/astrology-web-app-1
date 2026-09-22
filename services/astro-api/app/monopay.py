@@ -23,7 +23,7 @@ async def create_invoice(
     async with httpx.AsyncClient(timeout=10) as client:
         r = await client.post(
             f"{BASE_URL}/api/merchant/invoice/create",
-            headers={"X-Token": settings.monopay_token},
+            headers={"X-Token": settings.monopay_token.get_secret_value()},
             json={
                 "amount": amount_kopecks,
                 "ccy": 980,
@@ -41,7 +41,7 @@ async def get_invoice_status(invoice_id: str) -> dict:
     async with httpx.AsyncClient(timeout=10) as client:
         r = await client.get(
             f"{BASE_URL}/api/merchant/invoice/status",
-            headers={"X-Token": settings.monopay_token},
+            headers={"X-Token": settings.monopay_token.get_secret_value()},
             params={"invoiceId": invoice_id},
         )
         r.raise_for_status()
@@ -56,7 +56,7 @@ async def _fetch_pubkey(force_refresh: bool = False) -> EllipticCurvePublicKey:
     async with httpx.AsyncClient(timeout=10) as client:
         r = await client.get(
             f"{BASE_URL}/api/merchant/pubkey",
-            headers={"X-Token": settings.monopay_token},
+            headers={"X-Token": settings.monopay_token.get_secret_value()},
         )
         r.raise_for_status()
         pem = base64.b64decode(r.json()["key"])

@@ -1,17 +1,27 @@
-from pydantic import model_validator
+from pydantic import SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 _DEV_SECRET = "dev-secret-change-in-production-please"
 
 
 class Settings(BaseSettings):
+    """Application configuration.
+
+    Credentials are declared as SecretStr so they never appear in a repr.
+    This is not decoration: pytest prints the whole Settings object in an
+    assertion failure, so before this a single failing test dumped the live
+    Stripe key and monopay token straight into the output — and into CI logs
+    with it. SecretStr renders as ``**********`` and the real value is only
+    reachable through .get_secret_value().
+    """
+
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
     environment: str = "development"  # development | production
 
     database_url: str = "sqlite+aiosqlite:///./astro.db"
     sentry_dsn: str = ""
-    secret_key: str = _DEV_SECRET
+    secret_key: SecretStr = SecretStr(_DEV_SECRET)
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
     refresh_token_expire_days: int = 30
@@ -33,13 +43,16 @@ class Settings(BaseSettings):
     rate_limit_chart_calc: str = "20/minute"
 
     # Resend (https://resend.com) — empty key = dev mode, emails are logged not sent
-    resend_api_key: str = ""
+    resend_api_key: SecretStr = SecretStr("")
     email_from: str = "Astrodite <noreply@example.com>"
     # Where replies to transactional email go. Empty = no Reply-To header, in
     # which case replies land on the unroutable sending subdomain and vanish.
     email_reply_to: str = ""
 
-    max_saved_charts: int = 50
+    # Saved charts: a free-plan ceiling, unlimited on Pro. Existing accounts
+    # already over the limit keep every chart they have — the limit only
+    # applies to saving a new one.
+    max_saved_charts_free: int = 5
 
     # In-process cache of raw natal calculations. 0 disables it. Bounded on
     # purpose — an unbounded cache is a memory leak with a friendly name.
@@ -55,24 +68,24 @@ class Settings(BaseSettings):
     chiron_spk: str = ""
 
     # Stripe
-    stripe_secret_key: str = ""
-    stripe_webhook_secret: str = ""
+    stripe_secret_key: SecretStr = SecretStr("")
+    stripe_webhook_secret: SecretStr = SecretStr("")
     stripe_price_pro_monthly: str = ""
     stripe_price_expert_monthly: str = ""
 
     # monopay (monobank acquiring, https://api.monobank.ua) — empty token =
     # monopay disabled, checkout returns 503 (same pattern as Stripe)
-    monopay_token: str = ""
+    monopay_token: SecretStr = SecretStr("")
 
     # Google Sign-In (https://console.cloud.google.com). Empty = disabled:
     # the button is not shown and the endpoints return 503, so local
     # development needs no credentials.
     google_client_id: str = ""
-    google_client_secret: str = ""
+    google_client_secret: SecretStr = SecretStr("")
 
     @model_validator(mode="after")
     def _no_dev_secret_in_production(self) -> "Settings":
-        if self.environment == "production" and self.secret_key == _DEV_SECRET:
+        if self.environment == "production" and self.secret_key.get_secret_value() == _DEV_SECRET:
             raise ValueError(
                 "SECRET_KEY is still the dev default. "
                 "Generate one with: openssl rand -hex 32"

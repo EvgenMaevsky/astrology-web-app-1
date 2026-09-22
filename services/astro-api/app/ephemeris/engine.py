@@ -50,13 +50,20 @@ BODY_TARGETS: dict[str, str] = {
 
 BODY_ORDER = [*BODY_TARGETS.keys(), "true_node", "lilith", "chiron"]
 
-ASPECT_DEFS: dict[str, tuple[float, float]] = {
+# The five Ptolemaic aspects. Every plan sees these.
+MAJOR_ASPECT_DEFS: dict[str, tuple[float, float]] = {
     # name: (angle, default_orb)
     "conjunction":    (0.0,   8.0),
     "sextile":        (60.0,  6.0),
     "square":         (90.0,  8.0),
     "trine":          (120.0, 8.0),
     "opposition":     (180.0, 8.0),
+}
+
+# Restricted to the Pro plan (see routers/charts.py). Kept here rather than
+# in the router so the split has one definition: the engine computes all of
+# them, and filtering is a billing decision made afterwards.
+MINOR_ASPECT_DEFS: dict[str, tuple[float, float]] = {
     "semisextile":    (30.0,  2.0),
     "semisquare":     (45.0,  2.0),
     "sesquisquare":   (135.0, 2.0),
@@ -64,6 +71,11 @@ ASPECT_DEFS: dict[str, tuple[float, float]] = {
     "quintile":       (72.0,  1.5),
     "biquintile":     (144.0, 1.5),
 }
+
+ASPECT_DEFS: dict[str, tuple[float, float]] = {**MAJOR_ASPECT_DEFS, **MINOR_ASPECT_DEFS}
+
+MAJOR_ASPECTS = frozenset(MAJOR_ASPECT_DEFS)
+MINOR_ASPECTS = frozenset(MINOR_ASPECT_DEFS)
 
 
 @lru_cache(maxsize=1)

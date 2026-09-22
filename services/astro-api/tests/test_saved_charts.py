@@ -69,7 +69,7 @@ async def test_cannot_see_other_users_chart(client: AsyncClient):
 
 
 async def test_saved_charts_limit(client: AsyncClient, monkeypatch):
-    monkeypatch.setattr(settings, "max_saved_charts", 2)
+    monkeypatch.setattr(settings, "max_saved_charts_free", 2)
     token = await _register(client, "limited@example.com")
     headers = {"Authorization": f"Bearer {token}"}
 

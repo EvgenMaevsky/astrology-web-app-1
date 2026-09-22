@@ -10,10 +10,9 @@ from starlette.concurrency import run_in_threadpool
 from app.config import settings
 from app.database import get_db
 from app.dependencies.auth import get_current_user
-from app.dependencies.billing import require_plan
 from app.ephemeris.arabic_parts import compute_arabic_parts
 from app.ephemeris.cache import ResultCache
-from app.ephemeris.engine import EphemerisEngine
+from app.ephemeris.engine import MAJOR_ASPECTS, EphemerisEngine
 from app.ephemeris.terms import add_terms_to_planets
 from app.models.chart_log import ChartLog
 from app.models.chart_quota import ChartQuota
@@ -36,11 +35,22 @@ _engine = EphemerisEngine()
 # varying date, so they would mostly miss and only cost memory.
 _natal_cache = ResultCache(settings.chart_cache_size) if settings.chart_cache_size else None
 
-FREE_DAILY_LIMIT = 3
+# Natal charts are unlimited on every plan. What the free plan is metered on
+# is the advanced techniques, and the allowance is SHARED across all three —
+# two per day in total, not two of each.
+FREE_ADVANCED_DAILY_LIMIT = 2
+
+ADVANCED_CHART_TYPES = ("transit", "solar_return", "synastry")
 
 
-async def _reserve_free_chart(user: User, db: AsyncSession) -> None:
-    """Atomically reserve one free natal chart for the current UTC day."""
+async def _reserve_advanced_chart(user: User, db: AsyncSession) -> None:
+    """Atomically reserve one advanced chart for the current UTC day.
+
+    Kept as a single UPSERT with the limit in its WHERE clause rather than a
+    read-then-write: two simultaneous requests would otherwise both read the
+    same count and both be allowed through. This is the same pattern the C3
+    review put in place for the old natal quota.
+    """
     if user.plan != "free":
         return
 
@@ -52,7 +62,7 @@ async def _reserve_free_chart(user: User, db: AsyncSession) -> None:
         .on_conflict_do_update(
             index_elements=["user_id", "usage_date"],
             set_={"used": ChartQuota.used + 1},
-            where=ChartQuota.used < FREE_DAILY_LIMIT,
+            where=ChartQuota.used < FREE_ADVANCED_DAILY_LIMIT,
         )
         .returning(ChartQuota.used)
     )
@@ -62,12 +72,31 @@ async def _reserve_free_chart(user: User, db: AsyncSession) -> None:
             status_code=status.HTTP_403_FORBIDDEN,
             detail={
                 "code": "plan_limit",
-                "message": f"Free plan allows {FREE_DAILY_LIMIT} charts per day. Upgrade to Pro for unlimited access.",
+                "message": (
+                    f"The Free plan includes {FREE_ADVANCED_DAILY_LIMIT} transit, solar return "
+                    "or synastry charts per day. Upgrade to Pro for unlimited access."
+                ),
                 "current": user.plan,
                 "required": "pro",
             },
         )
     await db.commit()
+
+
+def _visible_aspects(aspects: list[dict], include_minor: bool) -> list[dict]:
+    """Drop minor aspects for plans that do not include them.
+
+    Filtered on the server, never in the UI: shipping all eleven and hiding
+    six of them would put the paid content one devtools panel away, and the
+    Pro plan sells exactly this.
+    """
+    if include_minor:
+        return aspects
+    return [a for a in aspects if a["aspect"] in MAJOR_ASPECTS]
+
+
+def includes_minor_aspects(user: User) -> bool:
+    return user.plan in ("pro", "expert")
 
 
 # ── Pure computation ─────────────────────────────────────────────────────────
@@ -118,13 +147,13 @@ def _calc_natal_cached(body: NatalChartRequest) -> dict:
     return data
 
 
-def _compute_natal(body: NatalChartRequest) -> NatalChartResponse:
+def _compute_natal(body: NatalChartRequest, include_minor: bool) -> NatalChartResponse:
     data = _calc_natal_cached(body)
     planets = data["planets"]
     houses = data["houses"]
 
     add_terms_to_planets(planets)
-    aspects = _engine.calc_aspects(planets)
+    aspects = _visible_aspects(_engine.calc_aspects(planets), include_minor)
     arabic_parts = compute_arabic_parts(planets, houses)
 
     return NatalChartResponse(
@@ -137,7 +166,7 @@ def _compute_natal(body: NatalChartRequest) -> NatalChartResponse:
     )
 
 
-def _compute_transit(body: TransitRequest) -> TransitResponse:
+def _compute_transit(body: TransitRequest, include_minor: bool) -> TransitResponse:
     data = _engine.calc_transit(
         natal_dt=body.natal_dt, natal_lat=body.natal_lat, natal_lon=body.natal_lon,
         transit_dt=body.transit_dt, transit_lat=body.transit_lat, transit_lon=body.transit_lon,
@@ -146,7 +175,7 @@ def _compute_transit(body: TransitRequest) -> TransitResponse:
 
     natal_planets = data["natal"]["planets"]
     add_terms_to_planets(natal_planets)
-    natal_aspects = _engine.calc_aspects(natal_planets)
+    natal_aspects = _visible_aspects(_engine.calc_aspects(natal_planets), include_minor)
     natal_arabic = compute_arabic_parts(natal_planets, data["natal"]["houses"])
 
     natal_resp = NatalChartResponse(
@@ -164,11 +193,11 @@ def _compute_transit(body: TransitRequest) -> TransitResponse:
     return TransitResponse(
         natal=natal_resp,
         transit=transit_planets,
-        aspects=data["aspects"],
+        aspects=_visible_aspects(data["aspects"], include_minor),
     )
 
 
-def _compute_solar_return(body: SolarReturnRequest) -> SolarReturnResponse:
+def _compute_solar_return(body: SolarReturnRequest, include_minor: bool) -> SolarReturnResponse:
     data = _engine.calc_solar_return(
         birth_dt=body.birth_dt, year=body.year,
         lat=body.lat, lon=body.lon, house_system=body.house_system,
@@ -176,7 +205,7 @@ def _compute_solar_return(body: SolarReturnRequest) -> SolarReturnResponse:
 
     planets = data["planets"]
     add_terms_to_planets(planets)
-    aspects = _engine.calc_aspects(planets)
+    aspects = _visible_aspects(_engine.calc_aspects(planets), include_minor)
     arabic_parts = compute_arabic_parts(planets, data["houses"])
 
     return SolarReturnResponse(
@@ -191,7 +220,7 @@ def _compute_solar_return(body: SolarReturnRequest) -> SolarReturnResponse:
     )
 
 
-def _compute_synastry(body: SynastryRequest) -> SynastryResponse:
+def _compute_synastry(body: SynastryRequest, include_minor: bool) -> SynastryResponse:
     data = _engine.calc_synastry(
         dt1=body.dt1, lat1=body.lat1, lon1=body.lon1,
         dt2=body.dt2, lat2=body.lat2, lon2=body.lon2,
@@ -203,8 +232,8 @@ def _compute_synastry(body: SynastryRequest) -> SynastryResponse:
 
     p1_planets = data["person1"]["planets"]
     p2_planets = data["person2"]["planets"]
-    p1_aspects = _engine.calc_aspects(p1_planets)
-    p2_aspects = _engine.calc_aspects(p2_planets)
+    p1_aspects = _visible_aspects(_engine.calc_aspects(p1_planets), include_minor)
+    p2_aspects = _visible_aspects(_engine.calc_aspects(p2_planets), include_minor)
     p1_arabic = compute_arabic_parts(p1_planets, data["person1"]["houses"])
     p2_arabic = compute_arabic_parts(p2_planets, data["person2"]["houses"])
 
@@ -219,7 +248,7 @@ def _compute_synastry(body: SynastryRequest) -> SynastryResponse:
             angles=data["person2"]["angles"], aspects=p2_aspects,
             arabic_parts=p2_arabic, meta=data["person2"]["meta"],
         ),
-        inter_aspects=data["inter_aspects"],
+        inter_aspects=_visible_aspects(data["inter_aspects"], include_minor),
     )
 
 
@@ -234,9 +263,9 @@ async def natal_chart(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> NatalChartResponse:
-    await _reserve_free_chart(current_user, db)
-
-    response = await run_in_threadpool(_compute_natal, body)
+    response = await run_in_threadpool(
+        _compute_natal, body, includes_minor_aspects(current_user)
+    )
 
     # Log this calculation for rate limiting
     db.add(ChartLog(user_id=current_user.id, chart_type="natal"))
@@ -250,10 +279,14 @@ async def natal_chart(
 async def transit_chart(
     request: Request,
     body: TransitRequest,
-    current_user: User = Depends(require_plan("pro", "expert")),
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> TransitResponse:
-    response = await run_in_threadpool(_compute_transit, body)
+    await _reserve_advanced_chart(current_user, db)
+
+    response = await run_in_threadpool(
+        _compute_transit, body, includes_minor_aspects(current_user)
+    )
 
     db.add(ChartLog(user_id=current_user.id, chart_type="transit"))
     await db.commit()
@@ -266,10 +299,14 @@ async def transit_chart(
 async def solar_return_chart(
     request: Request,
     body: SolarReturnRequest,
-    current_user: User = Depends(require_plan("pro", "expert")),
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> SolarReturnResponse:
-    response = await run_in_threadpool(_compute_solar_return, body)
+    await _reserve_advanced_chart(current_user, db)
+
+    response = await run_in_threadpool(
+        _compute_solar_return, body, includes_minor_aspects(current_user)
+    )
 
     db.add(ChartLog(user_id=current_user.id, chart_type="solar_return"))
     await db.commit()
@@ -282,10 +319,14 @@ async def solar_return_chart(
 async def synastry_chart(
     request: Request,
     body: SynastryRequest,
-    current_user: User = Depends(require_plan("pro", "expert")),
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> SynastryResponse:
-    response = await run_in_threadpool(_compute_synastry, body)
+    await _reserve_advanced_chart(current_user, db)
+
+    response = await run_in_threadpool(
+        _compute_synastry, body, includes_minor_aspects(current_user)
+    )
 
     db.add(ChartLog(user_id=current_user.id, chart_type="synastry"))
     await db.commit()
@@ -298,13 +339,22 @@ async def chart_usage(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> dict:
-    """Return today's chart count (used for free-plan UI indicator)."""
+    """Today's advanced-chart usage, for the free-plan indicator in the UI.
+
+    Counts only transits, solar returns and synastry — natal charts are
+    unlimited on every plan, so including them would show a number that
+    means nothing and a limit that does not exist.
+    """
     today_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
     result = await db.execute(
         select(func.count())
         .select_from(ChartLog)
-        .where(ChartLog.user_id == current_user.id, ChartLog.created_at >= today_start)
+        .where(
+            ChartLog.user_id == current_user.id,
+            ChartLog.created_at >= today_start,
+            ChartLog.chart_type.in_(ADVANCED_CHART_TYPES),
+        )
     )
     used = result.scalar_one()
-    limit = FREE_DAILY_LIMIT if current_user.plan == "free" else None
+    limit = FREE_ADVANCED_DAILY_LIMIT if current_user.plan == "free" else None
     return {"used": used, "limit": limit, "plan": current_user.plan}

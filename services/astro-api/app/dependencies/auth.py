@@ -68,7 +68,7 @@ async def get_current_user(
     )
     try:
         # jwt.decode verifies signature and exp
-        payload = jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])
+        payload = jwt.decode(token, settings.secret_key.get_secret_value(), algorithms=[settings.algorithm])
         user_id: str | None = payload.get("sub")
         if user_id is None or payload.get("type") != "access":
             raise exc

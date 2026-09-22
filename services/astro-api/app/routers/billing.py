@@ -48,13 +48,15 @@ PLANS = [
         "price_usd": 0,
         "price_uah": 0,
         "features": [
-            "3 natal charts",
-            "7 major aspects",
+            "Unlimited natal charts",
+            "5 major aspects",
+            "2 advanced charts per day",
             "City search & map",
             "Arabic parts",
             "Terms / bounds",
+            "5 saved charts",
         ],
-        "limits": {"natal_charts_per_day": 3},
+        "limits": {"advanced_charts_per_day": 2, "saved_charts": 5},
     },
     {
         "id": "pro",
@@ -62,11 +64,10 @@ PLANS = [
         "price_usd": 9,
         "price_uah": 350,
         "features": [
-            "Unlimited natal charts",
-            "All major & minor aspects",
-            "Transits",
-            "Solar return",
-            "Synastry",
+            "Everything in Free",
+            "Minor aspects",
+            "Unlimited transits, solar returns & synastry",
+            "Unlimited saved charts",
             "Priority support",
         ],
         "limits": {},
@@ -145,7 +146,7 @@ async def stripe_checkout(
     body: StripeCheckoutRequest,
     current_user: User = Depends(get_current_user),
 ) -> dict:
-    if not settings.stripe_secret_key:
+    if not settings.stripe_secret_key.get_secret_value():
         raise HTTPException(status_code=503, detail="Stripe not configured")
 
     plan_cfg = next((p for p in PLANS if p["id"] == body.plan), None)
@@ -156,7 +157,7 @@ async def stripe_checkout(
     if not price_id:
         raise HTTPException(status_code=503, detail=f"Stripe price not configured for {body.plan}")
 
-    stripe.api_key = settings.stripe_secret_key
+    stripe.api_key = settings.stripe_secret_key.get_secret_value()
 
     session_kwargs: dict = dict(
         # No payment_method_types here on purpose — Stripe dynamically picks
@@ -187,10 +188,10 @@ async def stripe_portal(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> dict:
-    if not settings.stripe_secret_key:
+    if not settings.stripe_secret_key.get_secret_value():
         raise HTTPException(status_code=503, detail="Stripe not configured")
 
-    stripe.api_key = settings.stripe_secret_key
+    stripe.api_key = settings.stripe_secret_key.get_secret_value()
 
     customer_id = current_user.stripe_customer_id
     if not customer_id:
@@ -220,7 +221,7 @@ async def stripe_webhook(
 
     try:
         event = stripe.Webhook.construct_event(
-            payload, sig, settings.stripe_webhook_secret
+            payload, sig, settings.stripe_webhook_secret.get_secret_value()
         )
     except (ValueError, stripe.SignatureVerificationError):
         raise HTTPException(status_code=400, detail="Invalid signature")
@@ -402,7 +403,7 @@ async def monopay_checkout(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> dict:
-    if not settings.monopay_token:
+    if not settings.monopay_token.get_secret_value():
         raise HTTPException(status_code=503, detail="monopay not configured")
 
     plan_cfg = next((p for p in PLANS if p["id"] == body.plan), None)

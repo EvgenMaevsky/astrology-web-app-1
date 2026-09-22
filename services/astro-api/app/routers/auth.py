@@ -56,7 +56,7 @@ def _make_access_token(user_id: str) -> str:
     expire = datetime.now(timezone.utc) + timedelta(minutes=settings.access_token_expire_minutes)
     return jwt.encode(
         {"sub": user_id, "type": "access", "exp": expire},
-        settings.secret_key,
+        settings.secret_key.get_secret_value(),
         algorithm=settings.algorithm,
     )
 
@@ -65,7 +65,7 @@ def _make_refresh_token(user_id: str) -> str:
     expire = datetime.now(timezone.utc) + timedelta(days=settings.refresh_token_expire_days)
     return jwt.encode(
         {"sub": user_id, "type": "refresh", "exp": expire, "jti": str(uuid.uuid4())},
-        settings.secret_key,
+        settings.secret_key.get_secret_value(),
         algorithm=settings.algorithm,
     )
 
@@ -303,7 +303,7 @@ async def refresh(body: RefreshRequest, db: AsyncSession = Depends(get_db)) -> T
     exc = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
 
     try:
-        payload = jwt.decode(body.refresh_token, settings.secret_key, algorithms=[settings.algorithm])
+        payload = jwt.decode(body.refresh_token, settings.secret_key.get_secret_value(), algorithms=[settings.algorithm])
         if payload.get("type") != "refresh":
             raise exc
         user_id: str = payload["sub"]

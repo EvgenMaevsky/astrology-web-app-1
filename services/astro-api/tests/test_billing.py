@@ -6,6 +6,7 @@ import time
 import uuid
 from datetime import datetime, timedelta, timezone
 
+from pydantic import SecretStr
 import pytest
 from httpx import AsyncClient
 from sqlalchemy import select
@@ -19,7 +20,7 @@ from tests.conftest import TestSession
 def _billing_secrets():
     """Set a fake Stripe webhook secret for the duration of each test, then restore."""
     prev_stripe = settings.stripe_webhook_secret
-    settings.stripe_webhook_secret = "whsec_test"
+    settings.stripe_webhook_secret = SecretStr("whsec_test")
     yield
     settings.stripe_webhook_secret = prev_stripe
 
@@ -31,7 +32,7 @@ def _stripe_signed_payload(event: dict) -> tuple[bytes, str]:
     payload = json.dumps(full_event).encode()
     t = int(time.time())
     sig = hmac.new(
-        settings.stripe_webhook_secret.encode(),
+        settings.stripe_webhook_secret.get_secret_value().encode(),
         f"{t}.".encode() + payload,
         hashlib.sha256,
     ).hexdigest()
@@ -255,7 +256,7 @@ async def test_list_plans_hides_expert_and_unimplemented_features(client: AsyncC
 
 
 async def test_stripe_checkout_rejects_hidden_plan(client: AsyncClient, monkeypatch):
-    monkeypatch.setattr(settings, "stripe_secret_key", "sk_test_fake")
+    monkeypatch.setattr(settings, "stripe_secret_key", SecretStr("sk_test_fake"))
     token = await _register(client, "hidden-stripe@example.com")
     r = await client.post(
         "/api/v1/billing/stripe/checkout",
@@ -268,7 +269,7 @@ async def test_stripe_checkout_rejects_hidden_plan(client: AsyncClient, monkeypa
 # ── monopay checkout ─────────────────────────────────────────────────────────
 
 async def test_monopay_checkout_creates_pending_subscription(client: AsyncClient, monkeypatch):
-    monkeypatch.setattr(settings, "monopay_token", "test_token")
+    monkeypatch.setattr(settings, "monopay_token", SecretStr("test_token"))
 
     async def fake_create_invoice(**kwargs):
         return {"invoiceId": "inv_test_1", "pageUrl": "https://pay.monobank.ua/inv_test_1"}
@@ -295,7 +296,7 @@ async def test_monopay_checkout_creates_pending_subscription(client: AsyncClient
 
 
 async def test_monopay_checkout_rejects_hidden_plan(client: AsyncClient, monkeypatch):
-    monkeypatch.setattr(settings, "monopay_token", "test_token")
+    monkeypatch.setattr(settings, "monopay_token", SecretStr("test_token"))
     token = await _register(client, "monopay-hidden@example.com")
     r = await client.post(
         "/api/v1/billing/monopay/checkout",
@@ -306,7 +307,7 @@ async def test_monopay_checkout_rejects_hidden_plan(client: AsyncClient, monkeyp
 
 
 async def test_monopay_checkout_without_token_returns_503(client: AsyncClient, monkeypatch):
-    monkeypatch.setattr(settings, "monopay_token", "")
+    monkeypatch.setattr(settings, "monopay_token", SecretStr(""))
     token = await _register(client, "monopay-notoken@example.com")
     r = await client.post(
         "/api/v1/billing/monopay/checkout",

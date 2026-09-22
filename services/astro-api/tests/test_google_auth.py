@@ -10,6 +10,7 @@ Google itself is never contacted: the code exchange and the JWKS lookup are
 both stubbed, and the tests assert on what our own logic does with the
 identity that comes back.
 """
+from pydantic import SecretStr
 import pytest
 from httpx import AsyncClient
 from sqlalchemy import select
@@ -26,7 +27,7 @@ BODY = {"code": "auth-code", "code_verifier": "verifier", "nonce": "nonce-123"}
 @pytest.fixture
 def google_enabled(monkeypatch):
     monkeypatch.setattr(settings, "google_client_id", "our-client-id.apps.googleusercontent.com")
-    monkeypatch.setattr(settings, "google_client_secret", "our-secret")
+    monkeypatch.setattr(settings, "google_client_secret", SecretStr("our-secret"))
 
 
 @pytest.fixture
@@ -284,7 +285,7 @@ async def test_disabled_without_credentials(client: AsyncClient, monkeypatch):
     # with local Google credentials configured would otherwise see this test
     # fail for no reason related to the code.
     monkeypatch.setattr(settings, "google_client_id", "")
-    monkeypatch.setattr(settings, "google_client_secret", "")
+    monkeypatch.setattr(settings, "google_client_secret", SecretStr(""))
 
     r = await client.get("/api/v1/auth/google/config")
     assert r.status_code == 200

@@ -34,17 +34,21 @@ async def create_saved_chart(
     await db.execute(
         update(User).where(User.id == current_user.id).values(plan=User.plan)
     )
-    count_result = await db.execute(
-        select(func.count()).where(Chart.user_id == current_user.id).select_from(Chart)
-    )
-    if count_result.scalar_one() >= settings.max_saved_charts:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail={
-                "code": "saved_charts_limit",
-                "message": f"You can save up to {settings.max_saved_charts} charts. Delete one to save a new chart.",
-            },
+    # Unlimited on Pro; the free plan has a ceiling.
+    limit = None if current_user.plan in ("pro", "expert") else settings.max_saved_charts_free
+    if limit is not None:
+        count_result = await db.execute(
+            select(func.count()).where(Chart.user_id == current_user.id).select_from(Chart)
         )
+        if count_result.scalar_one() >= limit:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={
+                    "code": "saved_charts_limit",
+                    "limit": limit,
+                    "message": f"The Free plan can keep {limit} saved charts. Delete one, or upgrade to Pro for unlimited.",
+                },
+            )
 
     chart = Chart(user_id=current_user.id, **body.model_dump())
     db.add(chart)

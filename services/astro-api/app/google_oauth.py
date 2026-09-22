@@ -41,7 +41,7 @@ class GoogleIdentity:
 
 
 def is_enabled() -> bool:
-    return bool(settings.google_client_id and settings.google_client_secret)
+    return bool(settings.google_client_id and settings.google_client_secret.get_secret_value())
 
 
 async def exchange_code(code: str, code_verifier: str, redirect_uri: str) -> str:
@@ -52,7 +52,7 @@ async def exchange_code(code: str, code_verifier: str, redirect_uri: str) -> str
             data={
                 "code": code,
                 "client_id": settings.google_client_id,
-                "client_secret": settings.google_client_secret,
+                "client_secret": settings.google_client_secret.get_secret_value(),
                 "redirect_uri": redirect_uri,
                 "grant_type": "authorization_code",
                 "code_verifier": code_verifier,

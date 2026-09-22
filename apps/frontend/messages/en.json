@@ -322,11 +322,11 @@
     "stripePortalUnavailable": "Stripe Customer Portal is not available yet. Contact support.",
     "renew": "Renew for 30 more days",
     "usage": "Today's usage",
-    "chartsToday": "charts calculated today",
+    "chartsToday": "advanced charts today",
     "limitSuffix": "/ {limit} limit",
     "dailyLimitReached": "Daily limit reached.",
     "upgradeToPro": "Upgrade to Pro",
-    "forUnlimitedCharts": "for unlimited charts.",
+    "forUnlimitedCharts": "for unlimited transits, solar returns and synastry.",
     "features": {}
   },
   "pricing": {
