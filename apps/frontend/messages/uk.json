@@ -98,7 +98,14 @@
       "missingVerificationLink": "Посилання для підтвердження відсутнє або недійсне",
       "verificationLinkInvalid": "Це посилання недійсне або застаріле.",
       "incorrectPassword": "Невірний пароль.",
-      "deleteAccountFailed": "Не вдалося видалити акаунт (помилка {status})."
+      "deleteAccountFailed": "Не вдалося видалити акаунт (помилка {status}).",
+      "googleFailed": "Не вдалося увійти через Google. Спробуйте ще раз або скористайтеся паролем.",
+      "emailMismatch": "Адреса не збігається."
+    },
+    "google": {
+      "or": "або",
+      "signIn": "Увійти через Google",
+      "signUp": "Зареєструватися через Google"
     }
   },
   "dashboard": {
@@ -366,7 +373,9 @@
     "confirmPasswordLabel": "Підтвердіть пароль, щоб назавжди видалити акаунт",
     "deleting": "Видалення…",
     "permanentlyDelete": "Остаточно видалити мій акаунт",
-    "cancel": "Скасувати"
+    "cancel": "Скасувати",
+    "confirmEmail": "Введіть свою email-адресу для підтвердження",
+    "noPasswordHint": "Ваш акаунт створено через Google, тож пароля в нього немає."
   },
   "landing": {
     "badge": "Astrodite",

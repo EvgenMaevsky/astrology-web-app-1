@@ -60,6 +60,12 @@ class Settings(BaseSettings):
     # monopay disabled, checkout returns 503 (same pattern as Stripe)
     monopay_token: str = ""
 
+    # Google Sign-In (https://console.cloud.google.com). Empty = disabled:
+    # the button is not shown and the endpoints return 503, so local
+    # development needs no credentials.
+    google_client_id: str = ""
+    google_client_secret: str = ""
+
     @model_validator(mode="after")
     def _no_dev_secret_in_production(self) -> "Settings":
         if self.environment == "production" and self.secret_key == _DEV_SECRET:

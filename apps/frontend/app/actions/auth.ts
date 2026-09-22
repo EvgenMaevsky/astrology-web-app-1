@@ -158,8 +158,11 @@ export async function deleteAccount(
   formData: FormData
 ): Promise<MessageState> {
   const t = await getTranslations("auth");
-  const password = formData.get("password") as string;
-  if (!password) return { error: t("errors.passwordRequired") };
+  // Exactly one of these is rendered, depending on whether the account has a
+  // password at all — a Google-created one does not.
+  const password = formData.get("password") as string | null;
+  const email = formData.get("email") as string | null;
+  if (!password && !email) return { error: t("errors.passwordRequired") };
 
   const token = await getAccessToken();
   if (!token) return { error: t("errors.notAuthenticated") };
@@ -169,13 +172,15 @@ export async function deleteAccount(
     res = await fetch(`${API_URL}/api/v1/users/me`, {
       method: "DELETE",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ password }),
+      body: JSON.stringify(password ? { password } : { email }),
     });
   } catch {
     return { error: t("errors.cannotConnect") };
   }
 
-  if (res.status === 403) return { error: t("errors.incorrectPassword") };
+  if (res.status === 403) {
+    return { error: password ? t("errors.incorrectPassword") : t("errors.emailMismatch") };
+  }
   if (!res.ok) return { error: t("errors.deleteAccountFailed", { status: res.status }) };
 
   await clearAuthCookies();

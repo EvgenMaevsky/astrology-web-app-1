@@ -21,8 +21,18 @@ async def delete_account(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> None:
-    if not _verify_password(body.password, current_user.password_hash):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Incorrect password")
+    if current_user.password_hash is not None:
+        if not body.password or not _verify_password(body.password, current_user.password_hash):
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Incorrect password")
+    else:
+        # Google-only account: there is no password to check, so confirmation
+        # is typing the account's own address.
+        typed = (body.email or "").strip().lower()
+        if typed != current_user.email.lower():
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail={"code": "email_mismatch", "message": "Type your email address to confirm."},
+            )
 
     # SQLite doesn't enforce the FK-level ondelete="CASCADE" these tables
     # declare, so rows without an ORM relationship must be deleted explicitly.

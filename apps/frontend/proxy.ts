@@ -6,6 +6,10 @@ import { type NextRequest, NextResponse } from "next/server";
 const PUBLIC_PATHS = [
   "/login", "/register", "/forgot-password", "/reset-password", "/verify-email",
   "/privacy", "/terms",
+  // Google sign-in round trip. The user is by definition not authenticated
+  // yet when these run, so without this the middleware bounces them to
+  // /login in the middle of signing in.
+  "/auth/google",
 ];
 const AUTH_REDIRECT_PATHS = ["/login", "/register"];
 const API_URL = process.env.API_URL ?? "http://127.0.0.1:8000";

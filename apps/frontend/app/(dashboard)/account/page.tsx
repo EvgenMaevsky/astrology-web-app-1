@@ -16,7 +16,12 @@ async function fetchMe(token: string) {
       cache: "no-store",
     });
     if (!res.ok) return null;
-    return res.json() as Promise<{ email: string; plan: string; email_verified: boolean }>;
+    return res.json() as Promise<{
+      email: string;
+      plan: string;
+      email_verified: boolean;
+      has_password: boolean;
+    }>;
   } catch {
     return null;
   }
@@ -35,7 +40,7 @@ export default async function AccountPage() {
 
       {user && <EmailSection email={user.email} verified={user.email_verified} />}
 
-      <DangerZone />
+      {user && <DangerZone hasPassword={user.has_password} email={user.email} />}
     </div>
   );
 }

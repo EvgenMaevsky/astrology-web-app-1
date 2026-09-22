@@ -98,7 +98,14 @@
       "missingVerificationLink": "Missing or invalid verification link",
       "verificationLinkInvalid": "This verification link is invalid or has expired.",
       "incorrectPassword": "Incorrect password.",
-      "deleteAccountFailed": "Could not delete account (error {status})."
+      "deleteAccountFailed": "Could not delete account (error {status}).",
+      "googleFailed": "Could not sign in with Google. Try again or use your password.",
+      "emailMismatch": "That address does not match."
+    },
+    "google": {
+      "or": "or",
+      "signIn": "Sign in with Google",
+      "signUp": "Sign up with Google"
     }
   },
   "dashboard": {
@@ -349,7 +356,9 @@
     "confirmPasswordLabel": "Confirm your password to permanently delete your account",
     "deleting": "Deleting…",
     "permanentlyDelete": "Permanently delete my account",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "confirmEmail": "Type your email address to confirm",
+    "noPasswordHint": "Your account was created through Google, so it has no password."
   },
   "landing": {
     "badge": "Astrodite",

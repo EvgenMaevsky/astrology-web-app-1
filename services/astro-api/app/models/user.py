@@ -21,7 +21,10 @@ class User(Base):
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
     email: Mapped[str] = mapped_column(String(320), unique=True, nullable=False, index=True)
-    password_hash: Mapped[str] = mapped_column(Text, nullable=False)
+    # Nullable since Google sign-in: an account created through Google has no
+    # password at all. Every code path that touches it must handle None —
+    # see routers/auth.py::login and routers/users.py::delete_account.
+    password_hash: Mapped[str | None] = mapped_column(Text, nullable=True)
     plan: Mapped[str] = mapped_column(String(32), nullable=False, default="free")
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     email_verified: Mapped[bool] = mapped_column(Boolean, default=False)
@@ -29,8 +32,17 @@ class User(Base):
     # column rather than an env-var allowlist, so admins can be granted
     # without a redeploy.
     is_admin: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    # Google's immutable subject identifier. UNIQUE is load-bearing: without
+    # it two accounts could latch onto the same Google profile. Matching is
+    # done on this, never on email — an address can change hands, a sub cannot.
+    google_sub: Mapped[str | None] = mapped_column(String(255), nullable=True, unique=True, index=True)
     stripe_customer_id: Mapped[str | None] = mapped_column(String(256), nullable=True, unique=True, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+    @property
+    def has_password(self) -> bool:
+        """False for accounts created through Google, which never had one."""
+        return self.password_hash is not None
 
     settings: Mapped["UserSettings"] = relationship(back_populates="user", uselist=False, cascade="all, delete-orphan")
     subscriptions: Mapped[list["Subscription"]] = relationship(back_populates="user", cascade="all, delete-orphan")
