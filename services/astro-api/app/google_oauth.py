@@ -59,8 +59,17 @@ async def exchange_code(code: str, code_verifier: str, redirect_uri: str) -> str
             },
         )
     if r.status_code >= 400:
-        # Body can contain the code and our redirect_uri; log the reason only.
-        log.warning("Google token exchange failed: %s", r.status_code)
+        # Log Google's own error code — never the body, which echoes back the
+        # authorization code and redirect_uri. The code alone is what makes
+        # this diagnosable: "invalid_client" means the client id/secret pair
+        # is wrong, "redirect_uri_mismatch" means the registered URI differs,
+        # "invalid_grant" means the code was already used or expired. Without
+        # it every one of those looks like the same generic failure.
+        try:
+            error_code = r.json().get("error", "unknown")
+        except ValueError:
+            error_code = "unparseable"
+        log.warning("Google token exchange failed: HTTP %s, error=%s", r.status_code, error_code)
         raise GoogleAuthError("Could not exchange the authorization code.")
 
     id_token = r.json().get("id_token")
