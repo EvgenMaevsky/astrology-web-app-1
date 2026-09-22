@@ -35,10 +35,10 @@ export default async function LandingPage() {
         </p>
         <div className="mt-8 flex items-center justify-center gap-4">
           <Link
-            href="/register"
+            href="/natal"
             className="rounded-lg bg-stone-900 hover:bg-stone-800 text-white text-sm font-semibold px-6 py-3 transition-colors"
           >
-            {t("tryFree")}
+            {t("calculateFree")}
           </Link>
           <Link
             href="/login"

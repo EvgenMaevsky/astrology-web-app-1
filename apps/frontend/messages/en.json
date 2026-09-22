@@ -423,7 +423,8 @@
     "startFree": "Start for free",
     "footerCopyright": "© {year} Astrodite",
     "privacy": "Privacy",
-    "terms": "Terms"
+    "terms": "Terms",
+    "calculateFree": "Calculate a chart for free"
   },
   "errors": {},
   "admin": {

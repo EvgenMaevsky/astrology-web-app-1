@@ -441,7 +441,8 @@
     "startFree": "Почати безкоштовно",
     "footerCopyright": "© {year} Astrodite",
     "privacy": "Конфіденційність",
-    "terms": "Умови"
+    "terms": "Умови",
+    "calculateFree": "Розрахувати карту безкоштовно"
   },
   "errors": {},
   "admin": {
