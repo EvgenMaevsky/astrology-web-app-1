@@ -41,6 +41,11 @@ class Settings(BaseSettings):
     # natal charts — nothing else throttled how fast an authenticated user
     # (any plan) could fire calculation requests.
     rate_limit_chart_calc: str = "20/minute"
+    # The public (unauthenticated) natal endpoint. Abuse protection, not a
+    # product tier: the daily count is unlimited on every plan, and this only
+    # bounds how fast one address can fire requests. It relies on uvicorn
+    # seeing the real client address (see docker-entrypoint.sh).
+    rate_limit_chart_public: str = "20/minute"
 
     # Resend (https://resend.com) — empty key = dev mode, emails are logged not sent
     resend_api_key: SecretStr = SecretStr("")

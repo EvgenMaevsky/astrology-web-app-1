@@ -257,7 +257,45 @@
       "fillAllFields": "Please fill in all fields",
       "latRange": "Latitude must be between -90 and 90",
       "lonRange": "Longitude must be between -180 and 180",
-      "cannotConnect": "Cannot connect to server"
+      "cannotConnect": "Cannot connect to server",
+      "tooManyRequests": "Too many requests. Wait a minute and try again.",
+      "invalidInput": "Please check the values you entered.",
+      "calculationFailed": "Could not calculate the chart. Please try again."
+    },
+    "public": {
+      "title": "Free natal chart",
+      "subtitle": "Enter a date, time and place of birth — the calculation is free and needs no account.",
+      "calculate": "Calculate chart",
+      "calculating": "Calculating…",
+      "resultTitle": "Your natal chart",
+      "signIn": "Sign in",
+      "signUp": "Sign up",
+      "alreadyHaveAccount": "You already have an account — open the full version",
+      "fullVersion": "Go to the full version"
+    },
+    "popup": {
+      "heading": "Your chart is ready",
+      "subheading": "Here is what a free account adds.",
+      "colAnonymous": "No account",
+      "colFree": "Free account",
+      "colPro": "Pro",
+      "rowChart": "Natal chart, planets, houses",
+      "rowMajor": "Major aspects",
+      "rowMinor": "Minor aspects",
+      "rowParts": "Arabic parts and terms",
+      "rowHouseSystems": "6 house systems",
+      "rowSave": "Saved charts and people",
+      "rowAdvanced": "Transits, solar return, synastry",
+      "valueNo": "—",
+      "valueYes": "yes",
+      "valueFreeSaved": "5 charts",
+      "valueProSaved": "unlimited",
+      "valueFreeAdvanced": "2 per day",
+      "valueProAdvanced": "unlimited",
+      "ctaRegister": "Create a free account",
+      "ctaContinue": "Continue without an account",
+      "waiting": "You can continue without an account in {seconds}s",
+      "close": "Close"
     }
   },
   "astro": {

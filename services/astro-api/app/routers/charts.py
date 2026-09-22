@@ -23,6 +23,7 @@ from app.schemas.chart import (
     TransitRequest, TransitResponse,
     SolarReturnRequest, SolarReturnResponse,
     SynastryRequest, SynastryResponse,
+    PublicNatalRequest, PublicNatalResponse,
 )
 
 router = APIRouter(prefix="/api/v1/charts", tags=["charts"])
@@ -41,6 +42,10 @@ _natal_cache = ResultCache(settings.chart_cache_size) if settings.chart_cache_si
 FREE_ADVANCED_DAILY_LIMIT = 2
 
 ADVANCED_CHART_TYPES = ("transit", "solar_return", "synastry")
+
+# The public chart is always Placidus. Choosing a house system is one of the
+# things an account buys, and pinning it also keeps the cache key narrow.
+PUBLIC_HOUSE_SYSTEM = "placidus"
 
 
 async def _reserve_advanced_chart(user: User, db: AsyncSession) -> None:
@@ -252,6 +257,33 @@ def _compute_synastry(body: SynastryRequest, include_minor: bool) -> SynastryRes
     )
 
 
+def _compute_public_natal(body: PublicNatalRequest) -> PublicNatalResponse:
+    """The anonymous chart: wheel, planets, houses and major aspects.
+
+    No terms and no Arabic parts — not omitted from the render, omitted from
+    the computation and from the response schema, so the difference between
+    this and a registered account is real rather than cosmetic.
+
+    Shares the natal cache with the authenticated endpoint by reusing the
+    same request shape, which matters: the public page is the one that will
+    see the same well-known birth data over and over.
+    """
+    cache_key_body = NatalChartRequest.model_construct(
+        birth_dt=body.birth_dt, timezone=None,
+        lat=body.lat, lon=body.lon,
+        house_system=PUBLIC_HOUSE_SYSTEM, bodies=None,
+    )
+    data = _calc_natal_cached(cache_key_body)
+
+    return PublicNatalResponse(
+        planets=data["planets"],
+        houses=data["houses"],
+        angles=data["angles"],
+        aspects=_visible_aspects(_engine.calc_aspects(data["planets"]), include_minor=False),
+        meta=data["meta"],
+    )
+
+
 # ── Endpoints ────────────────────────────────────────────────────────────────
 
 
@@ -358,3 +390,24 @@ async def chart_usage(
     used = result.scalar_one()
     limit = FREE_ADVANCED_DAILY_LIMIT if current_user.plan == "free" else None
     return {"used": used, "limit": limit, "plan": current_user.plan}
+
+
+@router.post("/natal/public", response_model=PublicNatalResponse)
+@limiter.limit(settings.rate_limit_chart_public)
+async def public_natal_chart(
+    request: Request,
+    body: PublicNatalRequest,
+) -> PublicNatalResponse:
+    """Natal chart for a visitor with no account.
+
+    Deliberately touches no database at all. Date, time and place of birth
+    are personal data, and an anonymous visitor has consented to nothing —
+    so nothing is written: no chart_logs row (its user_id is NOT NULL
+    anyway), no quota row, no log line carrying the inputs.
+
+    The daily count is unlimited, matching every plan. The rate limit here
+    is abuse protection, not a tier: it exists so one script cannot occupy
+    the worker, and it only works because the container now sees real client
+    addresses (see docker-entrypoint.sh).
+    """
+    return await run_in_threadpool(_compute_public_natal, body)

@@ -10,7 +10,29 @@ export function fmtDeg(sign_degree: number): string {
   return `${d}°${String(m).padStart(2, "0")}′`;
 }
 
-export function PlanetTable({ planets }: { planets: NatalChartResult["planets"] }) {
+/** A planet row without the fields an anonymous visitor does not receive. */
+type PlanetRow = {
+  longitude: number;
+  sign: string;
+  sign_degree: number;
+  house: number;
+  retrograde: boolean;
+  speed: number;
+  term_ruler?: string | null;
+};
+
+/**
+ * showTerms is false on the public page, where terms are withheld. The column
+ * is dropped rather than rendered empty: a column of dashes reads as "we
+ * could not work this out", not as "this needs an account".
+ */
+export function PlanetTable({
+  planets,
+  showTerms = true,
+}: {
+  planets: Record<string, PlanetRow>;
+  showTerms?: boolean;
+}) {
   const th = useTranslations("charts.table");
   const ta = useTranslations("astro");
   const astro = useAstroTranslator();
@@ -34,7 +56,9 @@ export function PlanetTable({ planets }: { planets: NatalChartResult["planets"] 
               <th className="text-left px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">{th("sign")}</th>
               <th className="text-left px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">{th("degree")}</th>
               <th className="text-left px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">{th("house")}</th>
-              <th className="text-left px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">{th("term")}</th>
+              {showTerms && (
+                <th className="text-left px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">{th("term")}</th>
+              )}
             </tr>
           </thead>
           <tbody>
@@ -46,7 +70,7 @@ export function PlanetTable({ planets }: { planets: NatalChartResult["planets"] 
                 <td className="px-4 py-2 text-stone-600">{r.sign}</td>
                 <td className="px-4 py-2 text-stone-600 font-mono text-xs">{r.degree}</td>
                 <td className="px-4 py-2 text-stone-500">{r.house}</td>
-                <td className="px-4 py-2 text-stone-400 text-xs">{r.term}</td>
+                {showTerms && <td className="px-4 py-2 text-stone-400 text-xs">{r.term}</td>}
               </tr>
             ))}
           </tbody>

@@ -6,6 +6,9 @@ import { type NextRequest, NextResponse } from "next/server";
 const PUBLIC_PATHS = [
   "/login", "/register", "/forgot-password", "/reset-password", "/verify-email",
   "/privacy", "/terms",
+  // The public natal chart — the entry point for search traffic, and by
+  // definition visited by people with no account.
+  "/natal",
   // Google sign-in round trip. The user is by definition not authenticated
   // yet when these run, so without this the middleware bounces them to
   // /login in the middle of signing in.

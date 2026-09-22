@@ -214,3 +214,61 @@ class SynastryResponse(BaseModel):
     person1: NatalChartResponse
     person2: NatalChartResponse
     inter_aspects: list[SynastryInterAspect]
+
+
+# ── Public (unauthenticated) natal ────────────────────────────────────────────
+
+
+class PublicNatalRequest(BaseModel):
+    """Deliberately narrower than NatalChartRequest.
+
+    house_system is not accepted: the public chart is always Placidus, and
+    choosing a system is one of the things registering buys. bodies is not
+    accepted either — letting an anonymous caller pick keeps the cache key
+    varied for no benefit to them.
+    """
+
+    birth_dt: datetime
+    timezone: str | None = None
+    lat: float = Field(ge=-90, le=90)
+    lon: float = Field(ge=-180, le=180)
+
+    @model_validator(mode="after")
+    def _localize(self) -> "PublicNatalRequest":
+        self.birth_dt = to_utc(self.birth_dt, self.timezone)
+        _check_ephemeris_range(self.birth_dt, "birth_dt")
+        return self
+
+
+class PublicPlanetPos(BaseModel):
+    """PlanetPos without term_ruler.
+
+    The omission is the point: terms are a registered-account feature, and a
+    schema that has no field for them cannot leak them even if somebody
+    later calls add_terms_to_planets() on the way here by mistake. Pydantic
+    drops keys the model does not declare.
+    """
+
+    longitude: float
+    latitude: float
+    distance: float
+    speed: float
+    sign: str
+    sign_degree: float
+    house: int
+    retrograde: bool
+
+
+class PublicNatalResponse(BaseModel):
+    """What an anonymous visitor receives: the chart itself, nothing more.
+
+    No arabic_parts and no terms — those are what registering adds. Withheld
+    on the server rather than hidden in the UI, so the difference is real
+    rather than one devtools panel away.
+    """
+
+    planets: dict[str, PublicPlanetPos]
+    houses: list[float]
+    angles: Angles
+    aspects: list[AspectEntry]
+    meta: ChartMeta

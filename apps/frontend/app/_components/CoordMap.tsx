@@ -12,12 +12,24 @@ export function CoordMap({ lat, lon, onChange }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<unknown>(null);
   const markerRef = useRef<unknown>(null);
-
   useEffect(() => {
-    if (!containerRef.current || mapRef.current) return;
+    if (!containerRef.current) return;
+
+    // React's development double-invoke runs this effect twice. The guard
+    // cannot live on mapRef alone, because mapRef is only assigned once the
+    // dynamic import resolves — by which time the second run has already
+    // started its own import, and Leaflet throws "Map container is already
+    // initialized" with two maps bound to one element.
+    //
+    // A per-run cancelled flag, checked AFTER the await, is what actually
+    // closes it: the first run's callback sees that its effect was torn
+    // down and builds nothing.
+    let cancelled = false;
 
     // Leaflet must be imported client-side only
     import("leaflet").then((L) => {
+      if (cancelled || mapRef.current) return;
+
       // Fix default icon paths (broken by bundlers)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -49,6 +61,7 @@ export function CoordMap({ lat, lon, onChange }: Props) {
     });
 
     return () => {
+      cancelled = true;
       if (mapRef.current) {
         (mapRef.current as { remove: () => void }).remove();
         mapRef.current = null;

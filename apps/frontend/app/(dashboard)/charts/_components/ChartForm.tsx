@@ -1,23 +1,15 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import { useActionState, useState } from "react";
 import { useTranslations } from "next-intl";
 import { calcNatalChart, ChartState } from "@/app/actions/charts";
-import { City } from "@/app/actions/atlas";
 import { Person } from "@/app/actions/persons";
+import { BirthDataFields, type BirthData } from "@/app/_components/BirthDataFields";
 import { ChartWheel } from "@/app/_components/chart-wheel/ChartWheel";
-import { CityAutocomplete } from "@/app/_components/CityAutocomplete";
 import { UpgradePrompt } from "@/app/_components/UpgradePrompt";
 import { HOUSE_SYSTEMS } from "@/app/lib/house-systems";
 import { PlanetTable, AspectTable, ArabicPartsTable } from "./ResultTables";
 import { SaveChartButton } from "./SaveChartButton";
-
-const CoordMap = dynamic(() => import("@/app/_components/CoordMap").then(m => m.CoordMap), {
-  ssr: false,
-  loading: () => <div className="w-full h-64 rounded-xl bg-stone-100 animate-pulse" />,
-});
-
 
 const initialState: ChartState = { status: "idle" };
 
@@ -31,36 +23,27 @@ export function ChartForm({ persons = [], selectedPerson = null }: Props) {
   const t = useTranslations("charts");
   const tf = useTranslations("charts.form");
 
-  const initLat = selectedPerson?.lat ?? 50.45;
-  const initLon = selectedPerson?.lon ?? 30.52;
-  const initTz = selectedPerson?.timezone ?? "Europe/Kyiv";
-  const initDt = selectedPerson
-    ? selectedPerson.birth_dt.replace("Z", "").slice(0, 16)
-    : "1990-01-01T12:00";
-
-  const [lat, setLat] = useState(initLat);
-  const [lon, setLon] = useState(initLon);
-  const [timezone, setTimezone] = useState(initTz);
-  const [datetime, setDatetime] = useState(initDt);
+  // The birth fields themselves live in BirthDataFields, shared with the
+  // public /natal page — the two forms ask for exactly the same facts, and
+  // a copy of them would drift.
+  const [birth, setBirth] = useState<BirthData>({
+    datetime: selectedPerson
+      ? selectedPerson.birth_dt.replace("Z", "").slice(0, 16)
+      : "1990-01-01T12:00",
+    lat: selectedPerson?.lat ?? 50.45,
+    lon: selectedPerson?.lon ?? 30.52,
+    timezone: selectedPerson?.timezone ?? "Europe/Kyiv",
+  });
 
   const handlePersonSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const p = persons.find((x) => x.id === e.target.value);
     if (!p) return;
-    setLat(p.lat);
-    setLon(p.lon);
-    setTimezone(p.timezone);
-    setDatetime(p.birth_dt.replace("Z", "").slice(0, 16));
-  };
-
-  const handleCitySelect = (city: City) => {
-    setLat(parseFloat(city.lat.toFixed(4)));
-    setLon(parseFloat(city.lon.toFixed(4)));
-    setTimezone(city.timezone);
-  };
-
-  const handleMapChange = (newLat: number, newLon: number) => {
-    setLat(newLat);
-    setLon(newLon);
+    setBirth({
+      datetime: p.birth_dt.replace("Z", "").slice(0, 16),
+      lat: p.lat,
+      lon: p.lon,
+      timezone: p.timezone,
+    });
   };
 
   return (
@@ -85,85 +68,24 @@ export function ChartForm({ persons = [], selectedPerson = null }: Props) {
           </div>
         )}
 
-        {/* City search */}
-        <div>
-          <label className="block text-xs font-medium text-stone-500 mb-1">{tf("city")}</label>
-          <CityAutocomplete onSelect={handleCitySelect} placeholder={t("natal.cityPlaceholder")} />
-          <p className="text-xs text-stone-400 mt-1">{tf("selectCityHint")}</p>
-        </div>
+        <BirthDataFields
+          value={birth}
+          onChange={setBirth}
+          cityPlaceholder={t("natal.cityPlaceholder")}
+        />
 
-        {/* Map */}
-        <CoordMap lat={lat} lon={lon} onChange={handleMapChange} />
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="sm:col-span-2">
-            <label className="block text-xs font-medium text-stone-500 mb-1">
-              {tf("dateTime")}
-            </label>
-            <input
-              type="datetime-local"
-              name="datetime"
-              value={datetime}
-              onChange={(e) => setDatetime(e.target.value)}
-              required
-              className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-stone-500 mb-1">{tf("latitude")}</label>
-            <input
-              type="number"
-              name="lat"
-              step="0.0001"
-              min="-90"
-              max="90"
-              value={lat}
-              onChange={e => setLat(parseFloat(e.target.value) || 0)}
-              required
-              className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-stone-500 mb-1">{tf("longitude")}</label>
-            <input
-              type="number"
-              name="lon"
-              step="0.0001"
-              min="-180"
-              max="180"
-              value={lon}
-              onChange={e => setLon(parseFloat(e.target.value) || 0)}
-              required
-              className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-stone-500 mb-1">{tf("houseSystem")}</label>
-            <select
-              name="house_system"
-              defaultValue="placidus"
-              className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white"
-            >
-              {HOUSE_SYSTEMS.map((hs) => (
-                <option key={hs.value} value={hs.value}>{hs.label}</option>
-              ))}
-            </select>
-          </div>
-
-          <div className="sm:col-span-2">
-            <label className="block text-xs font-medium text-stone-500 mb-1">{tf("timezone")}</label>
-            <input
-              type="text"
-              name="timezone"
-              value={timezone}
-              onChange={e => setTimezone(e.target.value)}
-              placeholder={tf("timezonePlaceholder")}
-              className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400"
-            />
-          </div>
+        {/* Signed-in only: the public chart is always Placidus. */}
+        <div className="sm:max-w-xs">
+          <label className="block text-xs font-medium text-stone-500 mb-1">{tf("houseSystem")}</label>
+          <select
+            name="house_system"
+            defaultValue="placidus"
+            className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white"
+          >
+            {HOUSE_SYSTEMS.map((hs) => (
+              <option key={hs.value} value={hs.value}>{hs.label}</option>
+            ))}
+          </select>
         </div>
 
         {state.status === "error" && (
@@ -187,8 +109,13 @@ export function ChartForm({ persons = [], selectedPerson = null }: Props) {
           <div className="flex justify-end">
             <SaveChartButton
               chartType="natal"
-              defaultTitle={`Natal chart — ${datetime}`}
-              requestPayload={{ birth_dt: datetime, timezone, lat, lon }}
+              defaultTitle={`Natal chart — ${birth.datetime}`}
+              requestPayload={{
+                birth_dt: birth.datetime,
+                timezone: birth.timezone,
+                lat: birth.lat,
+                lon: birth.lon,
+              }}
               result={state.data}
             />
           </div>
