@@ -67,7 +67,10 @@ export function sectorPath(
  *  (dots/aspect lines keep using the real longitude). */
 export function spreadAngles(
   points: { name: string; lon: number }[],
-  minSep = 7
+  // Raised from 7 when the glyphs were enlarged: the separation has to keep
+  // pace with the glyph size, or a stellium turns into a pile of overlapping
+  // symbols.
+  minSep = 10
 ): Record<string, number> {
   const n = points.length;
   if (n <= 1) return Object.fromEntries(points.map((p) => [p.name, p.lon]));

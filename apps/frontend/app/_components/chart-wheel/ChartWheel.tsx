@@ -24,6 +24,12 @@ const R_DOT       = 203; // exact planet position marker, hugging the house ring
 const R_PLANET    = 185; // planet glyph radius, right next to its dot
 const R_INNER     = 168; // inner circle (aspect lines inside)
 
+// viewBox origin and extent, kept in named constants because svgTipPos()
+// below has to use exactly the same numbers — when they were literals in
+// two places, changing the viewBox silently moved every tooltip.
+const VIEW_MIN = -42;
+const VIEW_SIZE = 684;
+
 interface PlanetData {
   longitude: number;
   sign: string;
@@ -72,8 +78,8 @@ function ZodiacRing({ asc }: { asc: number }) {
           d={sectorPath(CX, CY, R_ZODIAC_I, R_ZODIAC_O, startRad, endRad)}
           fill={ELEMENT_COLORS[elemIdx]}
           fillOpacity={0.15}
-          stroke="#888"
-          strokeWidth={0.5}
+          stroke="#777"
+          strokeWidth={1.2}
         />
         <text
           x={midPt.x}
@@ -81,7 +87,7 @@ function ZodiacRing({ asc }: { asc: number }) {
           textAnchor="middle"
           dominantBaseline="central"
           fontFamily="serif"
-          fontSize={17}
+          fontSize={26}
           fill={ELEMENT_COLORS[elemIdx]}
         >
           {SIGN_GLYPHS[i]}
@@ -90,6 +96,31 @@ function ZodiacRing({ asc }: { asc: number }) {
     );
   });
   return <g>{signs}</g>;
+}
+
+/**
+ * Degree scale around the rim: a tick every degree, longer every fifth and
+ * longer still every tenth. Purely decorative, but it is what makes a wheel
+ * read as an instrument rather than a pie chart, and it gives the eye a way
+ * to judge positions between the labelled cusps.
+ */
+function DegreeTicks({ asc }: { asc: number }) {
+  const ticks = [];
+  for (let deg = 0; deg < 360; deg++) {
+    const rad = eclToSvg(deg, asc);
+    const length = deg % 10 === 0 ? 11 : deg % 5 === 0 ? 7 : 4;
+    const a = polar(CX, CY, R_OUTER, rad);
+    const b = polar(CX, CY, R_OUTER - length, rad);
+    ticks.push(
+      <line
+        key={deg}
+        x1={a.x} y1={a.y} x2={b.x} y2={b.y}
+        stroke={deg % 10 === 0 ? "#555" : "#aaa"}
+        strokeWidth={deg % 10 === 0 ? 1.4 : deg % 5 === 0 ? 1 : 0.7}
+      />
+    );
+  }
+  return <g>{ticks}</g>;
 }
 
 /** Degree within the sign, e.g. 187.15° → "7°09′". */
@@ -118,8 +149,8 @@ function HouseRing({ houses, asc }: { houses: number[]; asc: number }) {
               d={sectorPath(CX, CY, R_HOUSE_I, R_HOUSE_O, startRad, endRad)}
               fill={isAngular ? "#8b6914" : "transparent"}
               fillOpacity={isAngular ? 0.08 : 0}
-              stroke={isAngular ? "#8b6914" : "#aaa"}
-              strokeWidth={isAngular ? 1 : 0.5}
+              stroke={isAngular ? "#8b6914" : "#999"}
+              strokeWidth={isAngular ? 2 : 1}
             />
             {/* Cusp tick — runs from the house ring out to the outer circle */}
             {(() => {
@@ -128,8 +159,8 @@ function HouseRing({ houses, asc }: { houses: number[]; asc: number }) {
               return (
                 <line
                   x1={p1.x} y1={p1.y} x2={p2.x} y2={p2.y}
-                  stroke={isAngular ? "#8b6914" : "#444"}
-                  strokeWidth={isAngular ? 1.5 : 0.9}
+                  stroke={isAngular ? "#8b6914" : "#333"}
+                  strokeWidth={isAngular ? 3.5 : 1.4}
                 />
               );
             })()}
@@ -141,7 +172,7 @@ function HouseRing({ houses, asc }: { houses: number[]; asc: number }) {
                 <text
                   x={pt.x} y={pt.y}
                   textAnchor="middle" dominantBaseline="central"
-                  fontSize={8} fill="#555" fontFamily="sans-serif"
+                  fontSize={10} fill="#555" fontFamily="sans-serif"
                 >
                   {fmtDegMin(lon)}
                 </text>
@@ -151,7 +182,7 @@ function HouseRing({ houses, asc }: { houses: number[]; asc: number }) {
             <text
               x={midPt.x} y={midPt.y}
               textAnchor="middle" dominantBaseline="central"
-              fontSize={9} fill="#666" fontFamily="sans-serif"
+              fontSize={13} fill="#666" fontFamily="sans-serif"
             >
               {i + 1}
             </text>
@@ -168,12 +199,12 @@ const BADGE_ASPECTS = new Set([
   "conjunction", "sextile", "square", "trine", "opposition",
 ]);
 
-/** Mouse position in viewBox units (viewBox="-32 -32 664 664", responsive width). */
+/** Mouse position in viewBox units (see VIEW_MIN / VIEW_SIZE). */
 function svgTipPos(e: React.MouseEvent<Element>): { x: number; y: number } {
   const rect = (e.currentTarget as Element).closest("svg")!.getBoundingClientRect();
   return {
-    x: ((e.clientX - rect.left) / rect.width) * 664 - 32,
-    y: ((e.clientY - rect.top) / rect.height) * 664 - 32,
+    x: ((e.clientX - rect.left) / rect.width) * VIEW_SIZE + VIEW_MIN,
+    y: ((e.clientY - rect.top) / rect.height) * VIEW_SIZE + VIEW_MIN,
   };
 }
 
@@ -244,15 +275,15 @@ function AspectLines({
             <line
               x1={pt1.x} y1={pt1.y} x2={pt2.x} y2={pt2.y}
               stroke={color}
-              strokeWidth={0.8}
+              strokeWidth={1.6}
             />
             {glyph && (
               <>
-                <circle cx={mid.x} cy={mid.y} r={6.5} fill="white" stroke={color} strokeWidth={0.4} />
+                <circle cx={mid.x} cy={mid.y} r={8.5} fill="white" stroke={color} strokeWidth={0.8} />
                 <text
                   x={mid.x} y={mid.y}
                   textAnchor="middle" dominantBaseline="central"
-                  fontSize={8.5} fill={color} fontFamily="serif"
+                  fontSize={11} fill={color} fontFamily="serif"
                 >
                   {glyph}
                 </text>
@@ -313,14 +344,14 @@ function PlanetLayer({
             style={{ cursor: "default" }}
           >
             {/* Exact position dot, hugging the house ring */}
-            <circle cx={dot.x} cy={dot.y} r={2.2} fill="#444" />
+            <circle cx={dot.x} cy={dot.y} r={3.2} fill="#333" />
             {/* Dot → glyph connector */}
-            <line x1={c1.x} y1={c1.y} x2={c2.x} y2={c2.y} stroke="#bbb" strokeWidth={0.6} />
+            <line x1={c1.x} y1={c1.y} x2={c2.x} y2={c2.y} stroke="#aaa" strokeWidth={1} />
             {/* Glyph */}
             <text
               x={pt.x} y={pt.y}
               textAnchor="middle" dominantBaseline="central"
-              fontFamily="serif" fontSize={16}
+              fontFamily="serif" fontSize={24}
               fill={p.retrograde ? "#c0392b" : "#1a1a2e"}
             >
               {glyph}
@@ -355,13 +386,13 @@ function AngleMarkers({ angles, asc }: { angles: ChartData["angles"]; asc: numbe
             : { x: pt.x, y: pt.y + 12 };
         return (
           <g key={label}>
-            <line x1={p1.x} y1={p1.y} x2={p2.x} y2={p2.y} stroke={color} strokeWidth={2} />
+            <line x1={p1.x} y1={p1.y} x2={p2.x} y2={p2.y} stroke={color} strokeWidth={4} />
             <text x={pt.x} y={pt.y} textAnchor="middle" dominantBaseline="central"
-              fontSize={10} fontWeight="700" fill={color} fontFamily="sans-serif">
+              fontSize={14} fontWeight="700" fill={color} fontFamily="sans-serif">
               {label}
             </text>
             <text x={degPt.x} y={degPt.y} textAnchor="middle" dominantBaseline="central"
-              fontSize={9} fill={color} fontFamily="sans-serif">
+              fontSize={11} fill={color} fontFamily="sans-serif">
               {fmtDegMin(lon)}
             </text>
           </g>
@@ -378,9 +409,9 @@ export function ChartWheel({ data }: { data: ChartData }) {
   const asc = data.angles.asc;
 
   return (
-    <div className="relative w-full max-w-2xl mx-auto select-none">
+    <div className="relative w-full max-w-4xl mx-auto select-none">
       <svg
-        viewBox="-32 -32 664 664"
+        viewBox={`${VIEW_MIN} ${VIEW_MIN} ${VIEW_SIZE} ${VIEW_SIZE}`}
         className="w-full h-full"
         style={{ fontFamily: "serif" }}
       >
@@ -397,8 +428,8 @@ export function ChartWheel({ data }: { data: ChartData }) {
         <AspectLines planets={data.planets} aspects={data.aspects} asc={asc} onHover={setTooltip} />
 
         {/* Inner circle */}
-        <circle cx={CX} cy={CY} r={R_INNER} fill="none" stroke="#ddd" strokeWidth={0.5} />
-        <circle cx={CX} cy={CY} r={R_HOUSE_I} fill="none" stroke="#ccc" strokeWidth={0.5} />
+        <circle cx={CX} cy={CY} r={R_INNER} fill="none" stroke="#ccc" strokeWidth={1.2} />
+        <circle cx={CX} cy={CY} r={R_HOUSE_I} fill="none" stroke="#bbb" strokeWidth={1.2} />
 
         {/* House ring */}
         <HouseRing houses={data.houses} asc={asc} />
@@ -407,8 +438,9 @@ export function ChartWheel({ data }: { data: ChartData }) {
         <ZodiacRing asc={asc} />
 
         {/* Outer ring border */}
-        <circle cx={CX} cy={CY} r={R_ZODIAC_O} fill="none" stroke="#888" strokeWidth={1} />
-        <circle cx={CX} cy={CY} r={R_OUTER} fill="none" stroke="#666" strokeWidth={1.5} />
+        <DegreeTicks asc={asc} />
+        <circle cx={CX} cy={CY} r={R_ZODIAC_O} fill="none" stroke="#555" strokeWidth={2.2} />
+        <circle cx={CX} cy={CY} r={R_OUTER} fill="none" stroke="#333" strokeWidth={3} />
 
         {/* Angle markers (ASC/DSC/MC/IC) */}
         <AngleMarkers angles={data.angles} asc={asc} />
