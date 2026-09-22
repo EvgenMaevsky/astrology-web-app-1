@@ -1,7 +1,7 @@
 ---
 status: planned
 created: 2026-09-20
-updated: 2026-09-20
+updated: 2026-09-22
 related: "[[2026-09-19-e1-admin-seo-settings]]"
 tags: [plan, auth, oauth, google, e2]
 ---
@@ -79,18 +79,87 @@ tags: [plan, auth, oauth, google, e2]
 **Межа безпеки:** `GOOGLE_CLIENT_SECRET` вводить власник сам — у свій
 `.env` на VPS і в Vercel. Модель секрет не бачить і не передає.
 
-1. Створити проєкт → «APIs & Services» → «OAuth consent screen».
-2. Тип **External**. Скоупи — тільки `openid`, `email`, `profile`
-   (несенситивні; за них Google не вимагає верифікації застосунку).
-3. **Перевести стан із «Testing» у «In production».** У «Testing» діє
-   ліміт тестових користувачів — стороння людина просто не зайде.
-4. «Credentials» → OAuth client ID → тип **Web application**.
-5. Authorized redirect URIs — **обидва**:
-   - `https://astrodite.cc/auth/google/callback`
-   - `http://localhost:3000/auth/google/callback`
-   Google звіряє рядок точно: зайвий слеш = помилка `redirect_uri_mismatch`.
-6. Отримані `client_id` і `client_secret` покласти у `.env` бекенда.
-   `client_id` не секрет, `client_secret` — секрет.
+> Консоль Google перейменувала цей розділ: раніше «APIs & Services →
+> OAuth consent screen», тепер «Google Auth Platform» із вкладками
+> Branding / Audience / Clients / Data Access. Нижче названо обидва
+> варіанти, бо який саме побачить власник — залежить від акаунта.
+
+### 1. Проєкт
+
+console.cloud.google.com → перемикач проєкту вгорі → **New project**.
+Назва довільна (напр. `astrodite`), організацію лишити як є.
+Переконатися, що далі всі кроки робляться саме в цьому проєкті —
+перемикач угорі показує поточний.
+
+### 2. Екран згоди (Branding / OAuth consent screen)
+
+- Тип аудиторії — **External**. «Internal» доступний лише для Workspace
+  і пустив би тільки співробітників організації.
+- App name: `Astrodite` — цю назву люди побачать у вікні входу.
+- User support email: `info@astrodite.cc`.
+- App domain / Authorized domain: `astrodite.cc`.
+- Developer contact: `info@astrodite.cc`.
+- Логотип **не обовʼязковий**. Завантаження логотипу може відправити
+  застосунок на ревʼю бренду — на старті не варто.
+
+### 3. Скоупи (Data Access / Scopes)
+
+Додати рівно три: `openid`, `email`, `profile`.
+
+Вони **несенситивні**, тож верифікація застосунку Google не потрібна і
+попередження «Google hasn't verified this app» користувачі не побачать.
+Будь-який інший скоуп (Calendar, Contacts, Drive) переводить застосунок
+у категорію, що вимагає ревʼю, — не додавати нічого зайвого.
+
+### 4. Publishing status → In production
+
+На вкладці Audience / OAuth consent screen знайти **Publishing status**
+і натиснути **Publish app**.
+
+**Це найлегше пропустити і найдорожче.** У стані «Testing» вхід працює
+лише для адрес, доданих у список Test users (ліміт 100). Власник
+тестуватиме зі свого акаунта — усе працюватиме, — а стороння людина
+отримає помилку `access_denied`. Для несенситивних скоупів публікація
+миттєва, без ревʼю.
+
+### 5. OAuth client (Clients / Credentials)
+
+**Create credentials → OAuth client ID → Application type: Web application.**
+
+Authorized redirect URIs — додати **обидва**:
+
+```
+https://astrodite.cc/auth/google/callback
+http://localhost:3000/auth/google/callback
+```
+
+- **Authorized JavaScript origins лишити порожнім** — потік іде через
+  серверний редірект, браузерний SDK не використовується.
+- Google звіряє рядок **точно**: зайвий слеш у кінці, `http` замість
+  `https` або `www.` дають `redirect_uri_mismatch`.
+- Прев'ю-деплої Vercel мають випадкові адреси, тож заздалегідь їх
+  зареєструвати неможливо — вхід через Google на прев'ю не працюватиме.
+  Це очікувано, не баг.
+
+### 6. Ключі
+
+Google покаже **Client ID** і **Client secret**.
+
+- `Client ID` — не секрет, потрапляє в браузер у складі посилання.
+- `Client secret` — **секрет**. Вводить власник сам, у `.env` бекенда на
+  VPS. Модель його не бачить і не передає.
+
+```
+GOOGLE_CLIENT_ID=...apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=...
+```
+
+**У Vercel нічого додавати не треба.** Обмін коду на токени робить
+бекенд; фронтенд дістає `client_id` через
+`GET /api/v1/auth/google/config`. Секрет у браузер не потрапляє взагалі.
+
+Якщо secret колись засвітиться — його можна перевипустити тут же,
+кнопкою, без зміни `client_id`.
 
 ## Частина 1 — Схема
 
