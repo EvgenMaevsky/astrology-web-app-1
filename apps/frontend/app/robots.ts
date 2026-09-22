@@ -1,7 +1,6 @@
 import type { MetadataRoute } from "next";
 import { getSiteSettings } from "@/app/lib/site-settings";
-
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+import { SITE_URL } from "@/app/lib/site-url";
 
 export default async function robots(): Promise<MetadataRoute.Robots> {
   const site = await getSiteSettings();
