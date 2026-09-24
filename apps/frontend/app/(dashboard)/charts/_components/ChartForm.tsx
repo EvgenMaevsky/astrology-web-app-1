@@ -48,17 +48,17 @@ export function ChartForm({ persons = [], selectedPerson = null }: Props) {
 
   return (
     <div className="space-y-8">
-      <form action={action} className="bg-white rounded-xl border border-stone-200 p-6 space-y-5">
-        <h2 className="text-sm font-semibold text-stone-700 uppercase tracking-wider">{t("natal.title")}</h2>
+      <form action={action} className="bg-white rounded-xl border border-mist-200 p-6 space-y-5">
+        <h2 className="text-sm font-semibold text-ink-700 uppercase tracking-wider">{t("natal.title")}</h2>
 
         {/* Saved persons selector */}
         {persons.length > 0 && (
           <div>
-            <label className="block text-xs font-medium text-stone-500 mb-1">{tf("loadSavedPerson")}</label>
+            <label className="block text-xs font-medium text-ink-600 mb-1">{tf("loadSavedPerson")}</label>
             <select
               defaultValue={selectedPerson?.id ?? ""}
               onChange={handlePersonSelect}
-              className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white"
+              className="w-full rounded-lg border border-mist-300 px-3 py-2 text-sm text-ink-900 focus:outline-none focus:ring-2 focus:ring-nebula-600 bg-white"
             >
               <option value="">{tf("enterManually")}</option>
               {persons.map((p) => (
@@ -76,11 +76,11 @@ export function ChartForm({ persons = [], selectedPerson = null }: Props) {
 
         {/* Signed-in only: the public chart is always Placidus. */}
         <div className="sm:max-w-xs">
-          <label className="block text-xs font-medium text-stone-500 mb-1">{tf("houseSystem")}</label>
+          <label className="block text-xs font-medium text-ink-600 mb-1">{tf("houseSystem")}</label>
           <select
             name="house_system"
             defaultValue="placidus"
-            className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white"
+            className="w-full rounded-lg border border-mist-300 px-3 py-2 text-sm text-ink-900 focus:outline-none focus:ring-2 focus:ring-nebula-600 bg-white"
           >
             {HOUSE_SYSTEMS.map((hs) => (
               <option key={hs.value} value={hs.value}>{hs.label}</option>
@@ -98,7 +98,7 @@ export function ChartForm({ persons = [], selectedPerson = null }: Props) {
         <button
           type="submit"
           disabled={pending}
-          className="rounded-lg bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-white text-sm font-semibold px-5 py-2 transition-colors"
+          className="rounded-lg bg-nebula-600 hover:bg-nebula-700 disabled:opacity-50 text-white text-sm font-semibold px-5 py-2 transition-colors"
         >
           {pending ? tf("calculating") : tf("calculate")}
         </button>
@@ -119,7 +119,9 @@ export function ChartForm({ persons = [], selectedPerson = null }: Props) {
               result={state.data}
             />
           </div>
-          <ChartWheel data={state.data} />
+          <div className="rounded-xl border border-mist-200 bg-white p-3 sm:p-6">
+            <ChartWheel data={state.data} />
+          </div>
           <PlanetTable planets={state.data.planets} />
           <AspectTable aspects={state.data.aspects} />
           <ArabicPartsTable parts={state.data.arabic_parts} />

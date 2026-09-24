@@ -15,7 +15,7 @@ import { useAstroTranslator } from "@/app/lib/astro-i18n";
 
 const CoordMap = dynamic(() => import("@/app/_components/CoordMap").then(m => m.CoordMap), {
   ssr: false,
-  loading: () => <div className="w-full h-64 rounded-xl bg-stone-100 animate-pulse" />,
+  loading: () => <div className="w-full h-64 rounded-xl bg-mist-100 animate-pulse" />,
 });
 
 
@@ -68,20 +68,20 @@ export function TransitForm({ persons = [] }: Props) {
 
   return (
     <div className="space-y-8">
-      <form action={action} className="bg-white rounded-xl border border-stone-200 p-6 space-y-6">
-        <h2 className="text-sm font-semibold text-stone-700 uppercase tracking-wider">{tt("title")}</h2>
+      <form action={action} className="bg-white rounded-xl border border-mist-200 p-6 space-y-6">
+        <h2 className="text-sm font-semibold text-ink-700 uppercase tracking-wider">{tt("title")}</h2>
 
         {/* Natal section */}
         <div className="space-y-4">
-          <h3 className="text-xs font-semibold text-stone-500 uppercase tracking-wider border-b border-stone-100 pb-2">{tt("natalData")}</h3>
+          <h3 className="text-xs font-semibold text-ink-600 uppercase tracking-wider border-b border-mist-100 pb-2">{tt("natalData")}</h3>
 
           {persons.length > 0 && (
             <div>
-              <label className="block text-xs font-medium text-stone-500 mb-1">{tf("loadSavedPerson")}</label>
+              <label className="block text-xs font-medium text-ink-600 mb-1">{tf("loadSavedPerson")}</label>
               <select
                 defaultValue=""
                 onChange={handlePersonSelect}
-                className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white"
+                className="w-full rounded-lg border border-mist-300 px-3 py-2 text-sm text-ink-900 focus:outline-none focus:ring-2 focus:ring-nebula-600 bg-white"
               >
                 <option value="">{tf("enterManually")}</option>
                 {persons.map((p) => (
@@ -92,7 +92,7 @@ export function TransitForm({ persons = [] }: Props) {
           )}
 
           <div>
-            <label className="block text-xs font-medium text-stone-500 mb-1">{tt("natalCity")}</label>
+            <label className="block text-xs font-medium text-ink-600 mb-1">{tt("natalCity")}</label>
             <CityAutocomplete onSelect={handleNatalCity} placeholder={tt("searchNatalCity")} />
           </div>
 
@@ -100,82 +100,82 @@ export function TransitForm({ persons = [] }: Props) {
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="sm:col-span-1">
-              <label className="block text-xs font-medium text-stone-500 mb-1">{tt("birthDateTime")}</label>
+              <label className="block text-xs font-medium text-ink-600 mb-1">{tt("birthDateTime")}</label>
               <input
                 type="datetime-local"
                 name="natal_dt"
                 value={natalDt}
                 onChange={e => setNatalDt(e.target.value)}
                 required
-                className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400"
+                className="w-full rounded-lg border border-mist-300 px-3 py-2 text-sm text-ink-900 focus:outline-none focus:ring-2 focus:ring-nebula-600"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-stone-500 mb-1">{tf("latitude")}</label>
+              <label className="block text-xs font-medium text-ink-600 mb-1">{tf("latitude")}</label>
               <input type="number" name="natal_lat" step="0.0001" min="-90" max="90"
                 value={natalLat} onChange={e => setNatalLat(parseFloat(e.target.value) || 0)} required
-                className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400" />
+                className="w-full rounded-lg border border-mist-300 px-3 py-2 text-sm text-ink-900 focus:outline-none focus:ring-2 focus:ring-nebula-600" />
             </div>
             <div>
-              <label className="block text-xs font-medium text-stone-500 mb-1">{tf("longitude")}</label>
+              <label className="block text-xs font-medium text-ink-600 mb-1">{tf("longitude")}</label>
               <input type="number" name="natal_lon" step="0.0001" min="-180" max="180"
                 value={natalLon} onChange={e => setNatalLon(parseFloat(e.target.value) || 0)} required
-                className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400" />
+                className="w-full rounded-lg border border-mist-300 px-3 py-2 text-sm text-ink-900 focus:outline-none focus:ring-2 focus:ring-nebula-600" />
             </div>
             <div className="sm:col-span-3">
-              <label className="block text-xs font-medium text-stone-500 mb-1">{tt("birthTimezone")}</label>
+              <label className="block text-xs font-medium text-ink-600 mb-1">{tt("birthTimezone")}</label>
               <input type="text" name="natal_tz" value={natalTz}
                 onChange={e => setNatalTz(e.target.value)} placeholder={tf("timezonePlaceholder")}
-                className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400" />
+                className="w-full rounded-lg border border-mist-300 px-3 py-2 text-sm text-ink-900 focus:outline-none focus:ring-2 focus:ring-nebula-600" />
             </div>
           </div>
         </div>
 
         {/* Transit section */}
         <div className="space-y-4">
-          <h3 className="text-xs font-semibold text-stone-500 uppercase tracking-wider border-b border-stone-100 pb-2">{tt("transitDate")}</h3>
+          <h3 className="text-xs font-semibold text-ink-600 uppercase tracking-wider border-b border-mist-100 pb-2">{tt("transitDate")}</h3>
 
           <div>
-            <label className="block text-xs font-medium text-stone-500 mb-1">{tt("transitLocation")}</label>
+            <label className="block text-xs font-medium text-ink-600 mb-1">{tt("transitLocation")}</label>
             <CityAutocomplete onSelect={handleTransitCity} placeholder={tt("searchTransitCity")} />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="sm:col-span-1">
-              <label className="block text-xs font-medium text-stone-500 mb-1">{tt("transitDateTime")}</label>
+              <label className="block text-xs font-medium text-ink-600 mb-1">{tt("transitDateTime")}</label>
               <input
                 type="datetime-local"
                 name="transit_dt"
                 value={transitDt}
                 onChange={e => setTransitDt(e.target.value)}
                 required
-                className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400"
+                className="w-full rounded-lg border border-mist-300 px-3 py-2 text-sm text-ink-900 focus:outline-none focus:ring-2 focus:ring-nebula-600"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-stone-500 mb-1">{tf("latitude")}</label>
+              <label className="block text-xs font-medium text-ink-600 mb-1">{tf("latitude")}</label>
               <input type="number" name="transit_lat" step="0.0001" min="-90" max="90"
                 value={transitLat} onChange={e => setTransitLat(parseFloat(e.target.value) || 0)} required
-                className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400" />
+                className="w-full rounded-lg border border-mist-300 px-3 py-2 text-sm text-ink-900 focus:outline-none focus:ring-2 focus:ring-nebula-600" />
             </div>
             <div>
-              <label className="block text-xs font-medium text-stone-500 mb-1">{tf("longitude")}</label>
+              <label className="block text-xs font-medium text-ink-600 mb-1">{tf("longitude")}</label>
               <input type="number" name="transit_lon" step="0.0001" min="-180" max="180"
                 value={transitLon} onChange={e => setTransitLon(parseFloat(e.target.value) || 0)} required
-                className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400" />
+                className="w-full rounded-lg border border-mist-300 px-3 py-2 text-sm text-ink-900 focus:outline-none focus:ring-2 focus:ring-nebula-600" />
             </div>
             <div className="sm:col-span-3">
-              <label className="block text-xs font-medium text-stone-500 mb-1">{tt("transitTimezone")}</label>
+              <label className="block text-xs font-medium text-ink-600 mb-1">{tt("transitTimezone")}</label>
               <input type="text" name="transit_tz" value={transitTz}
                 onChange={e => setTransitTz(e.target.value)} placeholder={tf("timezonePlaceholder")}
-                className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400" />
+                className="w-full rounded-lg border border-mist-300 px-3 py-2 text-sm text-ink-900 focus:outline-none focus:ring-2 focus:ring-nebula-600" />
             </div>
           </div>
 
           <div className="w-48">
-            <label className="block text-xs font-medium text-stone-500 mb-1">{tf("houseSystem")}</label>
+            <label className="block text-xs font-medium text-ink-600 mb-1">{tf("houseSystem")}</label>
             <select name="house_system" defaultValue="placidus"
-              className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white">
+              className="w-full rounded-lg border border-mist-300 px-3 py-2 text-sm text-ink-900 focus:outline-none focus:ring-2 focus:ring-nebula-600 bg-white">
               {HOUSE_SYSTEMS.map(hs => <option key={hs.value} value={hs.value}>{hs.label}</option>)}
             </select>
           </div>
@@ -189,7 +189,7 @@ export function TransitForm({ persons = [] }: Props) {
         )}
 
         <button type="submit" disabled={pending}
-          className="rounded-lg bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-white text-sm font-semibold px-5 py-2 transition-colors">
+          className="rounded-lg bg-nebula-600 hover:bg-nebula-700 disabled:opacity-50 text-white text-sm font-semibold px-5 py-2 transition-colors">
           {pending ? tf("calculating") : tt("calculateButton")}
         </button>
       </form>
@@ -221,32 +221,34 @@ function TransitResultPanel({ data }: { data: TransitResult }) {
 
   return (
     <div className="space-y-6">
-      <ChartWheel data={data.natal} />
+      <div className="rounded-xl border border-mist-200 bg-white p-3 sm:p-6">
+        <ChartWheel data={data.natal} />
+      </div>
 
       {/* Transit planets table */}
-      <div className="bg-white rounded-xl border border-stone-200 overflow-hidden">
-        <div className="px-4 py-3 border-b border-stone-100 bg-stone-50">
-          <h3 className="text-xs font-semibold text-stone-500 uppercase tracking-wider">{tt("transitPlanets")}</h3>
+      <div className="bg-white rounded-xl border border-mist-200 overflow-hidden">
+        <div className="px-4 py-3 border-b border-mist-100 bg-mist-50">
+          <h3 className="text-xs font-semibold text-ink-600 uppercase tracking-wider">{tt("transitPlanets")}</h3>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-stone-100 bg-stone-50">
-                <th className="text-left px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">{th("planet")}</th>
-                <th className="text-left px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">{th("sign")}</th>
-                <th className="text-left px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">{th("degree")}</th>
-                <th className="text-left px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">{th("house")}</th>
+              <tr className="border-b border-mist-100 bg-mist-50">
+                <th className="text-left px-4 py-2 text-xs font-semibold text-ink-600 uppercase tracking-wider">{th("planet")}</th>
+                <th className="text-left px-4 py-2 text-xs font-semibold text-ink-600 uppercase tracking-wider">{th("sign")}</th>
+                <th className="text-left px-4 py-2 text-xs font-semibold text-ink-600 uppercase tracking-wider">{th("degree")}</th>
+                <th className="text-left px-4 py-2 text-xs font-semibold text-ink-600 uppercase tracking-wider">{th("house")}</th>
               </tr>
             </thead>
             <tbody>
               {Object.entries(data.transit).map(([name, p]) => (
-                <tr key={name} className="border-b border-stone-50 hover:bg-stone-50">
-                  <td className="px-4 py-2 font-medium text-stone-800">
+                <tr key={name} className="border-b border-mist-100 hover:bg-mist-50">
+                  <td className="px-4 py-2 font-medium text-ink-900">
                     {astro("planets", name)}{p.retrograde && <span className="ml-1 text-red-500 text-xs" title={ta("retrograde")}>℞</span>}
                   </td>
-                  <td className="px-4 py-2 text-stone-600">{astro("signs", p.sign)}</td>
-                  <td className="px-4 py-2 text-stone-600 font-mono text-xs">{fmtDeg(p.sign_degree)}</td>
-                  <td className="px-4 py-2 text-stone-500">{p.house}</td>
+                  <td className="px-4 py-2 text-ink-600">{astro("signs", p.sign)}</td>
+                  <td className="px-4 py-2 text-ink-600 font-mono text-xs">{fmtDeg(p.sign_degree)}</td>
+                  <td className="px-4 py-2 text-ink-600">{p.house}</td>
                 </tr>
               ))}
             </tbody>
@@ -256,31 +258,31 @@ function TransitResultPanel({ data }: { data: TransitResult }) {
 
       {/* Transit-to-natal aspects */}
       {data.aspects.length > 0 && (
-        <div className="bg-white rounded-xl border border-stone-200 overflow-hidden">
-          <div className="px-4 py-3 border-b border-stone-100 bg-stone-50">
-            <h3 className="text-xs font-semibold text-stone-500 uppercase tracking-wider">{tt("transitAspects")}</h3>
+        <div className="bg-white rounded-xl border border-mist-200 overflow-hidden">
+          <div className="px-4 py-3 border-b border-mist-100 bg-mist-50">
+            <h3 className="text-xs font-semibold text-ink-600 uppercase tracking-wider">{tt("transitAspects")}</h3>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-stone-100 bg-stone-50">
-                  <th className="text-left px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">{th("transit")}</th>
-                  <th className="text-center px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">{th("asp")}</th>
-                  <th className="text-left px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">{th("natal")}</th>
-                  <th className="text-right px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">{th("orb")}</th>
-                  <th className="text-center px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">{th("appSep")}</th>
+                <tr className="border-b border-mist-100 bg-mist-50">
+                  <th className="text-left px-4 py-2 text-xs font-semibold text-ink-600 uppercase tracking-wider">{th("transit")}</th>
+                  <th className="text-center px-4 py-2 text-xs font-semibold text-ink-600 uppercase tracking-wider">{th("asp")}</th>
+                  <th className="text-left px-4 py-2 text-xs font-semibold text-ink-600 uppercase tracking-wider">{th("natal")}</th>
+                  <th className="text-right px-4 py-2 text-xs font-semibold text-ink-600 uppercase tracking-wider">{th("orb")}</th>
+                  <th className="text-center px-4 py-2 text-xs font-semibold text-ink-600 uppercase tracking-wider">{th("appSep")}</th>
                 </tr>
               </thead>
               <tbody>
                 {data.aspects.map((a, i) => (
-                  <tr key={i} className="border-b border-stone-50 hover:bg-stone-50">
-                    <td className="px-4 py-1.5 text-stone-700">{astro("planets", a.transit)}</td>
-                    <td className="px-4 py-1.5 text-center text-stone-600">
+                  <tr key={i} className="border-b border-mist-100 hover:bg-mist-50">
+                    <td className="px-4 py-1.5 text-ink-700">{astro("planets", a.transit)}</td>
+                    <td className="px-4 py-1.5 text-center text-ink-600">
                       <span title={astro("aspects", a.aspect)}>{ASPECT_LABELS[a.aspect] ?? a.aspect}</span>
                     </td>
-                    <td className="px-4 py-1.5 text-stone-700">{astro("planets", a.natal)}</td>
-                    <td className="px-4 py-1.5 text-right text-stone-500 font-mono text-xs">{a.orb.toFixed(2)}°</td>
-                    <td className="px-4 py-1.5 text-center text-xs text-stone-400" title={a.applying ? ta("applying") : ta("separating")}>{a.applying ? "▲" : "▽"}</td>
+                    <td className="px-4 py-1.5 text-ink-700">{astro("planets", a.natal)}</td>
+                    <td className="px-4 py-1.5 text-right text-ink-600 font-mono text-xs">{a.orb.toFixed(2)}°</td>
+                    <td className="px-4 py-1.5 text-center text-xs text-ink-600" title={a.applying ? ta("applying") : ta("separating")}>{a.applying ? "▲" : "▽"}</td>
                   </tr>
                 ))}
               </tbody>

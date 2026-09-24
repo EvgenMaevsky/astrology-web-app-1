@@ -25,7 +25,7 @@ export function PersonList({ persons }: { persons: Person[] }) {
 
   if (persons.length === 0) {
     return (
-      <div className="text-center py-12 text-stone-400 text-sm">
+      <div className="text-center py-12 text-ink-600 text-sm">
         {t("empty")}
       </div>
     );
@@ -34,24 +34,24 @@ export function PersonList({ persons }: { persons: Person[] }) {
   return (
     <ul className="space-y-3">
       {persons.map((p) => (
-        <li key={p.id} className="bg-white rounded-xl border border-stone-200 p-4 flex items-start justify-between gap-4 shadow-sm">
+        <li key={p.id} className="bg-white rounded-xl border border-mist-200 p-4 flex items-start justify-between gap-4 shadow-sm">
           <div className="min-w-0">
-            <p className="font-semibold text-stone-800 truncate">{p.name}</p>
-            <p className="text-xs text-stone-500 mt-0.5">{fmtDate(p.birth_dt, locale)}</p>
+            <p className="font-semibold text-ink-900 truncate">{p.name}</p>
+            <p className="text-xs text-ink-600 mt-0.5">{fmtDate(p.birth_dt, locale)}</p>
             {p.city_label && (
-              <p className="text-xs text-stone-400 mt-0.5">{p.city_label}</p>
+              <p className="text-xs text-ink-600 mt-0.5">{p.city_label}</p>
             )}
           </div>
           <div className="flex gap-2 shrink-0">
             <Link
               href={`/charts?person=${p.id}`}
-              className="rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold px-3 py-1.5 transition-colors"
+              className="rounded-lg bg-nebula-600 hover:bg-nebula-700 text-white text-xs font-semibold px-3 py-1.5 transition-colors"
             >
               {t("chart")}
             </Link>
             <button
               onClick={() => handleDelete(p.id, p.name)}
-              className="rounded-lg border border-stone-200 hover:bg-red-50 hover:border-red-200 hover:text-red-600 text-stone-500 text-xs font-medium px-3 py-1.5 transition-colors"
+              className="rounded-lg border border-mist-200 hover:bg-red-50 hover:border-red-200 hover:text-red-600 text-ink-600 text-xs font-medium px-3 py-1.5 transition-colors"
             >
               {t("delete")}
             </button>

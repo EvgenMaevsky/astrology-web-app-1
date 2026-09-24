@@ -47,6 +47,7 @@
   --color-dusk: #9A95C9;
   --color-nebula-500: #7C5CFF;
   --color-nebula-600: #6C4DF5;
+  --color-nebula-700: #5A3BE6; /* hover of the dashboard's primary button; white on it 6.6:1 */
   --color-azure-500: #4F8BFF;
   --color-azure-600: #3F7BF2;
   --color-gold-50: #FBF1DC;
@@ -54,9 +55,11 @@
   --color-gold-800: #7A5410;
   --color-gold-950: #2A1D05;
   --color-mist-50: #F6F4FF;
+  --color-mist-100: #EFECFD;
   --color-mist-200: #E4E0FA;
   --color-mist-300: #D6D0F5;
   --color-ink-600: #5B5690;
+  --color-ink-700: #3A3572;
   --color-ink-900: #1B1840;
 
   --font-display: var(--font-cormorant), Georgia, serif;

@@ -85,9 +85,11 @@ export const THEME: Record<Tone, ThemeRecipes> = {
       "w-full rounded-lg border border-mist-300 bg-white px-3.5 py-2.5 text-sm text-ink-900 " +
       "placeholder:text-ink-600 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-nebula-600",
     // white on nebula-600 ≈ 5.2:1
+    // Hover darkens rather than brightens: a lighter violet would take the
+    // white label below 5:1.
     primaryButton:
       "rounded-lg bg-nebula-600 px-4 py-2.5 text-sm font-semibold text-white transition " +
-      "hover:brightness-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-nebula-600 " +
+      "hover:bg-nebula-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-nebula-600 " +
       "focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60",
     secondaryButton:
       "rounded-lg border border-mist-300 bg-white px-4 py-2.5 text-sm font-medium text-ink-900 transition " +

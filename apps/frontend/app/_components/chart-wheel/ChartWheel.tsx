@@ -3,7 +3,9 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import {
+  ANGLE_GOLD,
   ASPECT_COLORS,
+  CHROME,
   ASPECT_GLYPHS,
   ELEMENT_COLORS,
   ELEMENT_INDEX,
@@ -78,7 +80,7 @@ function ZodiacRing({ asc }: { asc: number }) {
           d={sectorPath(CX, CY, R_ZODIAC_I, R_ZODIAC_O, startRad, endRad)}
           fill={ELEMENT_COLORS[elemIdx]}
           fillOpacity={0.15}
-          stroke="#777"
+          stroke={CHROME.soft}
           strokeWidth={1.2}
         />
         <text
@@ -115,7 +117,7 @@ function DegreeTicks({ asc }: { asc: number }) {
       <line
         key={deg}
         x1={a.x} y1={a.y} x2={b.x} y2={b.y}
-        stroke={deg % 10 === 0 ? "#555" : "#aaa"}
+        stroke={deg % 10 === 0 ? CHROME.mid : CHROME.light}
         strokeWidth={deg % 10 === 0 ? 1.4 : deg % 5 === 0 ? 1 : 0.7}
       />
     );
@@ -147,9 +149,9 @@ function HouseRing({ houses, asc }: { houses: number[]; asc: number }) {
           <g key={i}>
             <path
               d={sectorPath(CX, CY, R_HOUSE_I, R_HOUSE_O, startRad, endRad)}
-              fill={isAngular ? "#8b6914" : "transparent"}
+              fill={isAngular ? ANGLE_GOLD : "transparent"}
               fillOpacity={isAngular ? 0.08 : 0}
-              stroke={isAngular ? "#8b6914" : "#999"}
+              stroke={isAngular ? ANGLE_GOLD : CHROME.light}
               strokeWidth={isAngular ? 2 : 1}
             />
             {/* Cusp tick — runs from the house ring out to the outer circle */}
@@ -159,7 +161,7 @@ function HouseRing({ houses, asc }: { houses: number[]; asc: number }) {
               return (
                 <line
                   x1={p1.x} y1={p1.y} x2={p2.x} y2={p2.y}
-                  stroke={isAngular ? "#8b6914" : "#333"}
+                  stroke={isAngular ? ANGLE_GOLD : CHROME.strong}
                   strokeWidth={isAngular ? 3.5 : 1.4}
                 />
               );
@@ -172,7 +174,7 @@ function HouseRing({ houses, asc }: { houses: number[]; asc: number }) {
                 <text
                   x={pt.x} y={pt.y}
                   textAnchor="middle" dominantBaseline="central"
-                  fontSize={10} fill="#555" fontFamily="sans-serif"
+                  fontSize={10} fill={CHROME.mid} fontFamily="sans-serif"
                 >
                   {fmtDegMin(lon)}
                 </text>
@@ -182,7 +184,7 @@ function HouseRing({ houses, asc }: { houses: number[]; asc: number }) {
             <text
               x={midPt.x} y={midPt.y}
               textAnchor="middle" dominantBaseline="central"
-              fontSize={13} fill="#666" fontFamily="sans-serif"
+              fontSize={13} fill={CHROME.mid} fontFamily="sans-serif"
             >
               {i + 1}
             </text>
@@ -234,7 +236,7 @@ function AspectLines({
         const a2 = eclToSvg(p2.longitude, asc);
         const pt1 = polar(CX, CY, R_INNER, a1);
         const pt2 = polar(CX, CY, R_INNER, a2);
-        const color = ASPECT_COLORS[asp.aspect] ?? "#999";
+        const color = ASPECT_COLORS[asp.aspect] ?? CHROME.light;
         const opacity = Math.max(0.25, 1 - asp.orb / 10);
         const mid = { x: (pt1.x + pt2.x) / 2, y: (pt1.y + pt2.y) / 2 };
         const len = Math.hypot(pt2.x - pt1.x, pt2.y - pt1.y);
@@ -344,15 +346,15 @@ function PlanetLayer({
             style={{ cursor: "default" }}
           >
             {/* Exact position dot, hugging the house ring */}
-            <circle cx={dot.x} cy={dot.y} r={3.2} fill="#333" />
+            <circle cx={dot.x} cy={dot.y} r={3.2} fill={CHROME.strong} />
             {/* Dot → glyph connector */}
-            <line x1={c1.x} y1={c1.y} x2={c2.x} y2={c2.y} stroke="#aaa" strokeWidth={1} />
+            <line x1={c1.x} y1={c1.y} x2={c2.x} y2={c2.y} stroke={CHROME.light} strokeWidth={1} />
             {/* Glyph */}
             <text
               x={pt.x} y={pt.y}
               textAnchor="middle" dominantBaseline="central"
               fontFamily="serif" fontSize={24}
-              fill={p.retrograde ? "#c0392b" : "#1a1a2e"}
+              fill={p.retrograde ? "#c0392b" : CHROME.strong}
             >
               {glyph}
             </text>
@@ -365,8 +367,8 @@ function PlanetLayer({
 
 function AngleMarkers({ angles, asc }: { angles: ChartData["angles"]; asc: number }) {
   const markers = [
-    { label: "ASC", lon: angles.asc, color: "#8b6914" },
-    { label: "DSC", lon: angles.dsc, color: "#8b6914" },
+    { label: "ASC", lon: angles.asc, color: ANGLE_GOLD },
+    { label: "DSC", lon: angles.dsc, color: ANGLE_GOLD },
     { label: "MC",  lon: angles.mc,  color: "#1a5c8e" },
     { label: "IC",  lon: angles.ic,  color: "#1a5c8e" },
   ];
@@ -428,8 +430,8 @@ export function ChartWheel({ data }: { data: ChartData }) {
         <AspectLines planets={data.planets} aspects={data.aspects} asc={asc} onHover={setTooltip} />
 
         {/* Inner circle */}
-        <circle cx={CX} cy={CY} r={R_INNER} fill="none" stroke="#ccc" strokeWidth={1.2} />
-        <circle cx={CX} cy={CY} r={R_HOUSE_I} fill="none" stroke="#bbb" strokeWidth={1.2} />
+        <circle cx={CX} cy={CY} r={R_INNER} fill="none" stroke={CHROME.faint} strokeWidth={1.2} />
+        <circle cx={CX} cy={CY} r={R_HOUSE_I} fill="none" stroke={CHROME.faint} strokeWidth={1.2} />
 
         {/* House ring */}
         <HouseRing houses={data.houses} asc={asc} />
@@ -439,8 +441,8 @@ export function ChartWheel({ data }: { data: ChartData }) {
 
         {/* Outer ring border */}
         <DegreeTicks asc={asc} />
-        <circle cx={CX} cy={CY} r={R_ZODIAC_O} fill="none" stroke="#555" strokeWidth={2.2} />
-        <circle cx={CX} cy={CY} r={R_OUTER} fill="none" stroke="#333" strokeWidth={3} />
+        <circle cx={CX} cy={CY} r={R_ZODIAC_O} fill="none" stroke={CHROME.mid} strokeWidth={2.2} />
+        <circle cx={CX} cy={CY} r={R_OUTER} fill="none" stroke={CHROME.strong} strokeWidth={3} />
 
         {/* Angle markers (ASC/DSC/MC/IC) */}
         <AngleMarkers angles={data.angles} asc={asc} />
@@ -459,14 +461,14 @@ export function ChartWheel({ data }: { data: ChartData }) {
               <rect
                 x={tx} y={ty}
                 width={tipW} height={tipH}
-                rx={5} fill="white" stroke="#ccc" strokeWidth={1}
+                rx={5} fill="white" stroke={CHROME.faint} strokeWidth={1}
                 filter="url(#shadow)"
               />
               {tooltip.text.map((line, i) => (
                 <text
                   key={i}
                   x={tx + 9} y={ty + 14 + i * 16}
-                  fontSize={11} fill="#222" fontFamily="sans-serif"
+                  fontSize={11} fill={CHROME.strong} fontFamily="sans-serif"
                   dominantBaseline="middle"
                 >
                   {line}

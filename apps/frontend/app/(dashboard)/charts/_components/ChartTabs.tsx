@@ -32,15 +32,15 @@ export function ChartTabs({ persons, selectedPerson }: Props) {
 
   return (
     <div className="space-y-6">
-      <div className="flex gap-1 bg-stone-100 p-1 rounded-xl w-fit">
+      <div className="flex gap-1 bg-mist-100 p-1 rounded-xl w-fit">
         {TAB_IDS.map((id) => (
           <button
             key={id}
             onClick={() => setActive(id)}
             className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${
               active === id
-                ? "bg-white text-stone-900 shadow-sm"
-                : "text-stone-500 hover:text-stone-700"
+                ? "bg-white text-ink-900 shadow-sm"
+                : "text-ink-600 hover:text-ink-900"
             }`}
           >
             {t(TAB_LABEL_KEYS[id])}

@@ -20,8 +20,8 @@ export default async function ChartsPage({
 
   return (
     <div className="max-w-4xl mx-auto space-y-2">
-      <h1 className="text-xl font-semibold text-stone-800">{t("pageTitle")}</h1>
-      <p className="text-sm text-stone-500 pb-2">{t("pageSubtitle")}</p>
+      <h1 className="font-display text-3xl font-semibold text-ink-900">{t("pageTitle")}</h1>
+      <p className="text-sm text-ink-600 pb-2">{t("pageSubtitle")}</p>
       <ChartTabs persons={persons} selectedPerson={selected} />
     </div>
   );

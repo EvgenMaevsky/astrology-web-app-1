@@ -9,12 +9,12 @@ import { saveSeoSettings } from "@/app/actions/site-settings";
 import type { SiteSettings } from "@/app/lib/site-settings";
 
 const INPUT_CLASS =
-  "w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-800 " +
-  "focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500";
+  "w-full rounded-lg border border-mist-300 px-3 py-2 text-sm text-ink-900 " +
+  "focus:border-nebula-600 focus:outline-none focus:ring-1 focus:ring-nebula-600";
 
-const CARD_CLASS = "bg-white rounded-xl border border-stone-200 p-6 space-y-4";
+const CARD_CLASS = "bg-white rounded-xl border border-mist-200 p-6 space-y-4";
 
-const HEADING_CLASS = "text-sm font-semibold text-stone-700 uppercase tracking-wider";
+const HEADING_CLASS = "text-sm font-semibold text-ink-700 uppercase tracking-wider";
 
 function Field({
   label,
@@ -27,9 +27,9 @@ function Field({
 }) {
   return (
     <label className="block space-y-1">
-      <span className="text-sm font-medium text-stone-700">{label}</span>
+      <span className="text-sm font-medium text-ink-700">{label}</span>
       {children}
-      {hint && <span className="block text-xs text-stone-400">{hint}</span>}
+      {hint && <span className="block text-xs text-ink-600">{hint}</span>}
     </label>
   );
 }
@@ -49,7 +49,7 @@ function ImageField({
 
   return (
     <div className="space-y-2">
-      <span className="text-sm font-medium text-stone-700">{label}</span>
+      <span className="text-sm font-medium text-ink-700">{label}</span>
 
       {currentUrl && (
         <div className="flex items-center gap-3">
@@ -60,10 +60,10 @@ function ImageField({
           <img
             src={currentUrl}
             alt={label}
-            className="h-10 w-10 rounded border border-stone-200 bg-stone-50 object-contain"
+            className="h-10 w-10 rounded border border-mist-200 bg-mist-50 object-contain"
           />
-          <label className="flex items-center gap-2 text-sm text-stone-600">
-            <input type="checkbox" name={`remove_${kind}`} className="accent-amber-600" />
+          <label className="flex items-center gap-2 text-sm text-ink-600">
+            <input type="checkbox" name={`remove_${kind}`} className="accent-nebula-600" />
             {t("removeImage")}
           </label>
         </div>
@@ -73,9 +73,9 @@ function ImageField({
         type="file"
         name={kind}
         accept="image/png,image/jpeg,image/x-icon,image/vnd.microsoft.icon,image/webp"
-        className="block w-full text-sm text-stone-600 file:mr-3 file:rounded-lg file:border file:border-stone-300 file:bg-white file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-stone-700 hover:file:bg-stone-50"
+        className="block w-full text-sm text-ink-600 file:mr-3 file:rounded-lg file:border file:border-mist-300 file:bg-white file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-ink-700 hover:file:bg-mist-50"
       />
-      <span className="block text-xs text-stone-400">{hint}</span>
+      <span className="block text-xs text-ink-600">{hint}</span>
     </div>
   );
 }
@@ -158,16 +158,16 @@ export function SeoForm({
 
       <div className={CARD_CLASS}>
         <h2 className={HEADING_CLASS}>{t("indexing")}</h2>
-        <label className="flex items-start gap-2.5 text-sm text-stone-700">
+        <label className="flex items-start gap-2.5 text-sm text-ink-700">
           <input
             type="checkbox"
             name="noindex"
             defaultChecked={settings.noindex}
-            className="mt-0.5 accent-amber-600"
+            className="mt-0.5 accent-nebula-600"
           />
           <span>
             {t("noindex")}
-            <span className="block text-xs text-stone-400">{t("noindexHint")}</span>
+            <span className="block text-xs text-ink-600">{t("noindexHint")}</span>
           </span>
         </label>
       </div>
@@ -176,7 +176,7 @@ export function SeoForm({
         <button
           type="submit"
           disabled={pending}
-          className="rounded-lg bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-white text-sm font-medium px-4 py-2 transition-colors"
+          className="rounded-lg bg-nebula-600 hover:bg-nebula-700 disabled:opacity-50 text-white text-sm font-medium px-4 py-2 transition-colors"
         >
           {pending ? t("saving") : t("save")}
         </button>

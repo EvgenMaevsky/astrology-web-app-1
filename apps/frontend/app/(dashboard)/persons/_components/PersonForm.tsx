@@ -9,7 +9,7 @@ import { CityAutocomplete } from "@/app/_components/CityAutocomplete";
 
 const CoordMap = dynamic(
   () => import("@/app/_components/CoordMap").then((m) => m.CoordMap),
-  { ssr: false, loading: () => <div className="w-full h-48 rounded-xl bg-stone-100 animate-pulse" /> }
+  { ssr: false, loading: () => <div className="w-full h-48 rounded-xl bg-mist-100 animate-pulse" /> }
 );
 
 const initialState: PersonFormState = { status: "idle" };
@@ -45,18 +45,18 @@ export function PersonForm({ onCreated }: Props) {
   return (
     <form action={action} className="space-y-4">
       <div>
-        <label className="block text-xs font-medium text-stone-500 mb-1">{t("fullName")}</label>
+        <label className="block text-xs font-medium text-ink-600 mb-1">{t("fullName")}</label>
         <input
           type="text"
           name="name"
           required
           placeholder={t("fullNamePlaceholder")}
-          className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400"
+          className="w-full rounded-lg border border-mist-300 px-3 py-2 text-sm text-ink-900 focus:outline-none focus:ring-2 focus:ring-nebula-600"
         />
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-stone-500 mb-1">{t("city")}</label>
+        <label className="block text-xs font-medium text-ink-600 mb-1">{t("city")}</label>
         <CityAutocomplete onSelect={handleCitySelect} placeholder={t("searchCityPlaceholder")} />
       </div>
 
@@ -64,18 +64,18 @@ export function PersonForm({ onCreated }: Props) {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="sm:col-span-2">
-          <label className="block text-xs font-medium text-stone-500 mb-1">{t("dateTime")}</label>
+          <label className="block text-xs font-medium text-ink-600 mb-1">{t("dateTime")}</label>
           <input
             type="datetime-local"
             name="birth_dt"
             defaultValue="1990-01-01T12:00"
             required
-            className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400"
+            className="w-full rounded-lg border border-mist-300 px-3 py-2 text-sm text-ink-900 focus:outline-none focus:ring-2 focus:ring-nebula-600"
           />
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-stone-500 mb-1">{t("latitude")}</label>
+          <label className="block text-xs font-medium text-ink-600 mb-1">{t("latitude")}</label>
           <input
             type="number"
             name="lat"
@@ -85,12 +85,12 @@ export function PersonForm({ onCreated }: Props) {
             value={lat}
             onChange={(e) => setLat(parseFloat(e.target.value) || 0)}
             required
-            className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400"
+            className="w-full rounded-lg border border-mist-300 px-3 py-2 text-sm text-ink-900 focus:outline-none focus:ring-2 focus:ring-nebula-600"
           />
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-stone-500 mb-1">{t("longitude")}</label>
+          <label className="block text-xs font-medium text-ink-600 mb-1">{t("longitude")}</label>
           <input
             type="number"
             name="lon"
@@ -100,19 +100,19 @@ export function PersonForm({ onCreated }: Props) {
             value={lon}
             onChange={(e) => setLon(parseFloat(e.target.value) || 0)}
             required
-            className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400"
+            className="w-full rounded-lg border border-mist-300 px-3 py-2 text-sm text-ink-900 focus:outline-none focus:ring-2 focus:ring-nebula-600"
           />
         </div>
 
         <div className="sm:col-span-2">
-          <label className="block text-xs font-medium text-stone-500 mb-1">{t("timezone")}</label>
+          <label className="block text-xs font-medium text-ink-600 mb-1">{t("timezone")}</label>
           <input
             type="text"
             name="timezone"
             value={timezone}
             onChange={(e) => setTimezone(e.target.value)}
             required
-            className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400"
+            className="w-full rounded-lg border border-mist-300 px-3 py-2 text-sm text-ink-900 focus:outline-none focus:ring-2 focus:ring-nebula-600"
           />
         </div>
       </div>
@@ -131,7 +131,7 @@ export function PersonForm({ onCreated }: Props) {
       <button
         type="submit"
         disabled={pending}
-        className="rounded-lg bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-white text-sm font-semibold px-5 py-2 transition-colors"
+        className="rounded-lg bg-nebula-600 hover:bg-nebula-700 disabled:opacity-50 text-white text-sm font-semibold px-5 py-2 transition-colors"
       >
         {pending ? t("saving") : t("save")}
       </button>

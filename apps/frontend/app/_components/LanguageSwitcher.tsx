@@ -7,7 +7,8 @@ import type { Locale } from "@/i18n/request";
 
 const TONES = {
   // The dashboard and the beige pages until E7c moves them over.
-  light: { active: "font-semibold text-amber-700", idle: "text-stone-400 hover:text-stone-600" },
+  // nebula-700 / ink-600 on white ≈ 6.6 / 6.6:1
+  light: { active: "font-semibold text-nebula-700", idle: "text-ink-600 hover:text-ink-900" },
   // The dark marketing surfaces (docs/plans/2026-09-24-e7-redesign-design.md).
   dark: { active: "font-semibold text-gold-400", idle: "text-dusk hover:text-starlight" },
 } as const;

@@ -45,8 +45,8 @@ export default async function BillingPage({
   return (
     <div className="space-y-6 max-w-2xl">
       <div>
-        <h1 className="text-2xl font-semibold text-stone-900">{t("title")}</h1>
-        <p className="mt-1 text-sm text-stone-500">{t("subtitle")}</p>
+        <h1 className="font-display text-3xl font-semibold text-ink-900">{t("title")}</h1>
+        <p className="mt-1 text-sm text-ink-600">{t("subtitle")}</p>
       </div>
 
       {(success || monopayUpgraded) && (
@@ -56,18 +56,18 @@ export default async function BillingPage({
       )}
 
       {monopay && !monopayUpgraded && (
-        <div className="rounded-lg bg-stone-50 border border-stone-200 px-4 py-3 text-sm text-stone-600">
+        <div className="rounded-lg bg-mist-50 border border-mist-200 px-4 py-3 text-sm text-ink-600">
           {t("monopayPending")}
         </div>
       )}
 
       {/* Current plan */}
-      <div className="bg-white rounded-xl border border-stone-200 p-6 space-y-4">
-        <h2 className="text-sm font-semibold text-stone-700 uppercase tracking-wider">{t("currentPlan")}</h2>
+      <div className="bg-white rounded-xl border border-mist-200 p-6 space-y-4">
+        <h2 className="text-sm font-semibold text-ink-700 uppercase tracking-wider">{t("currentPlan")}</h2>
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-2xl font-bold text-stone-900">{planDetails?.name ?? "Free"}</p>
-            <p className="text-sm text-stone-500 mt-1">
+            <p className="text-2xl font-bold text-ink-900">{planDetails?.name ?? "Free"}</p>
+            <p className="text-sm text-ink-600 mt-1">
               {planDetails?.price_usd === 0
                 ? t("freeForever")
                 : sub?.provider === "monopay" && periodEndDate
@@ -83,7 +83,7 @@ export default async function BillingPage({
             ) : (
               <Link
                 href="/pricing"
-                className="rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-sm font-semibold px-4 py-2 transition-colors"
+                className="rounded-lg bg-gold-400 hover:brightness-105 text-gold-950 text-sm font-semibold px-4 py-2 transition-colors"
               >
                 {t("upgrade")}
               </Link>
@@ -94,8 +94,8 @@ export default async function BillingPage({
         {planDetails && (
           <ul className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-1.5">
             {planDetails.features.map((f) => (
-              <li key={f} className="flex items-start gap-2 text-sm text-stone-600">
-                <span className="text-amber-500 mt-0.5">✓</span>{translateFeature(f)}
+              <li key={f} className="flex items-start gap-2 text-sm text-ink-600">
+                <span className="text-nebula-600 mt-0.5">✓</span>{translateFeature(f)}
               </li>
             ))}
           </ul>
@@ -104,26 +104,26 @@ export default async function BillingPage({
 
       {/* Usage */}
       {usage && (
-        <div className="bg-white rounded-xl border border-stone-200 p-6 space-y-3">
-          <h2 className="text-sm font-semibold text-stone-700 uppercase tracking-wider">{t("usage")}</h2>
+        <div className="bg-white rounded-xl border border-mist-200 p-6 space-y-3">
+          <h2 className="text-sm font-semibold text-ink-700 uppercase tracking-wider">{t("usage")}</h2>
           <div className="flex items-center gap-4">
             <div>
-              <p className="text-2xl font-bold text-stone-900">{usage.used}</p>
-              <p className="text-xs text-stone-500">
+              <p className="text-2xl font-bold text-ink-900">{usage.used}</p>
+              <p className="text-xs text-ink-600">
                 {t("chartsToday")}{usage.limit != null ? ` ${t("limitSuffix", { limit: usage.limit })}` : ""}
               </p>
             </div>
             {usage.limit != null && (
-              <div className="flex-1 bg-stone-100 rounded-full h-2 overflow-hidden">
+              <div className="flex-1 bg-mist-100 rounded-full h-2 overflow-hidden">
                 <div
-                  className="bg-amber-500 h-full rounded-full transition-all"
+                  className="bg-nebula-600 h-full rounded-full transition-all"
                   style={{ width: `${Math.min(100, (usage.used / usage.limit) * 100)}%` }}
                 />
               </div>
             )}
           </div>
           {usage.plan === "free" && usage.limit != null && usage.used >= usage.limit && (
-            <p className="text-sm text-amber-700 bg-amber-50 rounded-lg px-3 py-2">
+            <p className="text-sm text-gold-800 bg-gold-50 rounded-lg px-3 py-2">
               {t("dailyLimitReached")}{" "}
               <Link href="/pricing" className="underline font-medium">{t("upgradeToPro")}</Link>{" "}
               {t("forUnlimitedCharts")}

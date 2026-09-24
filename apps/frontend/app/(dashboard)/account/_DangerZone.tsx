@@ -18,7 +18,7 @@ export function DangerZone({ hasPassword, email }: { hasPassword: boolean; email
     <div className="bg-white rounded-xl border border-red-200 p-6 space-y-4">
       <div>
         <h2 className="text-sm font-semibold text-red-700 uppercase tracking-wider">{t("dangerZone")}</h2>
-        <p className="mt-1 text-sm text-stone-500">
+        <p className="mt-1 text-sm text-ink-600">
           {t("dangerZoneText")}
         </p>
       </div>
@@ -35,7 +35,7 @@ export function DangerZone({ hasPassword, email }: { hasPassword: boolean; email
         <form action={action} className="space-y-3">
           {hasPassword ? (
             <>
-              <label htmlFor="delete-password" className="block text-sm font-medium text-stone-700">
+              <label htmlFor="delete-password" className="block text-sm font-medium text-ink-700">
                 {t("confirmPasswordLabel")}
               </label>
               <input
@@ -44,23 +44,23 @@ export function DangerZone({ hasPassword, email }: { hasPassword: boolean; email
                 type="password"
                 autoComplete="current-password"
                 required
-                className="w-full max-w-sm rounded-lg border border-stone-300 bg-white px-3.5 py-2.5 text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent text-sm"
+                className="w-full max-w-sm rounded-lg border border-mist-300 bg-white px-3.5 py-2.5 text-ink-900 placeholder:text-ink-600 focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent text-sm"
                 placeholder="••••••••"
               />
             </>
           ) : (
             <>
-              <label htmlFor="delete-email" className="block text-sm font-medium text-stone-700">
+              <label htmlFor="delete-email" className="block text-sm font-medium text-ink-700">
                 {t("confirmEmail")}
               </label>
-              <p className="text-xs text-stone-400">{t("noPasswordHint")}</p>
+              <p className="text-xs text-ink-600">{t("noPasswordHint")}</p>
               <input
                 id="delete-email"
                 name="email"
                 type="email"
                 autoComplete="off"
                 required
-                className="w-full max-w-sm rounded-lg border border-stone-300 bg-white px-3.5 py-2.5 text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent text-sm"
+                className="w-full max-w-sm rounded-lg border border-mist-300 bg-white px-3.5 py-2.5 text-ink-900 placeholder:text-ink-600 focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent text-sm"
                 placeholder={email}
               />
             </>
@@ -84,7 +84,7 @@ export function DangerZone({ hasPassword, email }: { hasPassword: boolean; email
               type="button"
               onClick={() => setConfirming(false)}
               disabled={pending}
-              className="rounded-lg border border-stone-300 text-stone-600 hover:bg-stone-50 text-sm font-medium px-4 py-2 transition-colors"
+              className="rounded-lg border border-mist-300 text-ink-600 hover:bg-mist-50 text-sm font-medium px-4 py-2 transition-colors"
             >
               {t("cancel")}
             </button>

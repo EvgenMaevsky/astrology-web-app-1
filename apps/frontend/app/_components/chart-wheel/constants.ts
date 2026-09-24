@@ -47,6 +47,21 @@ export const ASPECT_GLYPHS: Record<string, string> = {
   biquintile:   "bQ",
 };
 
+// Neutral "chrome" of the wheel — rings, ticks, cusps, labels — in the
+// dashboard's ink/mist palette (docs/plans/2026-09-24-e7-redesign-design.md §6).
+// Element and aspect colours below are semantic and deliberately untouched.
+// Contrast on white: strong 16.8, mid 6.6, soft 3.4 (≥ 3:1 for graphics).
+export const CHROME = {
+  strong: "#1B1840", // ink-900: outer ring, cusp lines, planet glyphs and dots
+  mid: "#5B5690",    // ink-600: zodiac ring edge, 10° ticks, cusp degrees, house numbers
+  soft: "#8A85B8",   // sign sector borders
+  light: "#A49ED0",  // 1° ticks, house-ring cusps, planet-to-dot connectors
+  faint: "#CBC5EE",  // inner rings, degree-label boxes
+} as const;
+
+// ASC/DSC and the angular cusps: gold marks what matters most (gold-800).
+export const ANGLE_GOLD = "#7A5410";
+
 // Element colors for zodiac rings
 export const ELEMENT_COLORS: Record<number, string> = {
   0: "#e05c3a", // Fire  — Aries, Leo, Sagittarius

@@ -14,7 +14,7 @@ import { SaveChartButton } from "./SaveChartButton";
 
 const CoordMap = dynamic(() => import("@/app/_components/CoordMap").then(m => m.CoordMap), {
   ssr: false,
-  loading: () => <div className="w-full h-64 rounded-xl bg-stone-100 animate-pulse" />,
+  loading: () => <div className="w-full h-64 rounded-xl bg-mist-100 animate-pulse" />,
 });
 
 
@@ -52,17 +52,17 @@ export function SolarReturnForm({ persons = [] }: Props) {
 
   return (
     <div className="space-y-8">
-      <form action={action} className="bg-white rounded-xl border border-stone-200 p-6 space-y-5">
-        <h2 className="text-sm font-semibold text-stone-700 uppercase tracking-wider">{ts("title")}</h2>
-        <p className="text-xs text-stone-400">{ts("subtitle")}</p>
+      <form action={action} className="bg-white rounded-xl border border-mist-200 p-6 space-y-5">
+        <h2 className="text-sm font-semibold text-ink-700 uppercase tracking-wider">{ts("title")}</h2>
+        <p className="text-xs text-ink-600">{ts("subtitle")}</p>
 
         {persons.length > 0 && (
           <div>
-            <label className="block text-xs font-medium text-stone-500 mb-1">{tf("loadSavedPerson")}</label>
+            <label className="block text-xs font-medium text-ink-600 mb-1">{tf("loadSavedPerson")}</label>
             <select
               defaultValue=""
               onChange={handlePersonSelect}
-              className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white"
+              className="w-full rounded-lg border border-mist-300 px-3 py-2 text-sm text-ink-900 focus:outline-none focus:ring-2 focus:ring-nebula-600 bg-white"
             >
               <option value="">{tf("enterManually")}</option>
               {persons.map((p) => (
@@ -73,7 +73,7 @@ export function SolarReturnForm({ persons = [] }: Props) {
         )}
 
         <div>
-          <label className="block text-xs font-medium text-stone-500 mb-1">{ts("location")}</label>
+          <label className="block text-xs font-medium text-ink-600 mb-1">{ts("location")}</label>
           <CityAutocomplete onSelect={handleCitySelect} placeholder={tf("city")} />
         </div>
 
@@ -81,24 +81,24 @@ export function SolarReturnForm({ persons = [] }: Props) {
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
-            <label className="block text-xs font-medium text-stone-500 mb-1">{ts("birthDateTime")}</label>
+            <label className="block text-xs font-medium text-ink-600 mb-1">{ts("birthDateTime")}</label>
             <input
               type="datetime-local"
               name="birth_dt"
               value={birthDt}
               onChange={e => setBirthDt(e.target.value)}
               required
-              className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400"
+              className="w-full rounded-lg border border-mist-300 px-3 py-2 text-sm text-ink-900 focus:outline-none focus:ring-2 focus:ring-nebula-600"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-stone-500 mb-1">{ts("birthTimezone")}</label>
+            <label className="block text-xs font-medium text-ink-600 mb-1">{ts("birthTimezone")}</label>
             <input type="text" name="timezone" value={birthTz}
               onChange={e => setBirthTz(e.target.value)} placeholder={tf("timezonePlaceholder")}
-              className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400" />
+              className="w-full rounded-lg border border-mist-300 px-3 py-2 text-sm text-ink-900 focus:outline-none focus:ring-2 focus:ring-nebula-600" />
           </div>
           <div>
-            <label className="block text-xs font-medium text-stone-500 mb-1">{ts("returnYear")}</label>
+            <label className="block text-xs font-medium text-ink-600 mb-1">{ts("returnYear")}</label>
             <input
               type="number"
               name="year"
@@ -107,27 +107,27 @@ export function SolarReturnForm({ persons = [] }: Props) {
               min="1900"
               max="2100"
               required
-              className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400"
+              className="w-full rounded-lg border border-mist-300 px-3 py-2 text-sm text-ink-900 focus:outline-none focus:ring-2 focus:ring-nebula-600"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-stone-500 mb-1">{tf("houseSystem")}</label>
+            <label className="block text-xs font-medium text-ink-600 mb-1">{tf("houseSystem")}</label>
             <select name="house_system" defaultValue="placidus"
-              className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white">
+              className="w-full rounded-lg border border-mist-300 px-3 py-2 text-sm text-ink-900 focus:outline-none focus:ring-2 focus:ring-nebula-600 bg-white">
               {HOUSE_SYSTEMS.map(hs => <option key={hs.value} value={hs.value}>{hs.label}</option>)}
             </select>
           </div>
           <div>
-            <label className="block text-xs font-medium text-stone-500 mb-1">{tf("latitude")}</label>
+            <label className="block text-xs font-medium text-ink-600 mb-1">{tf("latitude")}</label>
             <input type="number" name="lat" step="0.0001" min="-90" max="90"
               value={lat} onChange={e => setLat(parseFloat(e.target.value) || 0)} required
-              className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400" />
+              className="w-full rounded-lg border border-mist-300 px-3 py-2 text-sm text-ink-900 focus:outline-none focus:ring-2 focus:ring-nebula-600" />
           </div>
           <div>
-            <label className="block text-xs font-medium text-stone-500 mb-1">{tf("longitude")}</label>
+            <label className="block text-xs font-medium text-ink-600 mb-1">{tf("longitude")}</label>
             <input type="number" name="lon" step="0.0001" min="-180" max="180"
               value={lon} onChange={e => setLon(parseFloat(e.target.value) || 0)} required
-              className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400" />
+              className="w-full rounded-lg border border-mist-300 px-3 py-2 text-sm text-ink-900 focus:outline-none focus:ring-2 focus:ring-nebula-600" />
           </div>
         </div>
 
@@ -139,14 +139,14 @@ export function SolarReturnForm({ persons = [] }: Props) {
         )}
 
         <button type="submit" disabled={pending}
-          className="rounded-lg bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-white text-sm font-semibold px-5 py-2 transition-colors">
+          className="rounded-lg bg-nebula-600 hover:bg-nebula-700 disabled:opacity-50 text-white text-sm font-semibold px-5 py-2 transition-colors">
           {pending ? tf("calculating") : ts("calculateButton")}
         </button>
       </form>
 
       {state.status === "ok" && (
         <div className="space-y-4">
-          <div className="flex items-center justify-between gap-4 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-sm text-amber-800">
+          <div className="flex items-center justify-between gap-4 bg-mist-100 border border-mist-200 rounded-xl px-4 py-3 text-sm text-ink-700">
             <div>
               <span className="font-semibold">{ts("returnMoment")}</span>
               {new Date(state.data.return_dt).toLocaleString(locale === "uk" ? "uk-UA" : "en-GB", {
@@ -160,7 +160,9 @@ export function SolarReturnForm({ persons = [] }: Props) {
               result={state.data}
             />
           </div>
-          <ChartWheel data={state.data} />
+          <div className="rounded-xl border border-mist-200 bg-white p-3 sm:p-6">
+            <ChartWheel data={state.data} />
+          </div>
         </div>
       )}
     </div>

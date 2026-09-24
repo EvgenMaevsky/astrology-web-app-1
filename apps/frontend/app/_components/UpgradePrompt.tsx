@@ -14,18 +14,18 @@ export function UpgradePrompt({ message, required: _required }: Props) {
   // (see billing.py PLANS), so there's no other plan name to show here.
   const planName = "Pro";
   return (
-    <div className="rounded-xl bg-amber-50 border border-amber-200 p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3">
+    <div className="rounded-xl bg-gold-50 border border-gold-400/60 p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3">
       <div className="flex-1">
-        <p className="text-sm font-semibold text-amber-900">
+        <p className="text-sm font-semibold text-gold-950">
           {t("planRequired", { plan: planName })}
         </p>
-        <p className="text-sm text-amber-700 mt-0.5">
+        <p className="text-sm text-gold-800 mt-0.5">
           {message ?? t("defaultMessage", { plan: planName })}
         </p>
       </div>
       <Link
         href="/pricing"
-        className="shrink-0 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-sm font-semibold px-4 py-2 transition-colors"
+        className="shrink-0 rounded-lg bg-gold-400 hover:brightness-105 text-gold-950 text-sm font-semibold px-4 py-2 transition-colors"
       >
         {t("viewPlans")}
       </Link>

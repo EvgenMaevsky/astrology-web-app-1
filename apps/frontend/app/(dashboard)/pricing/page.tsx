@@ -27,12 +27,12 @@ export default async function PricingPage({
   return (
     <div className="space-y-8 max-w-4xl mx-auto">
       <div className="text-center">
-        <h1 className="text-3xl font-bold text-stone-900">{t("title")}</h1>
-        <p className="mt-2 text-stone-500">{t("subtitle")}</p>
+        <h1 className="font-display text-4xl font-semibold text-ink-900">{t("title")}</h1>
+        <p className="mt-2 text-ink-600">{t("subtitle")}</p>
       </div>
 
       {canceled && (
-        <div className="rounded-lg bg-stone-50 border border-stone-200 px-4 py-3 text-sm text-stone-600 text-center">
+        <div className="rounded-lg bg-mist-50 border border-mist-200 px-4 py-3 text-sm text-ink-600 text-center">
           {t("canceled")}
         </div>
       )}
@@ -48,7 +48,7 @@ export default async function PricingPage({
         ))}
       </div>
 
-      <p className="text-center text-xs text-stone-400">
+      <p className="text-center text-xs text-ink-600">
         {t("disclaimer")}
       </p>
     </div>

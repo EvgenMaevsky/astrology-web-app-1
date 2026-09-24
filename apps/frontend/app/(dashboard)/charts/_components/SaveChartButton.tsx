@@ -44,7 +44,7 @@ export function SaveChartButton({ chartType, defaultTitle, requestPayload, resul
         type="button"
         onClick={handleClick}
         disabled={pending}
-        className="rounded-lg border border-stone-300 bg-white hover:bg-stone-50 disabled:opacity-50 text-stone-700 text-sm font-medium px-3.5 py-1.5 transition-colors"
+        className="rounded-lg border border-mist-300 bg-white hover:bg-mist-50 disabled:opacity-50 text-ink-700 text-sm font-medium px-3.5 py-1.5 transition-colors"
       >
         {pending ? t("saving") : t("button")}
       </button>

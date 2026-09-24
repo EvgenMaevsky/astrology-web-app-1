@@ -34,8 +34,8 @@ export default async function AccountPage() {
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <div>
-        <h1 className="text-xl font-semibold text-stone-800">{t("title")}</h1>
-        <p className="text-sm text-stone-500 pb-2">{t("subtitle")}</p>
+        <h1 className="font-display text-3xl font-semibold text-ink-900">{t("title")}</h1>
+        <p className="text-sm text-ink-600 pb-2">{t("subtitle")}</p>
       </div>
 
       {user && <EmailSection email={user.email} verified={user.email_verified} />}

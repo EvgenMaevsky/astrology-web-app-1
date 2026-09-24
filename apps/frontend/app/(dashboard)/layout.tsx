@@ -4,6 +4,7 @@ import { getAccessToken, API_URL } from "@/app/lib/auth";
 import Link from "next/link";
 import { EmailVerificationBanner } from "./_EmailVerificationBanner";
 import { LanguageSwitcher } from "@/app/_components/LanguageSwitcher";
+import { NavLinks } from "./_NavLinks";
 
 // The service's public contact address, also printed in /privacy and /terms.
 // The env var stays an override so a fork or a staging deploy can point
@@ -50,37 +51,27 @@ export default async function DashboardLayout({
   ];
 
   return (
-    <div className="flex min-h-screen bg-stone-50">
-      <aside className="hidden lg:flex flex-col w-56 shrink-0 border-r border-stone-200 bg-white">
-        <div className="px-5 py-6 border-b border-stone-100">
-          <span className="text-xs font-semibold tracking-widest text-amber-700 uppercase">
-            Astrodite
-          </span>
+    <div className="flex min-h-screen bg-mist-50">
+      <aside className="hidden lg:flex flex-col w-56 shrink-0 border-r border-mist-200 bg-white">
+        <div className="px-5 py-6 border-b border-mist-100">
+          <span className="font-display text-2xl font-semibold tracking-wide text-ink-900">Astrodite</span>
         </div>
         <nav className="flex-1 py-4 px-3 space-y-0.5">
-          {NAV.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="flex items-center px-3 py-2 text-sm rounded-lg text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition-colors"
-            >
-              {item.label}
-            </Link>
-          ))}
+          <NavLinks items={NAV} layout="sidebar" />
         </nav>
-        <div className="px-3 py-4 border-t border-stone-100">
+        <div className="px-3 py-4 border-t border-mist-100">
           <form action={logout}>
             <button
               type="submit"
-              className="w-full text-left px-3 py-2 text-sm text-stone-500 hover:text-stone-800 hover:bg-stone-100 rounded-lg transition-colors"
+              className="w-full text-left px-3 py-2 text-sm text-ink-600 hover:text-ink-900 hover:bg-mist-100 rounded-lg transition-colors"
             >
               {t("signOut")}
             </button>
           </form>
-          <div className="flex items-center gap-3 px-3 pt-2 text-xs text-stone-400">
-            <Link href="/privacy" className="hover:text-stone-600">{t("privacy")}</Link>
-            <Link href="/terms" className="hover:text-stone-600">{t("terms")}</Link>
-            <a href={`mailto:${FEEDBACK_EMAIL}`} className="hover:text-stone-600">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 px-3 pt-2 text-xs text-ink-600">
+            <Link href="/privacy" className="hover:text-ink-900">{t("privacy")}</Link>
+            <Link href="/terms" className="hover:text-ink-900">{t("terms")}</Link>
+            <a href={`mailto:${FEEDBACK_EMAIL}`} className="hover:text-ink-900">
               {t("feedback")}
             </a>
           </div>
@@ -91,38 +82,35 @@ export default async function DashboardLayout({
       </aside>
 
       <div className="flex flex-col flex-1 min-w-0">
-        <header className="flex items-center justify-between px-6 py-4 bg-white border-b border-stone-200 h-14">
-          <span className="lg:hidden text-xs font-semibold tracking-widest text-amber-700 uppercase">
+        <header className="flex items-center justify-between px-6 py-4 bg-white border-b border-mist-200 h-14">
+          <span className="lg:hidden font-display text-xl font-semibold tracking-wide text-ink-900">
             Astrodite
           </span>
           <div className="flex items-center gap-3 ml-auto">
             {user && (
               <>
-                <span className="text-sm text-stone-500 hidden sm:block">{user.email}</span>
-                <span className="rounded-full bg-amber-100 text-amber-800 text-xs font-semibold px-2.5 py-1 capitalize">
+                <span className="text-sm text-ink-600 hidden sm:block">{user.email}</span>
+                {/* Gold marks what is paid for; the free plan stays neutral. */}
+                <span
+                  className={`rounded-full px-2.5 py-1 text-xs font-semibold capitalize ${
+                    user.plan === "free" ? "bg-mist-100 text-ink-700" : "bg-gold-50 text-gold-800"
+                  }`}
+                >
                   {user.plan}
                 </span>
               </>
             )}
             <LanguageSwitcher className="lg:hidden" />
             <form action={logout} className="lg:hidden">
-              <button type="submit" className="text-sm text-stone-500 hover:text-stone-900">
+              <button type="submit" className="text-sm text-ink-600 hover:text-ink-900">
                 {t("signOut")}
               </button>
             </form>
           </div>
         </header>
 
-        <nav className="lg:hidden flex gap-1 overflow-x-auto px-3 py-2 bg-white border-b border-stone-200">
-          {NAV.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="shrink-0 px-3 py-1.5 text-sm rounded-lg text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition-colors whitespace-nowrap"
-            >
-              {item.label}
-            </Link>
-          ))}
+        <nav className="lg:hidden flex gap-1 overflow-x-auto px-3 py-2 bg-white border-b border-mist-200">
+          <NavLinks items={NAV} layout="strip" />
         </nav>
 
         {user && !user.email_verified && <EmailVerificationBanner />}

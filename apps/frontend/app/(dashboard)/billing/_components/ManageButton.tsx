@@ -17,7 +17,7 @@ export function ManageButton() {
   return (
     <button
       onClick={handle}
-      className="rounded-lg border border-stone-300 hover:bg-stone-50 text-stone-700 text-sm font-semibold px-4 py-2 transition-colors"
+      className="rounded-lg border border-mist-300 hover:bg-mist-50 text-ink-700 text-sm font-semibold px-4 py-2 transition-colors"
     >
       {t("manageSubscription")}
     </button>

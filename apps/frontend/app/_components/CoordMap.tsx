@@ -83,5 +83,5 @@ export function CoordMap({ lat, lon, onChange }: Props) {
     });
   }, [lat, lon]);
 
-  return <div ref={containerRef} className="w-full h-64 rounded-xl overflow-hidden border border-stone-200 z-0" />;
+  return <div ref={containerRef} className="w-full h-64 rounded-xl overflow-hidden border border-mist-200 z-0" />;
 }

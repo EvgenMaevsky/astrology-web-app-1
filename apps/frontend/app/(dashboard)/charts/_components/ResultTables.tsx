@@ -47,30 +47,30 @@ export function PlanetTable({
   }));
 
   return (
-    <div className="bg-white rounded-xl border border-stone-200 overflow-hidden">
+    <div className="bg-white rounded-xl border border-mist-200 overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-stone-100 bg-stone-50">
-              <th className="text-left px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">{th("planet")}</th>
-              <th className="text-left px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">{th("sign")}</th>
-              <th className="text-left px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">{th("degree")}</th>
-              <th className="text-left px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">{th("house")}</th>
+            <tr className="border-b border-mist-100 bg-mist-50">
+              <th className="text-left px-4 py-2 text-xs font-semibold text-ink-600 uppercase tracking-wider">{th("planet")}</th>
+              <th className="text-left px-4 py-2 text-xs font-semibold text-ink-600 uppercase tracking-wider">{th("sign")}</th>
+              <th className="text-left px-4 py-2 text-xs font-semibold text-ink-600 uppercase tracking-wider">{th("degree")}</th>
+              <th className="text-left px-4 py-2 text-xs font-semibold text-ink-600 uppercase tracking-wider">{th("house")}</th>
               {showTerms && (
-                <th className="text-left px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">{th("term")}</th>
+                <th className="text-left px-4 py-2 text-xs font-semibold text-ink-600 uppercase tracking-wider">{th("term")}</th>
               )}
             </tr>
           </thead>
           <tbody>
             {rows.map((r) => (
-              <tr key={r.name} className="border-b border-stone-50 hover:bg-stone-50">
-                <td className="px-4 py-2 font-medium text-stone-800">
+              <tr key={r.name} className="border-b border-mist-100 hover:bg-mist-50">
+                <td className="px-4 py-2 font-medium text-ink-900">
                   {r.name}{r.retrograde && <span className="ml-1 text-red-500 text-xs" title={ta("retrograde")}>℞</span>}
                 </td>
-                <td className="px-4 py-2 text-stone-600">{r.sign}</td>
-                <td className="px-4 py-2 text-stone-600 font-mono text-xs">{r.degree}</td>
-                <td className="px-4 py-2 text-stone-500">{r.house}</td>
-                {showTerms && <td className="px-4 py-2 text-stone-400 text-xs">{r.term}</td>}
+                <td className="px-4 py-2 text-ink-600">{r.sign}</td>
+                <td className="px-4 py-2 text-ink-600 font-mono text-xs">{r.degree}</td>
+                <td className="px-4 py-2 text-ink-600">{r.house}</td>
+                {showTerms && <td className="px-4 py-2 text-ink-600 text-xs">{r.term}</td>}
               </tr>
             ))}
           </tbody>
@@ -85,26 +85,26 @@ export function ArabicPartsTable({ parts }: { parts: NatalChartResult["arabic_pa
   const astro = useAstroTranslator();
   if (!parts?.length) return null;
   return (
-    <div className="bg-white rounded-xl border border-stone-200 overflow-hidden">
-      <div className="px-4 py-3 border-b border-stone-100 bg-stone-50">
-        <h3 className="text-xs font-semibold text-stone-500 uppercase tracking-wider">{th("arabicParts")}</h3>
+    <div className="bg-white rounded-xl border border-mist-200 overflow-hidden">
+      <div className="px-4 py-3 border-b border-mist-100 bg-mist-50">
+        <h3 className="text-xs font-semibold text-ink-600 uppercase tracking-wider">{th("arabicParts")}</h3>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-stone-100">
-              <th className="text-left px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">{th("part")}</th>
-              <th className="text-left px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">{th("sign")}</th>
-              <th className="text-left px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">{th("degree")}</th>
+            <tr className="border-b border-mist-100">
+              <th className="text-left px-4 py-2 text-xs font-semibold text-ink-600 uppercase tracking-wider">{th("part")}</th>
+              <th className="text-left px-4 py-2 text-xs font-semibold text-ink-600 uppercase tracking-wider">{th("sign")}</th>
+              <th className="text-left px-4 py-2 text-xs font-semibold text-ink-600 uppercase tracking-wider">{th("degree")}</th>
             </tr>
           </thead>
           <tbody>
             {parts.map((p, i) => (
-              <tr key={`${p.name}-${i}`} className="border-b border-stone-50 hover:bg-stone-50">
+              <tr key={`${p.name}-${i}`} className="border-b border-mist-100 hover:bg-mist-50">
                 {/* Arabic part names are NOT translated (100+ backend strings, out of C2 scope) */}
-                <td className="px-4 py-1.5 text-stone-700">{p.name}</td>
-                <td className="px-4 py-1.5 text-stone-600">{astro("signs", p.sign)}</td>
-                <td className="px-4 py-1.5 text-stone-600 font-mono text-xs">{fmtDeg(p.sign_degree)}</td>
+                <td className="px-4 py-1.5 text-ink-700">{p.name}</td>
+                <td className="px-4 py-1.5 text-ink-600">{astro("signs", p.sign)}</td>
+                <td className="px-4 py-1.5 text-ink-600 font-mono text-xs">{fmtDeg(p.sign_degree)}</td>
               </tr>
             ))}
           </tbody>
@@ -127,28 +127,28 @@ export function AspectTable({ aspects }: { aspects: NatalChartResult["aspects"] 
   if (!aspects.length) return null;
 
   return (
-    <div className="bg-white rounded-xl border border-stone-200 overflow-hidden">
+    <div className="bg-white rounded-xl border border-mist-200 overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-stone-100 bg-stone-50">
-              <th className="text-left px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">{th("planet1")}</th>
-              <th className="text-center px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">{th("aspect")}</th>
-              <th className="text-left px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">{th("planet2")}</th>
-              <th className="text-right px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">{th("orb")}</th>
-              <th className="text-center px-4 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wider">{th("appSep")}</th>
+            <tr className="border-b border-mist-100 bg-mist-50">
+              <th className="text-left px-4 py-2 text-xs font-semibold text-ink-600 uppercase tracking-wider">{th("planet1")}</th>
+              <th className="text-center px-4 py-2 text-xs font-semibold text-ink-600 uppercase tracking-wider">{th("aspect")}</th>
+              <th className="text-left px-4 py-2 text-xs font-semibold text-ink-600 uppercase tracking-wider">{th("planet2")}</th>
+              <th className="text-right px-4 py-2 text-xs font-semibold text-ink-600 uppercase tracking-wider">{th("orb")}</th>
+              <th className="text-center px-4 py-2 text-xs font-semibold text-ink-600 uppercase tracking-wider">{th("appSep")}</th>
             </tr>
           </thead>
           <tbody>
             {aspects.map((a, i) => (
-              <tr key={i} className="border-b border-stone-50 hover:bg-stone-50">
-                <td className="px-4 py-1.5 text-stone-700">{astro("planets", a.planet1)}</td>
-                <td className="px-4 py-1.5 text-center text-stone-600">
+              <tr key={i} className="border-b border-mist-100 hover:bg-mist-50">
+                <td className="px-4 py-1.5 text-ink-700">{astro("planets", a.planet1)}</td>
+                <td className="px-4 py-1.5 text-center text-ink-600">
                   <span title={astro("aspects", a.aspect)}>{ASPECT_LABELS[a.aspect] ?? a.aspect}</span>
                 </td>
-                <td className="px-4 py-1.5 text-stone-700">{astro("planets", a.planet2)}</td>
-                <td className="px-4 py-1.5 text-right text-stone-500 font-mono text-xs">{a.orb.toFixed(2)}°</td>
-                <td className="px-4 py-1.5 text-center text-xs text-stone-400" title={a.applying ? ta("applying") : ta("separating")}>
+                <td className="px-4 py-1.5 text-ink-700">{astro("planets", a.planet2)}</td>
+                <td className="px-4 py-1.5 text-right text-ink-600 font-mono text-xs">{a.orb.toFixed(2)}°</td>
+                <td className="px-4 py-1.5 text-center text-xs text-ink-600" title={a.applying ? ta("applying") : ta("separating")}>
                   {a.applying ? "▲" : "▽"}
                 </td>
               </tr>
