@@ -5,7 +5,20 @@ import { useTransition } from "react";
 import { setLocale } from "@/app/actions/locale";
 import type { Locale } from "@/i18n/request";
 
-export function LanguageSwitcher({ className = "" }: { className?: string }) {
+const TONES = {
+  // The dashboard and the beige pages until E7c moves them over.
+  light: { active: "font-semibold text-amber-700", idle: "text-stone-400 hover:text-stone-600" },
+  // The dark marketing surfaces (docs/plans/2026-09-24-e7-redesign-design.md).
+  dark: { active: "font-semibold text-gold-400", idle: "text-dusk hover:text-starlight" },
+} as const;
+
+export function LanguageSwitcher({
+  className = "",
+  tone = "light",
+}: {
+  className?: string;
+  tone?: keyof typeof TONES;
+}) {
   const locale = useLocale();
   const t = useTranslations("common.languageSwitcher");
   const [pending, startTransition] = useTransition();
@@ -25,9 +38,7 @@ export function LanguageSwitcher({ className = "" }: { className?: string }) {
           onClick={() => handleSwitch(code)}
           disabled={pending}
           className={`px-1.5 py-0.5 rounded transition-colors disabled:opacity-50 ${
-            locale === code
-              ? "font-semibold text-amber-700"
-              : "text-stone-400 hover:text-stone-600"
+            locale === code ? TONES[tone].active : TONES[tone].idle
           }`}
         >
           {t(code)}

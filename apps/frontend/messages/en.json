@@ -399,32 +399,87 @@
     "noPasswordHint": "Your account was created through Google, so it has no password."
   },
   "landing": {
-    "badge": "Astrodite",
-    "heroTitle": "Precise natal astrology in your browser",
-    "heroSubtitle": "Our own ephemeris engine built on JPL data — calculation accuracy verified against Swiss Ephemeris, the same standard professional astrologers use.",
-    "tryFree": "Try for free",
-    "signIn": "Sign in",
-    "features": {
-      "accuracyTitle": "Accuracy",
-      "accuracyBody": "Our own ephemeris engine on JPL DE440s data — planetary positions match Swiss Ephemeris to within 0.003°.",
-      "houseSystemsTitle": "6 house systems",
-      "houseSystemsBody": "Placidus, Koch, Equal, Whole Sign, Regiomontanus, Campanus.",
-      "transitsTitle": "Transits, solar returns, synastry",
-      "transitsBody": "Current transits to a natal chart, solar return for any year, comparison of two charts.",
-      "atlasTitle": "Atlas of 34,000+ cities",
-      "atlasBody": "City search with automatic coordinate lookup and historical timezone.",
-      "savedTitle": "Saved profiles and charts",
-      "savedBody": "Save birth data and calculated charts, return to them anytime.",
-      "aspectsTitle": "Aspects with orbs",
-      "aspectsBody": "Full set of aspects with orbs, terms (bounds), and Arabic parts."
+    "hero": {
+      "eyebrow": "Astrology that calculates precisely",
+      "title": "A precise natal chart in your browser",
+      "subtitle": "Our own ephemeris engine built on NASA JPL data. Free, and no account needed.",
+      "cta": "Calculate a chart for free",
+      "signIn": "Sign in"
     },
-    "pricingTitle": "Pricing",
-    "perMonth": "/mo",
-    "startFree": "Start for free",
-    "footerCopyright": "© {year} Astrodite",
-    "privacy": "Privacy",
-    "terms": "Terms",
-    "calculateFree": "Calculate a chart for free"
+    "stats": {
+      "precision": "agreement with Swiss Ephemeris",
+      "cities": "cities with historical time zones",
+      "houses": "house systems",
+      "years": "years you can calculate"
+    },
+    "liveChart": {
+      "title": "This is what your chart looks like",
+      "subtitle": "A wheel that reads clearly to a beginner and to a professional astrologer.",
+      "ascTitle": "Ascendant",
+      "ascBody": "The sign rising in the east at the moment of birth. The horizontal line on the left.",
+      "mcTitle": "Midheaven",
+      "mcBody": "The highest point of the chart — vocation and career. The vertical axis at the top.",
+      "housesTitle": "Houses",
+      "housesBody": "Twelve areas of life. Their numbers sit on the inner ring.",
+      "aspectsTitle": "Aspects",
+      "aspectsBody": "The lines in the centre are angles between planets. Blue and green are harmonious, red is tense.",
+      "caption": "Example: 1 January 1990, 12:00, Kyiv. Made-up data.",
+      "cta": "Calculate yours"
+    },
+    "techniques": {
+      "title": "Three techniques in one place",
+      "natalTitle": "Natal chart",
+      "natalBody": "Planets, houses and aspects for any date from {from} to {to}.",
+      "transitsTitle": "Transits and solar return",
+      "transitsBody": "How today's sky acts on your chart, and a forecast for the year from your birthday.",
+      "synastryTitle": "Synastry",
+      "synastryBody": "Two charts compared: the aspects between two people's planets.",
+      "badgeFree": "Free, unlimited",
+      "badgeAdvanced": "Free: 2 a day · Pro: unlimited"
+    },
+    "pro": {
+      "title": "For professional practice",
+      "subtitle": "Techniques you usually only find in desktop software.",
+      "termsTitle": "Terms",
+      "termsBody": "The term ruler for every planet.",
+      "arabicTitle": "Arabic parts",
+      "arabicBody": "The Part of Fortune and other parts alongside the chart.",
+      "minorTitle": "Minor aspects",
+      "minorBody": "Quincunx, quintile, sesquiquadrate and more — on the Pro plan.",
+      "timezonesTitle": "Historical time zones",
+      "timezonesBody": "A city's clock is taken as it was in the year of birth, not as it is today.",
+      "personsTitle": "Saved people",
+      "personsBody": "Clients' and family members' details to hand, no retyping."
+    },
+    "how": {
+      "title": "How it works",
+      "step1Title": "Date, time and place",
+      "step1Body": "Start typing a city — coordinates and time zone fill themselves in.",
+      "step2Title": "A chart in an instant",
+      "step2Body": "The calculation takes a few tens of milliseconds.",
+      "step3Title": "Keep exploring",
+      "step3Body": "Save the chart, then add transits, a solar return or synastry."
+    },
+    "pricing": {
+      "title": "Plans",
+      "subtitle": "The natal chart is free and unlimited. Pro opens up everything else.",
+      "perMonth": "/mo",
+      "recommended": "For practice",
+      "cta": "Start for free",
+      "ctaPro": "Choose Pro"
+    },
+    "final": {
+      "title": "Your chart, in seconds",
+      "subtitle": "No account and no card. Just a date, a time and a place.",
+      "cta": "Calculate a chart"
+    },
+    "footer": {
+      "tagline": "Precise astrology in your browser.",
+      "copyright": "© {year} Astrodite",
+      "privacy": "Privacy",
+      "terms": "Terms",
+      "contact": "Contact us"
+    }
   },
   "errors": {},
   "admin": {

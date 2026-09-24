@@ -9,10 +9,23 @@ export function eclToSvg(lon: number, asc: number): number {
 }
 
 /** Polar → cartesian relative to SVG centre. */
+/**
+ * Coordinates are rounded to 1/1000 of a viewBox unit — far below a pixel,
+ * so invisible — because the wheel is now also server-rendered (the landing
+ * page's live chart). Math.sin/cos are not guaranteed to agree to the last
+ * digit between the server's JavaScript engine and the browser's, and at
+ * full precision they did not: the SVG hydrated with mismatched path data.
+ * Every point of the wheel passes through here, so this one change covers
+ * all of it.
+ */
+function round3(value: number): number {
+  return Math.round(value * 1000) / 1000;
+}
+
 export function polar(cx: number, cy: number, r: number, angleRad: number) {
   return {
-    x: cx + r * Math.cos(angleRad),
-    y: cy + r * Math.sin(angleRad),
+    x: round3(cx + r * Math.cos(angleRad)),
+    y: round3(cy + r * Math.sin(angleRad)),
   };
 }
 
