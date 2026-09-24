@@ -378,22 +378,26 @@ function AngleMarkers({ angles, asc }: { angles: ChartData["angles"]; asc: numbe
         const rad = eclToSvg(lon, asc);
         const p1 = polar(CX, CY, R_ZODIAC_I - 2, rad);
         const p2 = polar(CX, CY, R_OUTER + 4, rad);
-        const pt = polar(CX, CY, R_OUTER + 14, rad);
-        // MC/IC rays are ~vertical, so stacking further out radially reads as
-        // "above/below the label"; for the ~horizontal ASC/DSC rays that would
-        // overlap the label text, so put the degrees directly beneath it.
-        const degPt =
-          Math.abs(Math.sin(rad)) > 0.5
-            ? polar(CX, CY, R_OUTER + 26, rad)
-            : { x: pt.x, y: pt.y + 12 };
+        // MC/IC rays are ~vertical: the label is centred on the ray and the
+        // degrees stack further out. ASC/DSC rays are ~horizontal, where a
+        // centred label is half inside the outer ring; there the text starts
+        // at the end of the ray and runs outwards, degrees directly beneath.
+        const vertical = Math.abs(Math.sin(rad)) > 0.5;
+        const pt = vertical
+          ? polar(CX, CY, R_OUTER + 14, rad)
+          : polar(CX, CY, R_OUTER + 8, rad);
+        const anchor = vertical ? "middle" : Math.cos(rad) < 0 ? "end" : "start";
+        const degPt = vertical
+          ? polar(CX, CY, R_OUTER + 26, rad)
+          : { x: pt.x, y: pt.y + 13 };
         return (
           <g key={label}>
             <line x1={p1.x} y1={p1.y} x2={p2.x} y2={p2.y} stroke={color} strokeWidth={4} />
-            <text x={pt.x} y={pt.y} textAnchor="middle" dominantBaseline="central"
+            <text x={pt.x} y={pt.y} textAnchor={anchor} dominantBaseline="central"
               fontSize={14} fontWeight="700" fill={color} fontFamily="sans-serif">
               {label}
             </text>
-            <text x={degPt.x} y={degPt.y} textAnchor="middle" dominantBaseline="central"
+            <text x={degPt.x} y={degPt.y} textAnchor={anchor} dominantBaseline="central"
               fontSize={11} fill={color} fontFamily="sans-serif">
               {fmtDegMin(lon)}
             </text>

@@ -268,10 +268,7 @@
       "calculate": "Calculate chart",
       "calculating": "Calculating…",
       "resultTitle": "Your natal chart",
-      "signIn": "Sign in",
-      "signUp": "Sign up",
-      "alreadyHaveAccount": "You already have an account — open the full version",
-      "fullVersion": "Go to the full version"
+      "alreadyHaveAccount": "You already have an account — open the full version"
     },
     "popup": {
       "heading": "Your chart is ready",
@@ -500,6 +497,11 @@
       "ogImage": "Social preview image",
       "ogImageHint": "Shown when the link is shared. PNG, JPEG or WebP, up to 1 MB. 1200×630 recommended.",
       "removeImage": "Remove",
+      "logo": "Logo",
+      "logoDark": "For the dark pages",
+      "logoDarkHint": "Home, natal chart, sign-in and sign-up. A light logo on a transparent background. PNG, JPEG or WebP, up to 512 KB; shown 36 px tall. Empty — the text “Astrodite”.",
+      "logoLight": "For the dashboard",
+      "logoLightHint": "The signed-in area on a light background — a dark logo. PNG, JPEG or WebP, up to 512 KB. Empty — the text “Astrodite”.",
       "noindex": "Hide the site from search engines",
       "noindexHint": "Google and others will not index the site. Useful while the content is still in progress.",
       "save": "Save",
@@ -512,8 +514,21 @@
         "cannotConnect": "Could not reach the server.",
         "saveFailed": "Could not save. Please try again.",
         "fileTooLarge": "File is too large. Favicon up to 256 KB, social image up to 1 MB.",
-        "unsupportedImage": "Unsupported format. Use PNG, JPEG, ICO or WebP."
+        "unsupportedImage": "Unsupported format — the accepted ones are listed under the field."
       }
     }
+  },
+  "siteHeader": {
+    "natal": "Natal chart",
+    "features": "Features",
+    "pricing": "Pricing",
+    "how": "How it works",
+    "signIn": "Sign in",
+    "signUp": "Sign up",
+    "dashboard": "My dashboard",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "menu": "Main menu",
+    "scrollDown": "Scroll to the next section"
   }
 }

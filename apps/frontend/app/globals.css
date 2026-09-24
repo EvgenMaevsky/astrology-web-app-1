@@ -63,6 +63,13 @@
   --color-ink-900: #1B1840;
 
   --font-display: var(--font-cormorant), Georgia, serif;
+
+  /* The hero's "scroll down" arrow: a slow nudge, not a bounce. */
+  --animate-nudge: nudge 2.4s ease-in-out infinite;
+  @keyframes nudge {
+    0%, 100% { transform: translateY(0); opacity: 0.7; }
+    50% { transform: translateY(8px); opacity: 1; }
+  }
 }
 
 /*
@@ -70,3 +77,12 @@
  * the dashboard always light, by design. The old block only flipped the body
  * background, which every page paints over anyway.
  */
+
+/* Smooth scrolling for the landing's in-page menu links, unless the visitor
+   asked for less motion. data-scroll-behavior on <html> (layout.tsx) makes
+   Next switch it off for route changes, which should jump, not glide. */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}

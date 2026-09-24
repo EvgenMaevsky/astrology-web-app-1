@@ -48,6 +48,8 @@ export default async function AdminSeoPage() {
           settings={settings}
           faviconUrl={settings.favicon ? siteImageUrl(settings.favicon) : null}
           ogImageUrl={settings.og_image ? siteImageUrl(settings.og_image) : null}
+          logoDarkUrl={settings.logo_dark ? siteImageUrl(settings.logo_dark) : null}
+          logoLightUrl={settings.logo_light ? siteImageUrl(settings.logo_light) : null}
         />
       ) : (
         <p className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">

@@ -58,7 +58,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const locale = await getLocale();
 
   return (
-    <html lang={locale} className={`${geist.variable} ${cormorant.variable} h-full`}>
+    <html
+      lang={locale}
+      className={`${geist.variable} ${cormorant.variable} h-full`}
+      data-scroll-behavior="smooth"
+    >
       <head>
         <link
           rel="stylesheet"

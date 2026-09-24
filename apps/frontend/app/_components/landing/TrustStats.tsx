@@ -18,7 +18,7 @@ export async function TrustStats() {
   ];
 
   return (
-    <section className="border-y border-space-800 bg-space-950">
+    <section id="facts" className="scroll-mt-16 border-y border-space-800 bg-space-950">
       <dl className="mx-auto grid max-w-6xl grid-cols-2 gap-y-10 px-6 py-14 lg:grid-cols-4">
         {stats.map((stat) => (
           // dt must precede dd in the markup; column-reverse puts the number

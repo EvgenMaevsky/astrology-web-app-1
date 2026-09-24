@@ -29,7 +29,9 @@ export async function proxy(request: NextRequest) {
   // "/" is matched exactly, never as a startsWith() prefix — a prefix match
   // on "/" would make every route in the app "public".
   const isPublic = pathname === "/" || PUBLIC_PATHS.some((p) => pathname.startsWith(p));
-  const isAuthRedirectPath = pathname === "/" || AUTH_REDIRECT_PATHS.some((p) => pathname.startsWith(p));
+  // The landing is NOT here: a signed-in visitor sees it too, with "My
+  // dashboard" in the header in place of sign-in/sign-up.
+  const isAuthRedirectPath = AUTH_REDIRECT_PATHS.some((p) => pathname.startsWith(p));
   const hasAccess = request.cookies.has("access_token");
   const refreshToken = request.cookies.get("refresh_token")?.value;
 

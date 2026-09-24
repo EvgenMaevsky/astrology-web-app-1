@@ -48,3 +48,17 @@ export async function getAccessToken(): Promise<string | undefined> {
 export async function getRefreshToken(): Promise<string | undefined> {
   return (await cookies()).get(REFRESH_COOKIE)?.value;
 }
+
+/**
+ * Whether to treat the visitor as signed in on a public page, i.e. offer
+ * "My dashboard" rather than "Sign in".
+ *
+ * Either cookie counts. The access token lives 30 minutes and public pages
+ * do not refresh it, so checking it alone would offer "Sign in" to someone
+ * whose session is perfectly alive. If the refresh token turns out to be
+ * revoked, /dashboard sends them to /login — where "Sign in" would have.
+ */
+export async function hasSession(): Promise<boolean> {
+  const jar = await cookies();
+  return jar.has(ACCESS_COOKIE) || jar.has(REFRESH_COOKIE);
+}

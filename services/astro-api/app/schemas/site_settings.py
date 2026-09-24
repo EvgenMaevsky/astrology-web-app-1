@@ -12,6 +12,8 @@ class SiteSettingsOut(BaseModel):
     description_en: str | None
     favicon: str | None
     og_image: str | None
+    logo_dark: str | None
+    logo_light: str | None
     noindex: bool
 
     model_config = {"from_attributes": True}

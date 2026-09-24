@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { API_URL } from "@/app/lib/auth";
 
 export type SiteSettings = {
@@ -7,6 +8,8 @@ export type SiteSettings = {
   description_en: string | null;
   favicon: string | null;
   og_image: string | null;
+  logo_dark: string | null;
+  logo_light: string | null;
   noindex: boolean;
 };
 
@@ -30,8 +33,11 @@ export function siteImageUrl(name: string): string {
  *
  * no-store is deliberate — a cached copy would mean an admin's change only
  * appears at the next deploy, which defeats the point of having this page.
+ * React's cache() still dedupes within one request: metadata, the header
+ * logo and the footer logo all ask, and no-store fetches are not deduped
+ * on their own.
  */
-export async function getSiteSettings(): Promise<SiteSettings | null> {
+export const getSiteSettings = cache(async (): Promise<SiteSettings | null> => {
   try {
     const res = await fetch(`${API_URL}/api/v1/site-settings`, { cache: "no-store" });
     if (!res.ok) return null;
@@ -39,4 +45,4 @@ export async function getSiteSettings(): Promise<SiteSettings | null> {
   } catch {
     return null;
   }
-}
+});

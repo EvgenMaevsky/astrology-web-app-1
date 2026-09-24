@@ -21,9 +21,25 @@ log = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/site-settings", tags=["site-settings"])
 
-# Upload limits. Deliberately small: these are a favicon and a social preview
-# card, not a photo gallery.
-_MAX_BYTES = {"favicon": 256 * 1024, "og_image": 1024 * 1024}
+# Upload limits. Deliberately small: a favicon, a social preview card and two
+# logos, not a photo gallery.
+_MAX_BYTES = {
+    "favicon": 256 * 1024,
+    "og_image": 1024 * 1024,
+    "logo_dark": 512 * 1024,
+    "logo_light": 512 * 1024,
+}
+# ICO is a favicon format; as a logo it would render blurry or not at all.
+_ALLOWED_EXTS = {
+    "favicon": {".png", ".jpg", ".ico", ".webp"},
+    "og_image": {".png", ".jpg", ".ico", ".webp"},
+    "logo_dark": {".png", ".jpg", ".webp"},
+    "logo_light": {".png", ".jpg", ".webp"},
+}
+_INVALID_KIND = {
+    "code": "invalid_kind",
+    "message": "kind must be one of: " + ", ".join(_MAX_BYTES) + ".",
+}
 _CHUNK = 64 * 1024
 
 # Accepted formats, keyed by magic bytes. The declared Content-Type is
@@ -110,10 +126,7 @@ async def upload_image(
     db: AsyncSession = Depends(get_db),
 ) -> SiteSettingsOut:
     if kind not in _MAX_BYTES:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            detail={"code": "invalid_kind", "message": "kind must be 'favicon' or 'og_image'."},
-        )
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=_INVALID_KIND)
     limit = _MAX_BYTES[kind]
 
     # Read with a hard cap rather than file.read(): an unbounded read would
@@ -132,12 +145,16 @@ async def upload_image(
             )
 
     ext = _sniff(bytes(data[:16]))
-    if ext is None:
+    if ext is None or ext not in _ALLOWED_EXTS[kind]:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail={
                 "code": "unsupported_image",
-                "message": "File must be a PNG, JPEG, ICO or WebP image.",
+                "message": (
+                    "File must be a PNG, JPEG, ICO or WebP image."
+                    if ".ico" in _ALLOWED_EXTS[kind]
+                    else "File must be a PNG, JPEG or WebP image."
+                ),
             },
         )
 
@@ -167,10 +184,7 @@ async def delete_image(
     db: AsyncSession = Depends(get_db),
 ) -> SiteSettingsOut:
     if kind not in _MAX_BYTES:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            detail={"code": "invalid_kind", "message": "kind must be 'favicon' or 'og_image'."},
-        )
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=_INVALID_KIND)
 
     row = await get_or_create_settings(db)
     previous = getattr(row, kind)
@@ -189,8 +203,8 @@ async def delete_image(
 
 @router.get("/file/{name}")
 async def serve_image(name: str) -> FileResponse:
-    """Public: the favicon and OG image are fetched by browsers and crawlers
-    that have no session.
+    """Public: the favicon, OG image and logos are fetched by browsers and
+    crawlers that have no session.
     """
     if not _FILENAME_RE.match(name):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")

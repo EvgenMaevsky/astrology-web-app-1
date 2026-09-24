@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { LanguageSwitcher } from "@/app/_components/LanguageSwitcher";
+import { Logo } from "@/app/_components/Logo";
 
 // The service's public contact address — same one /privacy, /terms and the
 // dashboard sidebar print.
@@ -13,7 +14,7 @@ export async function Footer() {
     <footer className="border-t border-space-800 bg-space-950 px-6 py-12">
       <div className="mx-auto flex max-w-6xl flex-col gap-8 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="font-display text-xl text-starlight">Astrodite</p>
+          <Logo tone="dark" size="sm" />
           <p className="mt-1 text-sm text-dusk">{t("tagline")}</p>
           <p className="mt-4 text-xs text-dusk">{t("copyright", { year: new Date().getFullYear() })}</p>
         </div>

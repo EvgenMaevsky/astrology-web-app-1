@@ -8,7 +8,7 @@ type SeoState = { message?: string; error?: string } | undefined;
 
 type ErrorDetail = { code?: string } | string | undefined;
 
-type ImageKind = "favicon" | "og_image";
+type ImageKind = "favicon" | "og_image" | "logo_dark" | "logo_light";
 
 async function errorMessage(res: Response): Promise<string> {
   const t = await getTranslations("admin.seo.errors");
@@ -70,7 +70,7 @@ export async function saveSeoSettings(
   try {
     // Images first: if one fails we stop and say so, rather than reporting
     // success for a save that only half happened.
-    for (const kind of ["favicon", "og_image"] as const) {
+    for (const kind of ["favicon", "og_image", "logo_dark", "logo_light"] as const) {
       const failure = await applyImageChange(token, kind, formData);
       if (failure) return { error: failure };
     }

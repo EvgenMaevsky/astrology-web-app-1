@@ -5,6 +5,7 @@ import Link from "next/link";
 import { EmailVerificationBanner } from "./_EmailVerificationBanner";
 import { LanguageSwitcher } from "@/app/_components/LanguageSwitcher";
 import { NavLinks } from "./_NavLinks";
+import { Logo } from "@/app/_components/Logo";
 
 // The service's public contact address, also printed in /privacy and /terms.
 // The env var stays an override so a fork or a staging deploy can point
@@ -52,11 +53,16 @@ export default async function DashboardLayout({
 
   return (
     <div className="flex min-h-screen bg-mist-50">
-      <aside className="hidden lg:flex flex-col w-56 shrink-0 border-r border-mist-200 bg-white">
+      {/* sticky + h-screen: the sidebar stays put while a long chart page
+          scrolls, instead of stretching to the page's full height and
+          taking the sign-out link off screen. */}
+      <aside className="hidden lg:flex flex-col w-56 shrink-0 border-r border-mist-200 bg-white sticky top-0 h-screen">
         <div className="px-5 py-6 border-b border-mist-100">
-          <span className="font-display text-2xl font-semibold tracking-wide text-ink-900">Astrodite</span>
+          <Link href="/dashboard">
+            <Logo tone="light" />
+          </Link>
         </div>
-        <nav className="flex-1 py-4 px-3 space-y-0.5">
+        <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-0.5">
           <NavLinks items={NAV} layout="sidebar" />
         </nav>
         <div className="px-3 py-4 border-t border-mist-100">
@@ -83,9 +89,9 @@ export default async function DashboardLayout({
 
       <div className="flex flex-col flex-1 min-w-0">
         <header className="flex items-center justify-between px-6 py-4 bg-white border-b border-mist-200 h-14">
-          <span className="lg:hidden font-display text-xl font-semibold tracking-wide text-ink-900">
-            Astrodite
-          </span>
+          <Link href="/dashboard" className="lg:hidden">
+            <Logo tone="light" size="sm" />
+          </Link>
           <div className="flex items-center gap-3 ml-auto">
             {user && (
               <>

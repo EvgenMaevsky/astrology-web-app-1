@@ -39,11 +39,14 @@ function ImageField({
   label,
   hint,
   currentUrl,
+  previewOnDark = false,
 }: {
-  kind: "favicon" | "og_image";
+  kind: "favicon" | "og_image" | "logo_dark" | "logo_light";
   label: string;
   hint: string;
   currentUrl: string | null;
+  /** The logo for the dark pages is previewed on dark, or it may be invisible. */
+  previewOnDark?: boolean;
 }) {
   const t = useTranslations("admin.seo");
 
@@ -60,7 +63,9 @@ function ImageField({
           <img
             src={currentUrl}
             alt={label}
-            className="h-10 w-10 rounded border border-mist-200 bg-mist-50 object-contain"
+            className={`h-10 rounded border object-contain ${
+              kind.startsWith("logo") ? "w-auto max-w-[200px] px-2 py-1" : "w-10"
+            } ${previewOnDark ? "border-space-700 bg-space-950" : "border-mist-200 bg-mist-50"}`}
           />
           <label className="flex items-center gap-2 text-sm text-ink-600">
             <input type="checkbox" name={`remove_${kind}`} className="accent-nebula-600" />
@@ -72,7 +77,11 @@ function ImageField({
       <input
         type="file"
         name={kind}
-        accept="image/png,image/jpeg,image/x-icon,image/vnd.microsoft.icon,image/webp"
+        accept={
+          kind.startsWith("logo")
+            ? "image/png,image/jpeg,image/webp"
+            : "image/png,image/jpeg,image/x-icon,image/vnd.microsoft.icon,image/webp"
+        }
         className="block w-full text-sm text-ink-600 file:mr-3 file:rounded-lg file:border file:border-mist-300 file:bg-white file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-ink-700 hover:file:bg-mist-50"
       />
       <span className="block text-xs text-ink-600">{hint}</span>
@@ -84,10 +93,14 @@ export function SeoForm({
   settings,
   faviconUrl,
   ogImageUrl,
+  logoDarkUrl,
+  logoLightUrl,
 }: {
   settings: SiteSettings;
   faviconUrl: string | null;
   ogImageUrl: string | null;
+  logoDarkUrl: string | null;
+  logoLightUrl: string | null;
 }) {
   const t = useTranslations("admin.seo");
   const [state, action, pending] = useActionState(saveSeoSettings, undefined);
@@ -153,6 +166,23 @@ export function SeoForm({
           label={t("ogImage")}
           hint={t("ogImageHint")}
           currentUrl={ogImageUrl}
+        />
+      </div>
+
+      <div className={CARD_CLASS}>
+        <h2 className={HEADING_CLASS}>{t("logo")}</h2>
+        <ImageField
+          kind="logo_dark"
+          label={t("logoDark")}
+          hint={t("logoDarkHint")}
+          currentUrl={logoDarkUrl}
+          previewOnDark
+        />
+        <ImageField
+          kind="logo_light"
+          label={t("logoLight")}
+          hint={t("logoLightHint")}
+          currentUrl={logoLightUrl}
         />
       </div>
 

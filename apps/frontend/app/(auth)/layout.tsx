@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { LanguageSwitcher } from "@/app/_components/LanguageSwitcher";
+import { Logo } from "@/app/_components/Logo";
 import { Starfield } from "@/app/_components/Starfield";
 
 /**
@@ -23,8 +24,8 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_55%_45%_at_50%_45%,rgba(124,92,255,0.16),transparent_70%)]"
       />
-      <Link href="/" className="absolute left-5 top-4 z-10 font-display text-xl tracking-wide text-starlight">
-        Astrodite
+      <Link href="/" className="absolute left-5 top-4 z-10">
+        <Logo tone="dark" size="sm" />
       </Link>
       <div className="absolute right-4 top-4 z-10">
         <LanguageSwitcher tone="dark" />

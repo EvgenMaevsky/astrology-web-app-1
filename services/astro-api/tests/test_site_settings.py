@@ -279,3 +279,65 @@ async def test_replacing_an_image_removes_the_old_file(client: AsyncClient):
 
     assert (await client.get(f"/api/v1/site-settings/file/{new}")).status_code == 200
     assert (await client.get(f"/api/v1/site-settings/file/{old}")).status_code == 404
+
+
+# ── logos (E8) ───────────────────────────────────────────────────────────────
+
+@pytest.mark.parametrize("kind", ["logo_dark", "logo_light"])
+async def test_logo_upload_and_remove(client: AsyncClient, kind: str):
+    token = await _token(client, f"{kind}@example.com", admin=True)
+    up = await client.post(
+        "/api/v1/site-settings/upload",
+        data={"kind": kind},
+        files={"file": ("logo.webp", WEBP, "image/webp")},
+        headers=_auth(token),
+    )
+    assert up.status_code == 200
+    assert up.json()[kind].endswith(".webp")
+    # The other logo is independent of this one.
+    other = "logo_light" if kind == "logo_dark" else "logo_dark"
+    assert up.json()[other] is None
+
+    public = await client.get("/api/v1/site-settings")
+    assert public.json()[kind] == up.json()[kind]
+
+    r = await client.delete(f"/api/v1/site-settings/image/{kind}", headers=_auth(token))
+    assert r.status_code == 200
+    assert r.json()[kind] is None
+
+
+async def test_logo_rejects_ico(client: AsyncClient):
+    # Valid for a favicon, not for a logo — it would render blurry or not at all.
+    token = await _token(client, "logo-ico@example.com", admin=True)
+    r = await client.post(
+        "/api/v1/site-settings/upload",
+        data={"kind": "logo_dark"},
+        files={"file": ("logo.ico", ICO, "image/x-icon")},
+        headers=_auth(token),
+    )
+    assert r.status_code == 422
+    assert r.json()["detail"]["code"] == "unsupported_image"
+    assert "ICO" not in r.json()["detail"]["message"]
+
+
+async def test_logo_rejects_svg(client: AsyncClient):
+    token = await _token(client, "logo-svg@example.com", admin=True)
+    svg = b'<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>'
+    r = await client.post(
+        "/api/v1/site-settings/upload",
+        data={"kind": "logo_light"},
+        files={"file": ("logo.svg", svg, "image/svg+xml")},
+        headers=_auth(token),
+    )
+    assert r.status_code == 422
+
+
+async def test_logo_upload_rejects_non_admin(client: AsyncClient):
+    token = await _token(client, "logo-plain@example.com")
+    r = await client.post(
+        "/api/v1/site-settings/upload",
+        data={"kind": "logo_dark"},
+        files={"file": ("logo.png", PNG, "image/png")},
+        headers=_auth(token),
+    )
+    assert r.status_code == 403

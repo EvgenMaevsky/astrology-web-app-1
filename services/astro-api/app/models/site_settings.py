@@ -38,6 +38,10 @@ class SiteSettings(Base):
     # routers/site_settings.py for how they are generated and served.
     favicon: Mapped[str | None] = mapped_column(String(128), nullable=True)
     og_image: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    # Two logos because the site has two surfaces: the dark marketing pages
+    # and the light dashboard. NULL = the text wordmark.
+    logo_dark: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    logo_light: Mapped[str | None] = mapped_column(String(128), nullable=True)
 
     # Lets the owner pull the site out of search results with one switch,
     # e.g. while the content is still a work in progress.

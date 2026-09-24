@@ -10,7 +10,7 @@ export async function HowItWorks() {
   ];
 
   return (
-    <section className="border-t border-space-800 bg-space-950 px-6 py-24">
+    <section id="how" className="scroll-mt-16 border-t border-space-800 bg-space-950 px-6 py-24">
       <div className="mx-auto max-w-6xl">
         <h2 className="text-center font-display text-4xl font-semibold text-starlight sm:text-5xl">{t("title")}</h2>
         <div className="relative mt-16">
