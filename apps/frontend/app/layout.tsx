@@ -1,12 +1,25 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import { Cormorant_Garamond, Geist } from "next/font/google";
 import Script from "next/script";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getTranslations } from "next-intl/server";
 import { getSiteSettings, siteImageUrl } from "@/app/lib/site-settings";
 import "./globals.css";
 
-const geist = Geist({ subsets: ["latin"], variable: "--font-geist" });
+// `subsets` only decides what gets PRELOADED — the Cyrillic @font-face is
+// served either way. It is listed because Ukrainian is the default locale:
+// without the preload, Ukrainian text first paints in the fallback font and
+// then visibly swaps once the Cyrillic file arrives.
+const geist = Geist({ subsets: ["latin", "cyrillic"], variable: "--font-geist" });
+
+// Display face for headings (docs/plans/2026-09-24-e7-redesign-design.md §2).
+// Plain "cyrillic" already covers every Ukrainian letter, ґ (U+0491)
+// included — verified in the browser against the loaded faces' ranges.
+const cormorant = Cormorant_Garamond({
+  subsets: ["latin", "cyrillic"],
+  weight: ["500", "600"],
+  variable: "--font-cormorant",
+});
 
 export async function generateMetadata(): Promise<Metadata> {
   const [t, locale, site] = await Promise.all([
@@ -45,7 +58,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const locale = await getLocale();
 
   return (
-    <html lang={locale} className={`${geist.variable} h-full`}>
+    <html lang={locale} className={`${geist.variable} ${cormorant.variable} h-full`}>
       <head>
         <link
           rel="stylesheet"

@@ -35,9 +35,14 @@ tags: [plan, redesign, landing, e7a]
 
 ## Знахідки перед стартом
 
-- **Geist підключено лише з `latin`**, хоча Google Fonts має для нього
-  `cyrillic`. Отже, увесь український текст сайту зараз малюється запасним
-  шрифтом. Виправляється в Задачі 2.
+- ~~Geist підключено лише з `latin`, тому український текст іде запасним
+  шрифтом~~ — **хибно, спростовано перевіркою.** За документацією Next
+  `subsets` визначає лише **preload**; `@font-face` з кириличним
+  діапазоном Geist віддає завжди, і в браузері він завантажений. Реальний
+  ефект додавання `cyrillic` менший: український текст одразу рендериться
+  Geist, без перемальовування після завантаження шрифту (FOUT).
+- **`ґ` (U+0491) входить у базову підмножину `cyrillic`**, `cyrillic-ext`
+  не потрібен.
 - **`LanguageSwitcher`** має жорстко прописані бурштинові класи — на темному
   hero не читатиметься. Потрібен параметр `tone`.
 - **Node 22.22 запускає `.ts` нативно** (`node --test file.test.ts`) —
@@ -79,11 +84,11 @@ tags: [plan, redesign, landing, e7a]
 
 **Файли:** `app/layout.tsx`, `app/globals.css`
 
-- [ ] Geist: `subsets: ["latin", "cyrillic"]`.
+- [x] Geist: `subsets: ["latin", "cyrillic"]`.
 - [ ] Cormorant Garamond:
   ```ts
   const cormorant = Cormorant_Garamond({
-    subsets: ["latin", "cyrillic", "cyrillic-ext"],
+    subsets: ["latin", "cyrillic"],
     weight: ["500", "600"],
     variable: "--font-cormorant",
   });
@@ -91,7 +96,9 @@ tags: [plan, redesign, landing, e7a]
   змінну додати на `<html>` поряд із `geist.variable`.
 - [ ] У `@theme`: `--font-display: var(--font-cormorant), Georgia, serif;`
   → утиліта `font-display`.
-- [ ] **Перевірка кирилиці (обовʼязкова, spec §2):** відрендерити «ї є ґ і
+- [x] **Перевірка кирилиці (обовʼязкова, spec §2)** — ✅ усі 8 літер
+  `ї є ґ і Ї Є Ґ І` покриті завантаженими гранями Cormorant,
+  `document.fonts.check` → `true`. Було: відрендерити «ї є ґ і
   Ї Є Ґ І» класом `font-display` і через
   `document.fonts.check('600 32px "Cormorant Garamond"', 'їєґ')` та
   `getComputedStyle` переконатися, що використано саме Cormorant, а не

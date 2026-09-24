@@ -24,27 +24,46 @@
   font-display: block;
 }
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/*
+ * Design tokens — docs/plans/2026-09-24-e7-redesign-design.md §1.
+ *
+ * Own names rather than overriding Tailwind's built-in violet/blue scales,
+ * so the dashboard's existing stone/amber classes keep working until E7c
+ * moves it over.
+ *
+ * space / starlight / dusk / gold  → the dark marketing surfaces
+ * mist / ink / nebula-600           → the light dashboard
+ *
+ * nebula-500 on space-950 is 4.47:1 — just under WCAG AA for text. It is for
+ * lines, borders and glow only; never use it as a text colour.
+ */
+@theme {
+  --color-space-950: #0B0A1F;
+  --color-space-900: #16143A;
+  --color-space-800: #221E4E;
+  --color-space-700: #2E2966;
+  --color-space-600: #4A4580;
+  --color-starlight: #E8E6FF;
+  --color-dusk: #9A95C9;
+  --color-nebula-500: #7C5CFF;
+  --color-nebula-600: #6C4DF5;
+  --color-azure-500: #4F8BFF;
+  --color-azure-600: #3F7BF2;
+  --color-gold-50: #FBF1DC;
+  --color-gold-400: #F2C572;
+  --color-gold-800: #7A5410;
+  --color-gold-950: #2A1D05;
+  --color-mist-50: #F6F4FF;
+  --color-mist-200: #E4E0FA;
+  --color-mist-300: #D6D0F5;
+  --color-ink-600: #5B5690;
+  --color-ink-900: #1B1840;
+
+  --font-display: var(--font-cormorant), Georgia, serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-}
+/*
+ * No prefers-color-scheme block: the marketing surfaces are always dark and
+ * the dashboard always light, by design. The old block only flipped the body
+ * background, which every page paints over anyway.
+ */
