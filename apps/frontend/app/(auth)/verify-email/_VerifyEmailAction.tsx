@@ -4,6 +4,10 @@ import Link from "next/link";
 import { useActionState } from "react";
 import { useTranslations } from "next-intl";
 import { verifyEmail } from "@/app/actions/auth";
+import { THEME } from "@/app/_components/ui/theme";
+
+// Dark marketing surface — docs/plans/2026-09-24-e7-redesign-design.md §5.
+const ui = THEME.dark;
 
 // Verification only happens on an explicit user click (POST via server
 // action), never on page load — mail-client link scanners (e.g. Outlook
@@ -15,12 +19,12 @@ export function VerifyEmailAction({ token }: { token: string }) {
   if (state?.message) {
     return (
       <div className="space-y-5">
-        <p className="rounded-lg bg-emerald-50 border border-emerald-200 px-3.5 py-2.5 text-sm text-emerald-700">
+        <p className={ui.success}>
           {state.message}
         </p>
         <Link
           href="/dashboard"
-          className="block w-full text-center rounded-lg bg-stone-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-stone-800 transition-colors"
+          className={`block w-full text-center ${ui.primaryButton}`}
         >
           {t("goToDashboard")}
         </Link>
@@ -32,14 +36,14 @@ export function VerifyEmailAction({ token }: { token: string }) {
     <form action={action} className="space-y-5">
       <input type="hidden" name="token" value={token} />
       {state?.error && (
-        <p className="rounded-lg bg-red-50 border border-red-200 px-3.5 py-2.5 text-sm text-red-700">
+        <p className={ui.error}>
           {state.error}
         </p>
       )}
       <button
         type="submit"
         disabled={pending || !token}
-        className="w-full rounded-lg bg-stone-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-stone-900 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+        className={`w-full ${ui.primaryButton}`}
       >
         {pending ? t("submitPending") : t("submit")}
       </button>

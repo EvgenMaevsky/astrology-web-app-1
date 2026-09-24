@@ -1,5 +1,9 @@
 import { getTranslations } from "next-intl/server";
 import { VerifyEmailAction } from "./_VerifyEmailAction";
+import { THEME } from "@/app/_components/ui/theme";
+
+// Dark marketing surface — docs/plans/2026-09-24-e7-redesign-design.md §5.
+const ui = THEME.dark;
 
 export default async function VerifyEmailPage({
   searchParams,
@@ -11,13 +15,10 @@ export default async function VerifyEmailPage({
 
   return (
     <div className="w-full max-w-md">
-      <div className="rounded-2xl bg-white/80 backdrop-blur shadow-xl shadow-amber-900/10 border border-stone-200 p-8">
+      <div className={`${ui.card} p-8 shadow-2xl shadow-black/40`}>
         <div className="mb-8 text-center">
-          <p className="text-xs font-semibold tracking-widest text-amber-700 uppercase mb-2">
-            Astrodite
-          </p>
-          <h1 className="text-2xl font-semibold text-stone-900">{t("title")}</h1>
-          <p className="mt-2 text-sm text-stone-500">
+          <h1 className={`${ui.heading} text-3xl`}>{t("title")}</h1>
+          <p className="mt-2 text-sm text-dusk">
             {t("subtitle")}
           </p>
         </div>

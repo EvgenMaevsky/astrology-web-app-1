@@ -2,13 +2,17 @@
 
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { searchCities, City } from "@/app/actions/atlas";
+import { THEME, type Tone } from "@/app/_components/ui/theme";
 
 interface Props {
   onSelect: (city: City) => void;
   placeholder?: string;
+  /** "dark" on the public /natal page, "light" in the dashboard. */
+  tone?: Tone;
 }
 
-export function CityAutocomplete({ onSelect, placeholder = "Search city…" }: Props) {
+export function CityAutocomplete({ onSelect, placeholder = "Search city…", tone = "light" }: Props) {
+  const theme = THEME[tone];
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<City[]>([]);
   const [open, setOpen] = useState(false);
@@ -66,23 +70,23 @@ export function CityAutocomplete({ onSelect, placeholder = "Search city…" }: P
         onFocus={() => results.length > 0 && setOpen(true)}
         placeholder={placeholder}
         autoComplete="off"
-        className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400"
+        className={theme.input}
       />
       {open && (
-        <ul className="absolute z-50 mt-1 w-full bg-white border border-stone-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+        <ul className={`absolute z-50 mt-1 max-h-60 w-full overflow-y-auto rounded-lg ${theme.dropdown}`}>
           {results.map((city, i) => (
             <li
               key={city.id}
               onMouseDown={() => select(city)}
-              className={`px-3 py-2 text-sm cursor-pointer flex items-center justify-between ${
-                i === focused ? "bg-amber-50 text-amber-900" : "hover:bg-stone-50 text-stone-700"
+              className={`flex cursor-pointer items-center justify-between px-3 py-2 text-sm ${
+                i === focused ? theme.dropdownItemActive : theme.dropdownItem
               }`}
             >
               <span>
                 <span className="font-medium">{city.name}</span>
-                {city.region && <span className="text-stone-400 ml-1 text-xs">{city.region}</span>}
+                {city.region && <span className={`ml-1 text-xs ${theme.muted}`}>{city.region}</span>}
               </span>
-              <span className="text-xs text-stone-400 ml-2 shrink-0">{city.country}</span>
+              <span className={`ml-2 shrink-0 text-xs ${theme.muted}`}>{city.country}</span>
             </li>
           ))}
         </ul>

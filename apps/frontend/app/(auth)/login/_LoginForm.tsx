@@ -4,6 +4,10 @@ import Link from "next/link";
 import { useActionState } from "react";
 import { useTranslations } from "next-intl";
 import { login } from "@/app/actions/auth";
+import { THEME } from "@/app/_components/ui/theme";
+
+// Dark marketing surface — docs/plans/2026-09-24-e7-redesign-design.md §5.
+const ui = THEME.dark;
 
 /**
  * googleButton is passed in from the server page rather than rendered here:
@@ -22,23 +26,20 @@ export function LoginForm({
 
   return (
     <div className="w-full max-w-md">
-      <div className="rounded-2xl bg-white/80 backdrop-blur shadow-xl shadow-amber-900/10 border border-stone-200 p-8">
+      <div className={`${ui.card} p-8 shadow-2xl shadow-black/40`}>
         <div className="mb-8 text-center">
-          <p className="text-xs font-semibold tracking-widest text-amber-700 uppercase mb-2">
-            Astrodite
-          </p>
-          <h1 className="text-2xl font-semibold text-stone-900">{t("title")}</h1>
+          <h1 className={`${ui.heading} text-3xl`}>{t("title")}</h1>
         </div>
 
         {googleError && (
-          <p className="mb-5 rounded-lg bg-red-50 border border-red-200 px-3.5 py-2.5 text-sm text-red-700">
+          <p className={`mb-5 ${ui.error}`}>
             {googleError}
           </p>
         )}
 
         <form action={action} className="space-y-5">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-stone-700 mb-1.5">
+            <label htmlFor="email" className={`${ui.label} mb-1.5`}>
               {t("email")}
             </label>
             <input
@@ -47,17 +48,17 @@ export function LoginForm({
               type="email"
               autoComplete="email"
               required
-              className="w-full rounded-lg border border-stone-300 bg-white px-3.5 py-2.5 text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm"
+              className={ui.input}
               placeholder="you@example.com"
             />
           </div>
 
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label htmlFor="password" className="block text-sm font-medium text-stone-700">
+              <label htmlFor="password" className={ui.label}>
                 {t("password")}
               </label>
-              <Link href="/forgot-password" className="text-xs font-medium text-amber-700 hover:text-amber-800">
+              <Link href="/forgot-password" className={`text-xs ${ui.link}`}>
                 {t("forgotPassword")}
               </Link>
             </div>
@@ -67,13 +68,13 @@ export function LoginForm({
               type="password"
               autoComplete="current-password"
               required
-              className="w-full rounded-lg border border-stone-300 bg-white px-3.5 py-2.5 text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm"
+              className={ui.input}
               placeholder="••••••••"
             />
           </div>
 
           {state?.error && (
-            <p className="rounded-lg bg-red-50 border border-red-200 px-3.5 py-2.5 text-sm text-red-700">
+            <p className={ui.error}>
               {state.error}
             </p>
           )}
@@ -81,7 +82,7 @@ export function LoginForm({
           <button
             type="submit"
             disabled={pending}
-            className="w-full rounded-lg bg-stone-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-stone-900 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+            className={`w-full ${ui.primaryButton}`}
           >
             {pending ? t("submitPending") : t("submit")}
           </button>
@@ -89,9 +90,9 @@ export function LoginForm({
 
         {googleButton && <div className="mt-6">{googleButton}</div>}
 
-        <p className="mt-6 text-center text-sm text-stone-500">
+        <p className="mt-6 text-center text-sm text-dusk">
           {t("noAccount")}{" "}
-          <Link href="/register" className="font-medium text-amber-700 hover:text-amber-800">
+          <Link href="/register" className={ui.link}>
             {t("createOne")}
           </Link>
         </p>

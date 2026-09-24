@@ -1,4 +1,8 @@
 import Link from "next/link";
+import { THEME } from "@/app/_components/ui/theme";
+
+// Dark marketing surface — docs/plans/2026-09-24-e7-redesign-design.md §5.
+const ui = THEME.dark;
 
 export const metadata = { title: "Terms — Astrodite" };
 
@@ -6,26 +10,23 @@ export default function TermsPage() {
   return (
     <div className="w-full max-w-2xl">
       {/* ЧЕРНЕТКА — не юридична консультація; власник має вичитати перед публічним запуском */}
-      <div className="rounded-2xl bg-white/80 backdrop-blur shadow-xl shadow-amber-900/10 border border-stone-200 p-8 space-y-6 text-sm text-stone-700">
+      <div className={`${ui.card} space-y-6 p-8 text-sm text-starlight shadow-2xl shadow-black/40`}>
         <div>
-          <p className="text-xs font-semibold tracking-widest text-amber-700 uppercase mb-2">
-            Astrodite
-          </p>
-          <h1 className="text-2xl font-semibold text-stone-900">Умови користування</h1>
-          <p className="mt-2 text-xs text-stone-400">Чернетка. Останнє оновлення: 2026-07-16.</p>
+          <h1 className={`${ui.heading} text-3xl`}>Умови користування</h1>
+          <p className="mt-2 text-xs text-dusk">Чернетка. Останнє оновлення: 2026-07-16.</p>
         </div>
 
         <section className="space-y-2">
-          <h2 className="font-semibold text-stone-900">Опис сервісу</h2>
-          <p className="text-stone-600">
+          <h2 className="font-semibold text-starlight">Опис сервісу</h2>
+          <p className="text-dusk">
             Astrodite — веб-сервіс для розрахунку натальних, транзитних, соляр- та синастрійних
             астрологічних карт. Доступ надається на умовах, викладених нижче.
           </p>
         </section>
 
         <section className="space-y-2">
-          <h2 className="font-semibold text-stone-900">Тарифи, оплата і скасування</h2>
-          <p className="text-stone-600">
+          <h2 className="font-semibold text-starlight">Тарифи, оплата і скасування</h2>
+          <p className="text-dusk">
             Сервіс має безкоштовний план з обмеженнями та платний план Pro. Оплата
             обробляється через Stripe (підписка з автопродовженням) або monobank
             (разовий платіж — 30 днів доступу, без автопродовження). Stripe-підписку
@@ -37,8 +38,8 @@ export default function TermsPage() {
         </section>
 
         <section className="space-y-2">
-          <h2 className="font-semibold text-stone-900">Відмова від відповідальності</h2>
-          <p className="text-stone-600">
+          <h2 className="font-semibold text-starlight">Відмова від відповідальності</h2>
+          <p className="text-dusk">
             Астрологічний контент, який надає сервіс, має розважально-довідковий характер і не
             є професійною психологічною, медичною, фінансовою чи юридичною консультацією.
             Рішення, прийняті на основі цього контенту, — виключно на вашу відповідальність.
@@ -46,8 +47,8 @@ export default function TermsPage() {
         </section>
 
         <section className="space-y-2">
-          <h2 className="font-semibold text-stone-900">Обмеження відповідальності</h2>
-          <p className="text-stone-600">
+          <h2 className="font-semibold text-starlight">Обмеження відповідальності</h2>
+          <p className="text-dusk">
             Сервіс надається "як є". Ми докладаємо зусиль для точності астрономічних розрахунків,
             але не гарантуємо безперебійну роботу чи відсутність помилок і не несемо
             відповідальності за непрямі збитки, пов'язані з використанням сервісу.
@@ -55,26 +56,26 @@ export default function TermsPage() {
         </section>
 
         <section className="space-y-2">
-          <h2 className="font-semibold text-stone-900">Зміни умов</h2>
-          <p className="text-stone-600">
+          <h2 className="font-semibold text-starlight">Зміни умов</h2>
+          <p className="text-dusk">
             Ми можемо оновлювати ці умови. Суттєві зміни будуть повідомлені через сервіс або на
             вказану вами email-адресу.
           </p>
         </section>
 
         <section className="space-y-2">
-          <h2 className="font-semibold text-stone-900">Контакти</h2>
-          <p className="text-stone-600">
+          <h2 className="font-semibold text-starlight">Контакти</h2>
+          <p className="text-dusk">
             З питань щодо цих умов пишіть на{" "}
-            <a href="mailto:info@astrodite.cc" className="text-amber-700 hover:text-amber-800">
+            <a href="mailto:info@astrodite.cc" className={ui.link}>
               info@astrodite.cc
             </a>
             .
           </p>
         </section>
 
-        <p className="pt-4 border-t border-stone-100 text-center">
-          <Link href="/" className="text-amber-700 hover:text-amber-800 font-medium">
+        <p className="border-t border-space-700 pt-4 text-center">
+          <Link href="/" className={ui.link}>
             На головну
           </Link>
         </p>

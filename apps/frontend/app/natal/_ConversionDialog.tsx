@@ -9,9 +9,9 @@ const LOCK_SECONDS = 3;
 type Cell = string | boolean;
 
 function Mark({ value, yes, no }: { value: Cell; yes: string; no: string }) {
-  if (value === true) return <span className="text-emerald-600">✓ {yes}</span>;
-  if (value === false) return <span className="text-stone-300">{no}</span>;
-  return <span className="text-stone-700">{value}</span>;
+  if (value === true) return <span className="text-emerald-300">✓ {yes}</span>;
+  if (value === false) return <span className="text-dusk">{no}</span>;
+  return <span className="text-starlight">{value}</span>;
 }
 
 /**
@@ -93,20 +93,20 @@ export function ConversionDialog({
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/60 p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-space-950/80 p-4 backdrop-blur-sm">
       <div
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="conversion-heading"
-        className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white p-6 sm:p-8 shadow-2xl"
+        className="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-space-700 bg-space-900 p-6 shadow-2xl shadow-black/60 sm:p-8"
       >
         {!locked && (
           <button
             type="button"
             onClick={onClose}
             aria-label={t("close")}
-            className="absolute right-4 top-4 rounded-full p-1.5 text-stone-400 hover:bg-stone-100 hover:text-stone-700"
+            className="absolute right-4 top-4 rounded-full p-1.5 text-dusk transition hover:bg-space-800 hover:text-starlight"
           >
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
               <path d="M5 5l10 10M15 5L5 15" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
@@ -115,26 +115,26 @@ export function ConversionDialog({
         )}
 
         <div className="text-center mb-6">
-          <h2 id="conversion-heading" className="text-xl font-semibold text-stone-900">
+          <h2 id="conversion-heading" className="font-display text-3xl font-semibold text-starlight">
             {t("heading")}
           </h2>
-          <p className="mt-1 text-sm text-stone-500">{t("subheading")}</p>
+          <p className="mt-2 text-sm text-dusk">{t("subheading")}</p>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-stone-200 text-xs uppercase tracking-wider text-stone-400">
+              <tr className="border-b border-space-700 text-xs uppercase tracking-wider text-dusk">
                 <th className="py-2 text-left font-medium" />
                 <th className="py-2 px-2 text-center font-medium">{t("colAnonymous")}</th>
-                <th className="py-2 px-2 text-center font-medium text-amber-700">{t("colFree")}</th>
+                <th className="py-2 px-2 text-center font-medium text-gold-400">{t("colFree")}</th>
                 <th className="py-2 px-2 text-center font-medium">{t("colPro")}</th>
               </tr>
             </thead>
             <tbody>
               {rows.map((row) => (
-                <tr key={row.label} className="border-b border-stone-100">
-                  <td className="py-2.5 pr-3 text-stone-700">{row.label}</td>
+                <tr key={row.label} className="border-b border-space-800">
+                  <td className="py-2.5 pr-3 text-starlight">{row.label}</td>
                   {([row.anon, row.free, row.pro] as Cell[]).map((cell, i) => (
                     <td key={i} className="py-2.5 px-2 text-center whitespace-nowrap">
                       <Mark value={cell} yes={t("valueYes")} no={t("valueNo")} />
@@ -150,7 +150,7 @@ export function ConversionDialog({
           <Link
             ref={registerRef}
             href="/register"
-            className="w-full sm:w-auto rounded-lg bg-amber-600 hover:bg-amber-700 px-5 py-2.5 text-center text-sm font-semibold text-white transition-colors"
+            className="w-full rounded-lg bg-gold-400 px-5 py-2.5 text-center text-sm font-semibold text-gold-950 transition hover:brightness-110 sm:w-auto"
           >
             {t("ctaRegister")}
           </Link>
@@ -159,7 +159,7 @@ export function ConversionDialog({
             type="button"
             onClick={onClose}
             disabled={locked}
-            className="w-full sm:w-auto rounded-lg border border-stone-300 px-5 py-2.5 text-sm font-medium text-stone-600 hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+            className="w-full rounded-lg border border-space-600 px-5 py-2.5 text-sm font-medium text-starlight transition hover:border-dusk disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
           >
             {locked ? t("waiting", { seconds: remaining }) : t("ctaContinue")}
           </button>

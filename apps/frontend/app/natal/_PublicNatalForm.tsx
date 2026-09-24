@@ -7,6 +7,10 @@ import { BirthDataFields, type BirthData } from "@/app/_components/BirthDataFiel
 import { ChartWheel } from "@/app/_components/chart-wheel/ChartWheel";
 import { PlanetTable, AspectTable } from "@/app/(dashboard)/charts/_components/ResultTables";
 import { ConversionDialog } from "./_ConversionDialog";
+import { THEME } from "@/app/_components/ui/theme";
+
+// Dark marketing surface — docs/plans/2026-09-24-e7-redesign-design.md §5.
+const ui = THEME.dark;
 
 const initialState: PublicChartState = { status: "idle" };
 
@@ -60,21 +64,22 @@ export function PublicNatalForm({ showDialog }: { showDialog: boolean }) {
 
   return (
     <div className="space-y-8">
-      <form action={action} className="bg-white rounded-xl border border-stone-200 p-6 space-y-5">
+      <form action={action} className={`${ui.card} space-y-5 p-6 sm:p-8`}>
         <BirthDataFields
           value={birth}
           onChange={setBirth}
           cityPlaceholder={tc("natal.cityPlaceholder")}
+          tone="dark"
         />
 
         {state.status === "error" && (
-          <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{state.error}</p>
+          <p className={ui.error}>{state.error}</p>
         )}
 
         <button
           type="submit"
           disabled={pending}
-          className="rounded-lg bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-white text-sm font-semibold px-5 py-2.5 transition-colors"
+          className={`${ui.primaryButton} px-6`}
         >
           {pending ? t("calculating") : t("calculate")}
         </button>
@@ -82,8 +87,12 @@ export function PublicNatalForm({ showDialog }: { showDialog: boolean }) {
 
       {state.status === "ok" && (
         <div ref={resultRef} tabIndex={-1} className="space-y-6">
-          <h2 className="text-lg font-semibold text-stone-800">{t("resultTitle")}</h2>
-          <ChartWheel data={state.data} />
+          <h2 className="font-display text-3xl font-semibold text-starlight">{t("resultTitle")}</h2>
+          {/* The wheel and tables sit on light cards even on this dark page:
+              one set of wheel colours then works everywhere (spec §4). */}
+          <div className="rounded-3xl bg-white p-3 shadow-[0_0_80px_-24px_rgba(124,92,255,0.55)] sm:p-6">
+            <ChartWheel data={state.data} />
+          </div>
           <PlanetTable planets={state.data.planets} showTerms={false} />
           <AspectTable aspects={state.data.aspects} />
         </div>

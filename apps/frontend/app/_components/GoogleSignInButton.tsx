@@ -27,9 +27,9 @@ export async function GoogleSignInButton({ label }: { label: "signIn" | "signUp"
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3">
-        <span className="h-px flex-1 bg-stone-200" />
-        <span className="text-xs uppercase tracking-wider text-stone-400">{t("or")}</span>
-        <span className="h-px flex-1 bg-stone-200" />
+        <span className="h-px flex-1 bg-space-700" />
+        <span className="text-xs uppercase tracking-wider text-dusk">{t("or")}</span>
+        <span className="h-px flex-1 bg-space-700" />
       </div>
 
       <a

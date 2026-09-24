@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { LanguageSwitcher } from "@/app/_components/LanguageSwitcher";
+import { Starfield } from "@/app/_components/Starfield";
 import { getAccessToken } from "@/app/lib/auth";
 import { PublicNatalForm } from "./_PublicNatalForm";
 
@@ -24,28 +25,34 @@ export default async function PublicNatalPage() {
   const signedIn = Boolean(token);
 
   return (
-    <div className="min-h-screen bg-stone-50">
-      <header className="flex items-center justify-between border-b border-stone-200 bg-white px-4 sm:px-6 py-3">
-        <Link href="/" className="text-xs font-semibold uppercase tracking-widest text-amber-700">
+    <div className="relative isolate min-h-screen overflow-hidden bg-space-950">
+      {/* Pinned to the viewport, not the page: on a long page (chart results,
+          legal text) a page-sized canvas would allocate a huge backing store
+          and thin the stars out, since their count follows width only. */}
+      <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10">
+        <Starfield density={0.45} interactive={false} />
+      </div>
+      <header className="relative z-10 mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
+        <Link href="/" className="font-display text-2xl tracking-wide text-starlight">
           Astrodite
         </Link>
         <div className="flex items-center gap-3">
-          <LanguageSwitcher />
+          <LanguageSwitcher tone="dark" />
           {signedIn ? (
             <Link
               href="/charts"
-              className="rounded-lg bg-stone-900 px-3.5 py-1.5 text-sm font-medium text-white hover:bg-stone-800"
+              className="rounded-lg bg-gold-400 px-3.5 py-1.5 text-sm font-semibold text-gold-950 transition hover:brightness-110"
             >
               {t("fullVersion")}
             </Link>
           ) : (
             <>
-              <Link href="/login" className="text-sm text-stone-600 hover:text-stone-900">
+              <Link href="/login" className="text-sm text-dusk transition hover:text-starlight">
                 {t("signIn")}
               </Link>
               <Link
                 href="/register"
-                className="rounded-lg bg-amber-600 px-3.5 py-1.5 text-sm font-medium text-white hover:bg-amber-700"
+                className="rounded-lg border border-space-600 px-3.5 py-1.5 text-sm font-medium text-starlight transition hover:border-dusk"
               >
                 {t("signUp")}
               </Link>
@@ -54,10 +61,10 @@ export default async function PublicNatalPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-3xl px-4 sm:px-6 py-8 space-y-6">
+      <main className="relative z-10 mx-auto max-w-3xl space-y-8 px-4 pb-20 pt-8 sm:px-6">
         <div>
-          <h1 className="text-2xl font-semibold text-stone-900">{t("title")}</h1>
-          <p className="mt-1 text-sm text-stone-500">{t("subtitle")}</p>
+          <h1 className="font-display text-4xl font-semibold text-starlight sm:text-5xl">{t("title")}</h1>
+          <p className="mt-3 text-dusk">{t("subtitle")}</p>
         </div>
 
         {/* Nothing to sell to someone who already has an account, so they get

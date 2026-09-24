@@ -4,17 +4,12 @@ import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import { City } from "@/app/actions/atlas";
 import { CityAutocomplete } from "@/app/_components/CityAutocomplete";
+import { THEME, type Tone } from "@/app/_components/ui/theme";
 
 const CoordMap = dynamic(() => import("@/app/_components/CoordMap").then((m) => m.CoordMap), {
   ssr: false,
-  loading: () => <div className="w-full h-64 rounded-xl bg-stone-100 animate-pulse" />,
+  loading: () => <div className="h-64 w-full animate-pulse rounded-xl bg-dusk/20" />,
 });
-
-const INPUT =
-  "w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-800 " +
-  "focus:outline-none focus:ring-2 focus:ring-amber-400";
-
-const LABEL = "block text-xs font-medium text-stone-500 mb-1";
 
 export interface BirthData {
   datetime: string;
@@ -37,12 +32,18 @@ export function BirthDataFields({
   value,
   onChange,
   cityPlaceholder,
+  tone = "light",
 }: {
   value: BirthData;
   onChange: (next: BirthData) => void;
   cityPlaceholder: string;
+  /** "dark" on the public /natal page, "light" in the dashboard. */
+  tone?: Tone;
 }) {
   const tf = useTranslations("charts.form");
+  const theme = THEME[tone];
+  const INPUT = theme.input;
+  const LABEL = `${theme.label} mb-1.5`;
 
   const patch = (next: Partial<BirthData>) => onChange({ ...value, ...next });
 
@@ -57,8 +58,8 @@ export function BirthDataFields({
     <>
       <div>
         <label className={LABEL}>{tf("city")}</label>
-        <CityAutocomplete onSelect={handleCitySelect} placeholder={cityPlaceholder} />
-        <p className="text-xs text-stone-400 mt-1">{tf("selectCityHint")}</p>
+        <CityAutocomplete onSelect={handleCitySelect} placeholder={cityPlaceholder} tone={tone} />
+        <p className={`mt-1.5 text-xs ${theme.muted}`}>{tf("selectCityHint")}</p>
       </div>
 
       <CoordMap
