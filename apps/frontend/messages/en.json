@@ -362,20 +362,30 @@
     "dailyLimitReached": "Daily limit reached.",
     "upgradeToPro": "Upgrade to Pro",
     "forUnlimitedCharts": "for unlimited transits, solar returns and synastry.",
-    "features": {}
+    "features": {},
+    "perYear": "${price}/year",
+    "yearlySuffix": "yearly",
+    "renewYear": "Renew for a year — ${price}"
   },
   "pricing": {
     "title": "Plans & Pricing",
     "subtitle": "Choose the plan that fits your practice.",
     "canceled": "Payment was canceled — you were not charged.",
-    "mostPopular": "Most popular",
     "free": "Free",
     "perMonth": "/mo",
-    "approxUah": "≈ {uah} UAH/month",
+    "approxUah": "≈ {uah, number} UAH/month",
     "currentPlanLabel": "Current plan",
     "upgradeStripe": "Upgrade with Card (Stripe)",
     "payMonopay": "Pay with monobank (UAH)",
-    "disclaimer": "All prices shown in USD. Card payments (Stripe) renew monthly and can be canceled at any time. Ukrainian users may pay in UAH via monobank — 30 days per payment, no auto-renewal."
+    "disclaimer": "All prices shown in USD. Card payments (Stripe) renew monthly or yearly, depending on the plan you choose, and can be canceled at any time. Ukrainian users may pay in UAH via monobank — 30 or 365 days per payment, no auto-renewal.",
+    "perYear": "/yr",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "approxUahYear": "≈ {uah, number} UAH/year",
+    "freeMonths": "{months, plural, =1 {One month free} other {# months free}}",
+    "saving": "Save ${saving}",
+    "perMonthEquiv": "≈ ${price}/mo, billed yearly",
+    "switchInterval": "You can change the billing period under Billing"
   },
   "account": {
     "title": "Account",
@@ -468,9 +478,15 @@
       "title": "Plans",
       "subtitle": "The natal chart is free and unlimited. Pro opens up everything else.",
       "perMonth": "/mo",
-      "recommended": "For practice",
       "cta": "Start for free",
-      "ctaPro": "Choose Pro"
+      "ctaPro": "Choose Pro",
+      "perYear": "/yr",
+      "monthly": "Monthly",
+      "yearly": "Yearly",
+      "ctaProYear": "Choose Pro yearly",
+      "freeMonths": "{months, plural, =1 {One month free} other {# months free}}",
+      "saving": "Save ${saving}",
+      "perMonthEquiv": "≈ ${price}/mo, billed yearly"
     },
     "final": {
       "title": "Your chart, in seconds",

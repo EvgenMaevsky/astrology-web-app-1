@@ -76,6 +76,9 @@ class Settings(BaseSettings):
     stripe_secret_key: SecretStr = SecretStr("")
     stripe_webhook_secret: SecretStr = SecretStr("")
     stripe_price_pro_monthly: str = ""
+    # Recurring $99/year price of the same Pro product. Empty = yearly card
+    # payment is not offered (monopay yearly still works).
+    stripe_price_pro_yearly: str = ""
     stripe_price_expert_monthly: str = ""
 
     # monopay (monobank acquiring, https://api.monobank.ua) — empty token =

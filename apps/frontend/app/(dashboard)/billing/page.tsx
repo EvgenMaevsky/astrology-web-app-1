@@ -40,6 +40,7 @@ export default async function BillingPage({
 
   const planDetails = plans.find((p) => p.id === (sub?.plan ?? "free"));
   const isPaid = sub?.plan && sub.plan !== "free";
+  const yearly = sub?.interval === "year";
   const periodEndDate = sub?.period_end ? new Date(sub.period_end) : null;
 
   return (
@@ -66,18 +67,36 @@ export default async function BillingPage({
         <h2 className="text-sm font-semibold text-ink-700 uppercase tracking-wider">{t("currentPlan")}</h2>
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-2xl font-bold text-ink-900">{planDetails?.name ?? "Free"}</p>
+            <p className="text-2xl font-bold text-ink-900">
+              {planDetails?.name ?? "Free"}
+              {isPaid && yearly && (
+                <span className="ml-2 text-base font-medium text-ink-600">{t("yearlySuffix")}</span>
+              )}
+            </p>
             <p className="text-sm text-ink-600 mt-1">
               {planDetails?.price_usd === 0
                 ? t("freeForever")
                 : sub?.provider === "monopay" && periodEndDate
                 ? t("activeUntil", { date: periodEndDate.toLocaleDateString(locale === "uk" ? "uk-UA" : "en-GB") })
+                : yearly
+                ? t("perYear", { price: planDetails?.price_usd_yearly ?? 0 })
                 : t("perMonth", { price: planDetails?.price_usd ?? 0 })}
             </p>
           </div>
           <div className="flex gap-3">
             {sub?.provider === "monopay" ? (
-              <RenewButton plan={sub.plan} />
+              // monobank has no auto-renewal, so both periods are offered
+              // here — this is also how a monthly buyer switches to yearly.
+              <div className="flex flex-col items-end gap-2">
+                <RenewButton plan={sub.plan} interval="month" label={t("renew")} />
+                {planDetails?.price_usd_yearly ? (
+                  <RenewButton
+                    plan={sub.plan}
+                    interval="year"
+                    label={t("renewYear", { price: planDetails.price_usd_yearly })}
+                  />
+                ) : null}
+              </div>
             ) : isPaid ? (
               <ManageButton />
             ) : (

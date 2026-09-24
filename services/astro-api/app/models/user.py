@@ -76,6 +76,11 @@ class Subscription(Base):
     monopay_invoice_id: Mapped[str | None] = mapped_column(String(64), nullable=True, unique=True, index=True)
     period_start: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     period_end: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    # "month" | "year". Separate from `plan` on purpose: access checks look
+    # at the plan only, and a yearly Pro is still Pro.
+    billing_interval: Mapped[str] = mapped_column(
+        String(8), nullable=False, default="month", server_default="month"
+    )
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
     user: Mapped["User"] = relationship(back_populates="subscriptions")

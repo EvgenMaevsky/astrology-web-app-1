@@ -74,3 +74,14 @@ def test_every_advertised_feature_has_a_ukrainian_translation():
         f for plan in PLANS for f in plan["features"] if f not in dictionary
     ]
     assert not missing, f"no Ukrainian translation for: {missing}"
+
+
+def test_yearly_pro_is_a_real_discount_in_both_currencies():
+    # $99 = $9 x 12 - $9 (a month free); the UAH figure must give the same
+    # deal, not quietly a worse one.
+    pro = _plan("pro")
+    assert pro["price_usd_yearly"] == 99
+    assert pro["price_usd_yearly"] < pro["price_usd"] * 12
+    usd_ratio = pro["price_usd_yearly"] / pro["price_usd"]
+    uah_ratio = pro["price_uah_yearly"] / pro["price_uah"]
+    assert uah_ratio == usd_ratio

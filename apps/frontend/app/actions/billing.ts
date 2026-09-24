@@ -2,12 +2,18 @@
 
 import { redirect } from "next/navigation";
 import { API_URL, getAccessToken } from "@/app/lib/auth";
+import type { Interval } from "@/app/lib/offers";
 
 export interface Plan {
   id: string;
   name: string;
   price_usd: number;
   price_uah: number;
+  /** Only on plans also sold yearly (Pro). */
+  price_usd_yearly?: number;
+  price_uah_yearly?: number;
+  /** False until the owner has created the yearly price in Stripe. */
+  stripe_yearly_available?: boolean;
   features: string[];
   limits: Record<string, number>;
 }
@@ -17,6 +23,8 @@ export interface Subscription {
   plan_name: string;
   provider: "stripe" | "monopay" | null;
   period_end: string | null;
+  /** null when there is no active paid subscription. */
+  interval: Interval | null;
 }
 
 export interface ChartUsage {
@@ -65,14 +73,14 @@ export async function getChartUsage(): Promise<ChartUsage | null> {
   }
 }
 
-export async function startStripeCheckout(plan: string): Promise<void> {
+export async function startStripeCheckout(plan: string, interval: Interval = "month"): Promise<void> {
   const token = await getAccessToken();
   if (!token) redirect("/login");
 
   const res = await fetch(`${API_URL}/api/v1/billing/stripe/checkout`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-    body: JSON.stringify({ plan }),
+    body: JSON.stringify({ plan, interval }),
     cache: "no-store",
   });
 
@@ -100,14 +108,14 @@ export async function openStripePortal(): Promise<void> {
   redirect(url);
 }
 
-export async function startMonopayCheckout(plan: string): Promise<void> {
+export async function startMonopayCheckout(plan: string, interval: Interval = "month"): Promise<void> {
   const token = await getAccessToken();
   if (!token) redirect("/login");
 
   const res = await fetch(`${API_URL}/api/v1/billing/monopay/checkout`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-    body: JSON.stringify({ plan }),
+    body: JSON.stringify({ plan, interval }),
     cache: "no-store",
   });
 

@@ -654,3 +654,195 @@ async def test_lazy_expiry_does_not_touch_stripe_subscription(client: AsyncClien
         )
         sub = result.scalar_one()
         assert sub.status == "active"
+
+
+# ── Yearly Pro (E9) ──────────────────────────────────────────────────────────
+
+class _FakeSession:
+    url = "https://checkout.stripe.test/session"
+
+
+async def test_plans_expose_yearly_price_and_stripe_availability(client: AsyncClient, monkeypatch):
+    monkeypatch.setattr(settings, "stripe_price_pro_yearly", "")
+    pro = next(p for p in (await client.get("/api/v1/billing/plans")).json() if p["id"] == "pro")
+    assert pro["price_usd_yearly"] == 99
+    assert pro["stripe_yearly_available"] is False
+    # Price ids are server config, not something the page needs.
+    assert not any(k.startswith("stripe_price") for k in pro)
+
+    monkeypatch.setattr(settings, "stripe_price_pro_yearly", "price_yearly_test")
+    pro = next(p for p in (await client.get("/api/v1/billing/plans")).json() if p["id"] == "pro")
+    assert pro["stripe_yearly_available"] is True
+
+
+@pytest.mark.parametrize("interval,setting,price", [
+    ("month", "stripe_price_pro_monthly", "price_month_test"),
+    ("year", "stripe_price_pro_yearly", "price_year_test"),
+])
+async def test_stripe_checkout_uses_the_price_for_the_interval(
+    client: AsyncClient, monkeypatch, interval, setting, price
+):
+    monkeypatch.setattr(settings, "stripe_secret_key", SecretStr("sk_test_fake"))
+    monkeypatch.setattr(settings, "stripe_price_pro_monthly", "price_month_test")
+    monkeypatch.setattr(settings, "stripe_price_pro_yearly", "price_year_test")
+    captured = {}
+
+    def fake_create(**kwargs):
+        captured.update(kwargs)
+        return _FakeSession()
+
+    monkeypatch.setattr("stripe.checkout.Session.create", fake_create)
+    token = await _register(client, f"stripe-{interval}@example.com")
+    r = await client.post(
+        "/api/v1/billing/stripe/checkout",
+        json={"plan": "pro", "interval": interval},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert r.status_code == 200
+    assert captured["line_items"] == [{"price": price, "quantity": 1}]
+    assert captured["subscription_data"]["metadata"]["interval"] == interval
+
+
+async def test_stripe_yearly_checkout_without_price_is_503(client: AsyncClient, monkeypatch):
+    monkeypatch.setattr(settings, "stripe_secret_key", SecretStr("sk_test_fake"))
+    monkeypatch.setattr(settings, "stripe_price_pro_yearly", "")
+    token = await _register(client, "stripe-year-missing@example.com")
+    r = await client.post(
+        "/api/v1/billing/stripe/checkout",
+        json={"plan": "pro", "interval": "year"},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert r.status_code == 503
+
+
+async def test_checkout_rejects_unknown_interval(client: AsyncClient, monkeypatch):
+    monkeypatch.setattr(settings, "monopay_token", SecretStr("test_token"))
+    token = await _register(client, "bad-interval@example.com")
+    r = await client.post(
+        "/api/v1/billing/monopay/checkout",
+        json={"plan": "pro", "interval": "week"},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert r.status_code == 422
+
+
+async def test_stripe_webhook_records_yearly_interval_from_the_price(client: AsyncClient):
+    await _register(client, "stripe-yearly-hook@example.com")
+    user = await _get_user("stripe-yearly-hook@example.com")
+    event = {
+        "type": "customer.subscription.created",
+        "data": {"object": {
+            "id": "sub_yearly_test",
+            "status": "active",
+            # Metadata says month (e.g. bought monthly, then switched in the
+            # Customer Portal); the price is the source of truth.
+            "metadata": {"user_id": user.id, "plan": "pro", "interval": "month"},
+            "items": {"data": [{
+                "current_period_start": 1784357910,
+                "current_period_end": 1815893910,
+                "price": {"recurring": {"interval": "year"}},
+            }]},
+        }},
+    }
+    payload, sig = _stripe_signed_payload(event)
+    r = await client.post(
+        "/api/v1/billing/stripe/webhook", content=payload, headers={"stripe-signature": sig}
+    )
+    assert r.status_code == 200
+    async with TestSession() as session:
+        sub = (await session.execute(
+            select(Subscription).where(Subscription.stripe_sub_id == "sub_yearly_test")
+        )).scalar_one()
+        assert sub.billing_interval == "year"
+
+
+async def test_monopay_yearly_checkout_charges_the_yearly_price(client: AsyncClient, monkeypatch):
+    monkeypatch.setattr(settings, "monopay_token", SecretStr("test_token"))
+    captured = {}
+
+    async def fake_create_invoice(**kwargs):
+        captured.update(kwargs)
+        return {"invoiceId": "inv_year_1", "pageUrl": "https://pay.monobank.ua/inv_year_1"}
+
+    monkeypatch.setattr("app.monopay.create_invoice", fake_create_invoice)
+    token = await _register(client, "monopay-year@example.com")
+    r = await client.post(
+        "/api/v1/billing/monopay/checkout",
+        json={"plan": "pro", "interval": "year"},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert r.status_code == 200
+    assert captured["amount_kopecks"] == 3850 * 100
+    assert "1 year" in captured["destination"]
+    async with TestSession() as session:
+        sub = (await session.execute(
+            select(Subscription).where(Subscription.monopay_invoice_id == "inv_year_1")
+        )).scalar_one()
+        assert sub.billing_interval == "year"
+
+
+async def test_monopay_yearly_payment_grants_365_days(client: AsyncClient, monkeypatch):
+    async def fake_verify(raw_body: bytes, x_sign: str) -> bool:
+        return True
+
+    monkeypatch.setattr("app.monopay.verify_webhook_signature", fake_verify)
+    token = await _register(client, "monopay-year-pay@example.com")
+    user = await _get_user("monopay-year-pay@example.com")
+    async with TestSession() as session:
+        session.add(Subscription(
+            id=str(uuid.uuid4()), user_id=user.id, plan="pro", status="pending",
+            monopay_invoice_id="inv_year_pay", billing_interval="year",
+        ))
+        await session.commit()
+
+    body = json.dumps({"invoiceId": "inv_year_pay", "status": "success", "amount": 385000}).encode()
+    r = await client.post(
+        "/api/v1/billing/monopay/webhook", content=body,
+        headers={"X-Sign": "irrelevant", "Content-Type": "application/json"},
+    )
+    assert r.status_code == 200
+    async with TestSession() as session:
+        sub = (await session.execute(
+            select(Subscription).where(Subscription.monopay_invoice_id == "inv_year_pay")
+        )).scalar_one()
+        assert sub.status == "active"
+        assert abs((sub.period_end - sub.period_start) - timedelta(days=365)) < timedelta(seconds=5)
+
+    r = await client.get("/api/v1/billing/subscription", headers={"Authorization": f"Bearer {token}"})
+    assert r.json()["plan"] == "pro"
+    assert r.json()["interval"] == "year"
+
+
+async def test_monopay_yearly_renewal_of_a_monthly_plan_adds_a_year(client: AsyncClient, monkeypatch):
+    async def fake_verify(raw_body: bytes, x_sign: str) -> bool:
+        return True
+
+    monkeypatch.setattr("app.monopay.verify_webhook_signature", fake_verify)
+    await _register(client, "monopay-upgrade-year@example.com")
+    user = await _get_user("monopay-upgrade-year@example.com")
+    original_end = datetime.now(timezone.utc) + timedelta(days=10)
+    async with TestSession() as session:
+        session.add(Subscription(
+            id=str(uuid.uuid4()), user_id=user.id, plan="pro", status="active",
+            monopay_invoice_id="inv_month_active", billing_interval="month",
+            period_start=datetime.now(timezone.utc) - timedelta(days=20), period_end=original_end,
+        ))
+        session.add(Subscription(
+            id=str(uuid.uuid4()), user_id=user.id, plan="pro", status="pending",
+            monopay_invoice_id="inv_year_renew", billing_interval="year",
+        ))
+        await session.commit()
+
+    body = json.dumps({"invoiceId": "inv_year_renew", "status": "success", "amount": 385000}).encode()
+    await client.post(
+        "/api/v1/billing/monopay/webhook", content=body,
+        headers={"X-Sign": "irrelevant", "Content-Type": "application/json"},
+    )
+    async with TestSession() as session:
+        active = (await session.execute(
+            select(Subscription).where(Subscription.monopay_invoice_id == "inv_month_active")
+        )).scalar_one()
+        end = active.period_end if active.period_end.tzinfo else active.period_end.replace(tzinfo=timezone.utc)
+        # Remaining 10 days are kept, a full year is added on top.
+        assert abs((end - (original_end + timedelta(days=365))).total_seconds()) < 5
+        assert active.billing_interval == "year"

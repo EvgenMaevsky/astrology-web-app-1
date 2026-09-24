@@ -7,8 +7,8 @@ Stripe flow:
   POST /stripe/webhook   → receives Stripe webhook events
 
 monopay flow (monobank acquiring, for Ukrainian users — one-time invoice,
-no native subscriptions; a successful payment grants 30 days of the plan
-with no auto-renewal):
+no native subscriptions; a successful payment grants 30 or 365 days of the
+plan, depending on the interval bought, with no auto-renewal):
   POST /monopay/checkout → creates an invoice, returns {url} to redirect to
   POST /monopay/sync     → re-checks the caller's pending invoice status
                             (used right after redirect-back, since a
@@ -24,6 +24,8 @@ from datetime import datetime, timedelta, timezone
 
 import stripe
 from fastapi import APIRouter, Depends, HTTPException, Request, status
+from typing import Literal
+
 from pydantic import BaseModel
 from sqlalchemy import func, select, update
 from sqlalchemy.dialects.postgresql import insert as pg_insert
@@ -63,6 +65,10 @@ PLANS = [
         "name": "Pro",
         "price_usd": 9,
         "price_uah": 350,
+        # $9 x 12 - $9: a month free. UAH at the monthly plan's own rate
+        # (350 per $9), so both currencies give the same discount.
+        "price_usd_yearly": 99,
+        "price_uah_yearly": 3850,
         "features": [
             "Everything in Free",
             "All aspects, major and minor",
@@ -71,7 +77,6 @@ PLANS = [
             "Priority support",
         ],
         "limits": {},
-        "stripe_price_id": settings.stripe_price_pro_monthly,
     },
     {
         "id": "expert",
@@ -87,7 +92,6 @@ PLANS = [
             "Priority support",
         ],
         "limits": {},
-        "stripe_price_id": settings.stripe_price_expert_monthly,
         # Not for sale yet — none of the features above are implemented.
         # Kept in the catalogue (not deleted) because get_subscription()
         # falls back to PLANS[0] for an unknown plan id, and any user whose
@@ -97,9 +101,45 @@ PLANS = [
 ]
 
 
+Interval = Literal["month", "year"]
+
+# Setting names rather than values: read at request time, so a price added
+# to .env takes effect on restart and tests can patch settings.
+_STRIPE_PRICE_SETTING: dict[tuple[str, str], str] = {
+    ("pro", "month"): "stripe_price_pro_monthly",
+    ("pro", "year"): "stripe_price_pro_yearly",
+    ("expert", "month"): "stripe_price_expert_monthly",
+}
+
+MONOPAY_PERIODS: dict[str, timedelta] = {
+    "month": timedelta(days=30),
+    "year": timedelta(days=365),
+}
+
+
+def _stripe_price(plan_id: str, interval: str) -> str:
+    name = _STRIPE_PRICE_SETTING.get((plan_id, interval))
+    return getattr(settings, name) if name else ""
+
+
+def _monopay_amount_uah(plan_cfg: dict, interval: str) -> int | None:
+    """UAH price for the interval, or None if the plan is not sold that way."""
+    return plan_cfg.get("price_uah_yearly") if interval == "year" else plan_cfg.get("price_uah")
+
+
 @router.get("/plans")
 async def list_plans() -> list[dict]:
-    return [p for p in PLANS if p.get("public", True)]
+    plans = []
+    for p in PLANS:
+        if not p.get("public", True):
+            continue
+        out = dict(p)
+        if "price_usd_yearly" in p:
+            # Lets the page hide the yearly card-payment button until the
+            # owner has created the yearly price in Stripe.
+            out["stripe_yearly_available"] = bool(_stripe_price(p["id"], "year"))
+        plans.append(out)
+    return plans
 
 
 # ── Current subscription ──────────────────────────────────────────────────────
@@ -120,7 +160,9 @@ async def get_subscription(
     active_sub = result.scalars().first()
     provider = None
     period_end = None
+    interval = None
     if active_sub is not None:
+        interval = active_sub.billing_interval
         if active_sub.monopay_invoice_id:
             provider = "monopay"
         elif active_sub.stripe_sub_id:
@@ -129,7 +171,7 @@ async def get_subscription(
 
     return {
         "plan": current_user.plan, "plan_name": plan["name"],
-        "provider": provider, "period_end": period_end,
+        "provider": provider, "period_end": period_end, "interval": interval,
     }
 
 
@@ -138,7 +180,7 @@ async def get_subscription(
 
 class StripeCheckoutRequest(BaseModel):
     plan: str  # "pro" | "expert"
-    interval: str = "month"  # "month" | "year"
+    interval: Interval = "month"
 
 
 @router.post("/stripe/checkout")
@@ -153,9 +195,12 @@ async def stripe_checkout(
     if not plan_cfg or body.plan == "free" or not plan_cfg.get("public", True):
         raise HTTPException(status_code=400, detail="Invalid plan")
 
-    price_id = plan_cfg.get("stripe_price_id", "")
+    price_id = _stripe_price(body.plan, body.interval)
     if not price_id:
-        raise HTTPException(status_code=503, detail=f"Stripe price not configured for {body.plan}")
+        raise HTTPException(
+            status_code=503,
+            detail=f"Stripe price not configured for {body.plan} ({body.interval})",
+        )
 
     stripe.api_key = settings.stripe_secret_key.get_secret_value()
 
@@ -168,11 +213,13 @@ async def stripe_checkout(
         mode="subscription",
         success_url=f"{settings.frontend_url}/billing?success=1",
         cancel_url=f"{settings.frontend_url}/pricing?canceled=1",
-        metadata={"user_id": current_user.id, "plan": body.plan},
+        metadata={"user_id": current_user.id, "plan": body.plan, "interval": body.interval},
         # Also stamp metadata onto the subscription object itself — Stripe does
         # NOT copy Checkout Session metadata there automatically, and the
         # customer.subscription.* webhooks only see subscription-level metadata.
-        subscription_data={"metadata": {"user_id": current_user.id, "plan": body.plan}},
+        subscription_data={
+            "metadata": {"user_id": current_user.id, "plan": body.plan, "interval": body.interval}
+        },
     )
     if current_user.stripe_customer_id:
         session_kwargs["customer"] = current_user.stripe_customer_id
@@ -248,14 +295,32 @@ def _subscription_period(data: dict) -> tuple[datetime | None, datetime | None]:
     return _ts(item.get("current_period_start")), _ts(item.get("current_period_end"))
 
 
+def _subscription_interval(data: dict) -> str:
+    """The billing interval of the subscription's price.
+
+    Read from the price, not from our metadata: a customer can switch
+    between the monthly and the yearly price in the Customer Portal, and
+    only the price reflects that. Metadata is the fallback.
+    """
+    items = (data.get("items") or {}).get("data") or []
+    if items:
+        interval = ((items[0].get("price") or {}).get("recurring") or {}).get("interval")
+        if interval in MONOPAY_PERIODS:
+            return interval
+    interval = (data.get("metadata") or {}).get("interval")
+    return interval if interval in MONOPAY_PERIODS else "month"
+
+
 async def _upsert_subscription(
     db: AsyncSession, user_id: str, plan: str, status_: str,
     stripe_sub_id: str | None, period_start=None, period_end=None,
+    billing_interval: str = "month",
 ) -> None:
     if not stripe_sub_id:
         db.add(Subscription(
             id=str(uuid.uuid4()), user_id=user_id, plan=plan, status=status_,
             stripe_sub_id=stripe_sub_id, period_start=period_start, period_end=period_end,
+            billing_interval=billing_interval,
         ))
         return
 
@@ -263,12 +328,14 @@ async def _upsert_subscription(
     statement = insert(Subscription).values(
         id=str(uuid.uuid4()), user_id=user_id, plan=plan, status=status_,
         stripe_sub_id=stripe_sub_id, period_start=period_start, period_end=period_end,
+        billing_interval=billing_interval,
     )
     statement = statement.on_conflict_do_update(
         index_elements=["stripe_sub_id"],
         set_={
             "plan": statement.excluded.plan,
             "status": statement.excluded.status,
+            "billing_interval": statement.excluded.billing_interval,
             "period_start": func.coalesce(statement.excluded.period_start, Subscription.period_start),
             "period_end": func.coalesce(statement.excluded.period_end, Subscription.period_end),
         },
@@ -341,6 +408,7 @@ async def _handle_stripe_event(event: dict, db: AsyncSession) -> None:
                 db, user_id, plan, sub_status, sub_id,
                 period_start=period_start,
                 period_end=period_end,
+                billing_interval=_subscription_interval(data),
             )
             await _sync_user_plan(db, user_id)
             await db.commit()
@@ -390,11 +458,9 @@ async def _handle_stripe_event(event: dict, db: AsyncSession) -> None:
 
 # ── monopay ──────────────────────────────────────────────────────────────────
 
-MONOPAY_PERIOD = timedelta(days=30)
-
-
 class MonopayCheckoutRequest(BaseModel):
     plan: str
+    interval: Interval = "month"
 
 
 @router.post("/monopay/checkout")
@@ -409,11 +475,15 @@ async def monopay_checkout(
     plan_cfg = next((p for p in PLANS if p["id"] == body.plan), None)
     if not plan_cfg or body.plan == "free" or not plan_cfg.get("public", True):
         raise HTTPException(status_code=400, detail="Invalid plan")
+    amount_uah = _monopay_amount_uah(plan_cfg, body.interval)
+    if not amount_uah:
+        raise HTTPException(status_code=400, detail="Invalid interval for this plan")
 
     invoice = await monopay.create_invoice(
-        amount_kopecks=plan_cfg["price_uah"] * 100,
+        amount_kopecks=amount_uah * 100,
         reference=f"{current_user.id}-{body.plan}-{uuid.uuid4().hex[:8]}",
-        destination=f"Astrodite {plan_cfg['name']} — 30 days",
+        destination=f"Astrodite {plan_cfg['name']} — "
+        + ("1 year" if body.interval == "year" else "30 days"),
         redirect_url=f"{settings.frontend_url}/billing?monopay=1",
         webhook_url=f"{settings.api_public_url}/api/v1/billing/monopay/webhook",
     )
@@ -422,7 +492,7 @@ async def monopay_checkout(
     # look the invoice up here rather than trusting fields on the callback.
     db.add(Subscription(
         id=str(uuid.uuid4()), user_id=current_user.id, plan=body.plan, status="pending",
-        monopay_invoice_id=invoice["invoiceId"],
+        monopay_invoice_id=invoice["invoiceId"], billing_interval=body.interval,
     ))
     await db.commit()
 
@@ -458,6 +528,9 @@ async def _apply_monopay_status(inv: dict, db: AsyncSession) -> None:
         # accepted "canceled"/"failed" as reactivatable, which is the gap.
         if sub.status == "pending":
             now = datetime.now(timezone.utc)
+            # The period THIS payment bought: renewing a monthly plan with a
+            # yearly payment adds a year, and vice versa.
+            period = MONOPAY_PERIODS.get(sub.billing_interval, MONOPAY_PERIODS["month"])
             # Renewal: if the user already has a different active monopay
             # subscription, extend ITS period instead of activating this
             # (new) pending row as a second concurrent one.
@@ -474,12 +547,14 @@ async def _apply_monopay_status(inv: dict, db: AsyncSession) -> None:
                 base = active_sub.period_end
                 if base is not None and base.tzinfo is None:
                     base = base.replace(tzinfo=timezone.utc)
-                active_sub.period_end = max(now, base or now) + MONOPAY_PERIOD
+                active_sub.period_end = max(now, base or now) + period
+                # The row the user sees now reflects their latest purchase.
+                active_sub.billing_interval = sub.billing_interval
                 sub.status = "merged"
             else:
                 sub.status = "active"
                 sub.period_start = now
-                sub.period_end = now + MONOPAY_PERIOD
+                sub.period_end = now + period
 
             user_result = await db.execute(select(User).where(User.id == sub.user_id))
             user = user_result.scalar_one_or_none()

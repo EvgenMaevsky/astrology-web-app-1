@@ -32,7 +32,11 @@ are already done (or does alongside).
   `checkout.session.completed`, `customer.subscription.*`,
   `invoice.payment_succeeded`.
 - Copy the live `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, and the live
-  Price ID for `STRIPE_PRICE_PRO_MONTHLY` into `infra/.env`.
+  Price IDs for `STRIPE_PRICE_PRO_MONTHLY` ($9/month) and
+  `STRIPE_PRICE_PRO_YEARLY` ($99/year, same Pro product) into `infra/.env`.
+  Test-mode price IDs do not exist in live mode — both must be created again.
+- In the Customer Portal settings, allow switching between the two Pro
+  prices, so a monthly subscriber can move to yearly (and back) there.
 
 ## 4. monopay (monobank acquiring) — go live
 

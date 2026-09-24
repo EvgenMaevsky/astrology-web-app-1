@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { getPlans, getSubscription } from "@/app/actions/billing";
+import { buildOffers } from "@/app/lib/offers";
 import { PricingCard } from "./_components/PricingCard";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -20,12 +21,13 @@ export default async function PricingPage({
     getSubscription(),
   ]);
   const currentPlan = sub?.plan ?? "free";
+  const offers = buildOffers(plans);
 
   // monopay is available when MONOPAY_TOKEN env is configured (server checks internally)
   const monopayAvailable = true;
 
   return (
-    <div className="space-y-8 max-w-4xl mx-auto">
+    <div className="space-y-8 max-w-5xl mx-auto">
       <div className="text-center">
         <h1 className="font-display text-4xl font-semibold text-ink-900">{t("title")}</h1>
         <p className="mt-2 text-ink-600">{t("subtitle")}</p>
@@ -38,11 +40,12 @@ export default async function PricingPage({
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {plans.map((plan) => (
+        {offers.map((offer) => (
           <PricingCard
-            key={plan.id}
-            plan={plan}
+            key={offer.key}
+            offer={offer}
             currentPlan={currentPlan}
+            currentInterval={sub?.interval ?? null}
             monopayAvailable={monopayAvailable}
           />
         ))}
