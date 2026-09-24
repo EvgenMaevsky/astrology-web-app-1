@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { getPlans } from "@/app/actions/billing";
 import { getFeatureTranslator } from "@/app/lib/billing-i18n";
+import { FULL_SCREEN } from "./section";
 
 /**
  * Plans come from the API catalogue, never from copy written here — the
@@ -17,7 +18,7 @@ export async function Pricing() {
   if (plans.length === 0) return null;
 
   return (
-    <section id="pricing" className="scroll-mt-16 border-t border-space-800 bg-space-950 px-6 py-24">
+    <section id="pricing" className={`${FULL_SCREEN} border-t border-space-800 bg-space-950 px-6 py-24`}>
       <div className="mx-auto max-w-4xl">
         <div className="text-center">
           <h2 className="font-display text-4xl font-semibold text-starlight sm:text-5xl">{t("title")}</h2>

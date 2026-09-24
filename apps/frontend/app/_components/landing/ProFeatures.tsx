@@ -1,4 +1,5 @@
 import { getTranslations } from "next-intl/server";
+import { FULL_SCREEN } from "./section";
 
 export async function ProFeatures() {
   const t = await getTranslations("landing.pro");
@@ -12,7 +13,7 @@ export async function ProFeatures() {
   ];
 
   return (
-    <section className="border-t border-space-800 bg-space-950 px-6 py-24">
+    <section className={`${FULL_SCREEN} border-t border-space-800 bg-space-950 px-6 py-24`}>
       <div className="mx-auto grid max-w-6xl gap-14 lg:grid-cols-[1fr_1.4fr]">
         <div>
           <h2 className="font-display text-4xl font-semibold text-starlight sm:text-5xl">{t("title")}</h2>

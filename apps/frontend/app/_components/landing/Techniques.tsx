@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { LANDING_FACTS } from "@/app/lib/landing-facts";
+import { FULL_SCREEN } from "./section";
 
 /**
  * The three techniques, badged with the allowances from plan E4: natal is
@@ -21,7 +22,7 @@ export async function Techniques() {
   ];
 
   return (
-    <section id="features" className="scroll-mt-16 bg-space-950 px-6 py-24">
+    <section id="features" className={`${FULL_SCREEN} bg-space-950 px-6 py-24`}>
       <div className="mx-auto max-w-6xl">
         <h2 className="text-center font-display text-4xl font-semibold text-starlight sm:text-5xl">{t("title")}</h2>
         <div className="mt-14 grid gap-6 md:grid-cols-3">

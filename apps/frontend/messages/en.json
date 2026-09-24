@@ -404,10 +404,17 @@
       "signIn": "Sign in"
     },
     "stats": {
+      "eyebrow": "Our strengths",
+      "title": "Why choose Astrodite",
+      "subtitle": "The precision of professional astrology software, right in your browser. Nothing to install, and your first chart needs no sign-up.",
       "precision": "agreement with Swiss Ephemeris",
       "cities": "cities with historical time zones",
       "houses": "house systems",
-      "years": "years you can calculate"
+      "years": "years you can calculate",
+      "precisionNote": "Planet positions agree with Swiss Ephemeris, the reference engine behind professional software.",
+      "citiesNote": "We apply the time zone and daylight saving time in force at the place and date of birth.",
+      "housesNote": "Placidus, Koch, Regiomontanus, Campanus, Equal and Whole Sign — your choice.",
+      "yearsNote": "Three centuries of NASA JPL ephemerides: from great-grandparents to grandchildren."
     },
     "liveChart": {
       "title": "This is what your chart looks like",

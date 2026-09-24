@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { Starfield } from "@/app/_components/Starfield";
+import { FULL_SCREEN } from "./section";
 
 export async function FinalCta() {
   const t = await getTranslations("landing.final");
 
   return (
-    <section className="relative isolate overflow-hidden border-t border-space-800 bg-space-950 px-6 py-32 text-center">
+    <section className={`${FULL_SCREEN} relative isolate overflow-hidden border-t border-space-800 bg-space-950 px-6 py-32 text-center`}>
       {/* A second sky. It only animates while on screen, so it and the
           hero's never run at the same time. */}
       <Starfield density={0.6} />

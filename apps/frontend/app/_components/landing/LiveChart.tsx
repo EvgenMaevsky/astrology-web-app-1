@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { ChartWheel } from "@/app/_components/chart-wheel/ChartWheel";
 import sample from "./sample-chart.json";
+import { FULL_SCREEN } from "./section";
 
 /**
  * The real ChartWheel, on a fixed made-up chart generated once from our own
@@ -25,7 +26,7 @@ export function LiveChart() {
   ];
 
   return (
-    <section className="bg-space-950 px-6 py-24">
+    <section className={`${FULL_SCREEN} bg-space-950 px-6 py-24`}>
       <div className="mx-auto max-w-6xl">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="font-display text-4xl font-semibold text-starlight sm:text-5xl">{t("title")}</h2>
