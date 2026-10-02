@@ -82,6 +82,17 @@ def expected_keys() -> list[str]:
     return keys
 
 
+def _no_duplicates(pairs: list[tuple[str, object]]) -> dict[str, object]:
+    # json.loads keeps the LAST value of a repeated key without a word, so a
+    # stale draft left below the real text would silently win.
+    seen: set[str] = set()
+    for key, _ in pairs:
+        if key in seen:
+            raise ValueError(f"{key} appears twice in one file")
+        seen.add(key)
+    return dict(pairs)
+
+
 @lru_cache(maxsize=len(LANGUAGES))
 def load(lang: str) -> dict[str, dict[str, str]]:
     """All texts for a language. Cached: the files only change on deploy."""
@@ -89,7 +100,7 @@ def load(lang: str) -> dict[str, dict[str, str]]:
         raise ValueError(f"unsupported language: {lang}")
     merged: dict[str, dict[str, str]] = {}
     for path in sorted((DATA_DIR / lang).glob("*.json")):
-        for key, entry in json.loads(path.read_text(encoding="utf-8")).items():
+        for key, entry in json.loads(path.read_text(encoding="utf-8"), object_pairs_hook=_no_duplicates).items():
             if key in merged:
                 raise ValueError(f"{key} defined twice (second time in {path.name})")
             merged[key] = entry
