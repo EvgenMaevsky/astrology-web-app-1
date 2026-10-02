@@ -96,7 +96,7 @@ export function PublicNatalForm({ showDialog }: { showDialog: boolean }) {
           </div>
           <PlanetTable planets={state.data.planets} showTerms={false} />
           <AspectTable aspects={state.data.aspects} />
-          <Interpretation chart={state.data} />
+          <Interpretation chart={state.data} tone="dark" />
         </div>
       )}
 
