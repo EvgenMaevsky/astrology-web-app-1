@@ -75,6 +75,13 @@ LANGUAGE_REGRESSIONS = {
     # Editorial principles of the base itself.
     "fatalistic wording": r"(приречен|обов’язково станеться|обов'язково станеться|точно буде розлучення)",
     "Russian-style quote marks": r"[„“”]",
+    # "Людина" is grammatically feminine, which made "вона може стати
+    # вчителькою" read as if every reader were a woman. Keep roles neutral.
+    "gendered role nouns": (
+        r"\b(вчительк|викладачк|дослідниц|мандрівниц|шукачк|лідерк|керівниц|підприємиц|"
+        r"спортсменк|проповідниц|працівниц|помічниц|цілительк|оповідачк|слухачк|наставниц|"
+        r"провідниц|втішниц|майстрин|авторк|організаторк|посередниц)(я|а|і|и|ею|ою|ю|у|ям|ями|ах)\b"
+    ),
 }
 
 
