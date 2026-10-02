@@ -23,6 +23,7 @@ from app.routers.persons import router as persons_router
 from app.routers.saved_charts import router as saved_charts_router
 from app.routers.settings import router as settings_router
 from app.routers.site_settings import router as site_settings_router
+from app.routers.interpretations import router as interpretations_router
 from app.routers.users import router as users_router
 
 
@@ -71,6 +72,7 @@ app.include_router(billing_router)
 app.include_router(atlas_router)
 app.include_router(users_router)
 app.include_router(site_settings_router)
+app.include_router(interpretations_router)
 
 
 @app.get("/health")

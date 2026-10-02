@@ -9,6 +9,7 @@ import { CityAutocomplete } from "@/app/_components/CityAutocomplete";
 import { UpgradePrompt } from "@/app/_components/UpgradePrompt";
 import { HOUSE_SYSTEMS } from "@/app/lib/house-systems";
 import { useAstroTranslator } from "@/app/lib/astro-i18n";
+import { CollapsibleCard } from "@/app/_components/ui/CollapsibleCard";
 
 
 const initialState: ExtendedChartState<SynastryResult> = { status: "idle" };
@@ -65,7 +66,7 @@ export function SynastryForm({ persons = [] }: Props) {
       <form action={action} className="bg-white rounded-xl border border-mist-200 p-6 space-y-6">
         <h2 className="text-sm font-semibold text-ink-700 uppercase tracking-wider">{tsy("title")}</h2>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
           {/* Person 1 */}
           <div className="space-y-4 border border-mist-100 rounded-xl p-4">
             <h3 className="text-xs font-semibold text-ink-600 uppercase tracking-wider">{tsy("person1")}</h3>
@@ -184,14 +185,13 @@ function SynastryResultPanel({ data }: { data: SynastryResult }) {
   return (
     <div className="space-y-6">
       {/* Side-by-side planet tables */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
         {(["person1", "person2"] as const).map((key) => (
-          <div key={key} className="bg-white rounded-xl border border-mist-200 overflow-hidden">
-            <div className="px-4 py-3 border-b border-mist-100 bg-mist-50">
-              <h3 className="text-xs font-semibold text-ink-600 uppercase tracking-wider">
-                {key === "person1" ? tsy("person1") : tsy("person2")} — {tsy("planets")}
-              </h3>
-            </div>
+          <CollapsibleCard
+            key={key}
+            title={`${key === "person1" ? tsy("person1") : tsy("person2")} — ${tsy("planets")}`}
+            defaultOpen={key === "person1"}
+          >
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
@@ -214,20 +214,17 @@ function SynastryResultPanel({ data }: { data: SynastryResult }) {
                 </tbody>
               </table>
             </div>
-          </div>
+          </CollapsibleCard>
         ))}
       </div>
 
       {/* Inter-aspects */}
       {data.inter_aspects.length > 0 && (
-        <div className="bg-white rounded-xl border border-mist-200 overflow-hidden">
-          <div className="px-4 py-3 border-b border-mist-100 bg-mist-50">
-            <h3 className="text-xs font-semibold text-ink-600 uppercase tracking-wider">{tsy("interAspects")}</h3>
-          </div>
+        <CollapsibleCard title={tsy("interAspects")}>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-mist-100 bg-mist-50">
+                <tr className="border-b border-mist-100">
                   <th className="text-left px-4 py-2 text-xs font-semibold text-ink-600 uppercase">{tsy("person1")}</th>
                   <th className="text-center px-4 py-2 text-xs font-semibold text-ink-600 uppercase">{th("asp")}</th>
                   <th className="text-left px-4 py-2 text-xs font-semibold text-ink-600 uppercase">{tsy("person2")}</th>
@@ -250,7 +247,7 @@ function SynastryResultPanel({ data }: { data: SynastryResult }) {
               </tbody>
             </table>
           </div>
-        </div>
+        </CollapsibleCard>
       )}
     </div>
   );

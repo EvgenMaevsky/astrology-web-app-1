@@ -10,6 +10,7 @@ import { UpgradePrompt } from "@/app/_components/UpgradePrompt";
 import { HOUSE_SYSTEMS } from "@/app/lib/house-systems";
 import { PlanetTable, AspectTable, ArabicPartsTable } from "./ResultTables";
 import { SaveChartButton } from "./SaveChartButton";
+import { Interpretation } from "@/app/_components/Interpretation";
 
 const initialState: ChartState = { status: "idle" };
 
@@ -125,6 +126,7 @@ export function ChartForm({ persons = [], selectedPerson = null }: Props) {
           <PlanetTable planets={state.data.planets} />
           <AspectTable aspects={state.data.aspects} />
           <ArabicPartsTable parts={state.data.arabic_parts} />
+          <Interpretation chart={state.data} />
         </div>
       )}
     </div>

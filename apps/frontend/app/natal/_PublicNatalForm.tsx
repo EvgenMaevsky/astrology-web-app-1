@@ -8,6 +8,7 @@ import { ChartWheel } from "@/app/_components/chart-wheel/ChartWheel";
 import { PlanetTable, AspectTable } from "@/app/(dashboard)/charts/_components/ResultTables";
 import { ConversionDialog } from "./_ConversionDialog";
 import { THEME } from "@/app/_components/ui/theme";
+import { Interpretation } from "@/app/_components/Interpretation";
 
 // Dark marketing surface — docs/plans/2026-09-24-e7-redesign-design.md §5.
 const ui = THEME.dark;
@@ -95,6 +96,7 @@ export function PublicNatalForm({ showDialog }: { showDialog: boolean }) {
           </div>
           <PlanetTable planets={state.data.planets} showTerms={false} />
           <AspectTable aspects={state.data.aspects} />
+          <Interpretation chart={state.data} />
         </div>
       )}
 

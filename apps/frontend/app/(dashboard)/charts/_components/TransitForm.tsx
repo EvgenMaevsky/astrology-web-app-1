@@ -12,6 +12,7 @@ import { CityAutocomplete } from "@/app/_components/CityAutocomplete";
 import { UpgradePrompt } from "@/app/_components/UpgradePrompt";
 import { HOUSE_SYSTEMS } from "@/app/lib/house-systems";
 import { useAstroTranslator } from "@/app/lib/astro-i18n";
+import { CollapsibleCard } from "@/app/_components/ui/CollapsibleCard";
 
 const CoordMap = dynamic(() => import("@/app/_components/CoordMap").then(m => m.CoordMap), {
   ssr: false,
@@ -226,14 +227,11 @@ function TransitResultPanel({ data }: { data: TransitResult }) {
       </div>
 
       {/* Transit planets table */}
-      <div className="bg-white rounded-xl border border-mist-200 overflow-hidden">
-        <div className="px-4 py-3 border-b border-mist-100 bg-mist-50">
-          <h3 className="text-xs font-semibold text-ink-600 uppercase tracking-wider">{tt("transitPlanets")}</h3>
-        </div>
+      <CollapsibleCard title={tt("transitPlanets")} defaultOpen>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-mist-100 bg-mist-50">
+              <tr className="border-b border-mist-100">
                 <th className="text-left px-4 py-2 text-xs font-semibold text-ink-600 uppercase tracking-wider">{th("planet")}</th>
                 <th className="text-left px-4 py-2 text-xs font-semibold text-ink-600 uppercase tracking-wider">{th("sign")}</th>
                 <th className="text-left px-4 py-2 text-xs font-semibold text-ink-600 uppercase tracking-wider">{th("degree")}</th>
@@ -254,18 +252,15 @@ function TransitResultPanel({ data }: { data: TransitResult }) {
             </tbody>
           </table>
         </div>
-      </div>
+      </CollapsibleCard>
 
       {/* Transit-to-natal aspects */}
       {data.aspects.length > 0 && (
-        <div className="bg-white rounded-xl border border-mist-200 overflow-hidden">
-          <div className="px-4 py-3 border-b border-mist-100 bg-mist-50">
-            <h3 className="text-xs font-semibold text-ink-600 uppercase tracking-wider">{tt("transitAspects")}</h3>
-          </div>
+        <CollapsibleCard title={tt("transitAspects")}>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-mist-100 bg-mist-50">
+                <tr className="border-b border-mist-100">
                   <th className="text-left px-4 py-2 text-xs font-semibold text-ink-600 uppercase tracking-wider">{th("transit")}</th>
                   <th className="text-center px-4 py-2 text-xs font-semibold text-ink-600 uppercase tracking-wider">{th("asp")}</th>
                   <th className="text-left px-4 py-2 text-xs font-semibold text-ink-600 uppercase tracking-wider">{th("natal")}</th>
@@ -288,7 +283,7 @@ function TransitResultPanel({ data }: { data: TransitResult }) {
               </tbody>
             </table>
           </div>
-        </div>
+        </CollapsibleCard>
       )}
     </div>
   );

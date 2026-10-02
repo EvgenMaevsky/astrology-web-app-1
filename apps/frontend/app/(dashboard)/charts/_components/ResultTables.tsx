@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { NatalChartResult } from "@/app/actions/charts";
 import { useAstroTranslator } from "@/app/lib/astro-i18n";
+import { CollapsibleCard } from "@/app/_components/ui/CollapsibleCard";
 
 export function fmtDeg(sign_degree: number): string {
   const d = Math.floor(sign_degree);
@@ -29,9 +30,11 @@ type PlanetRow = {
 export function PlanetTable({
   planets,
   showTerms = true,
+  defaultOpen = true,
 }: {
   planets: Record<string, PlanetRow>;
   showTerms?: boolean;
+  defaultOpen?: boolean;
 }) {
   const th = useTranslations("charts.table");
   const ta = useTranslations("astro");
@@ -47,11 +50,11 @@ export function PlanetTable({
   }));
 
   return (
-    <div className="bg-white rounded-xl border border-mist-200 overflow-hidden">
+    <CollapsibleCard title={th("planets")} defaultOpen={defaultOpen}>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-mist-100 bg-mist-50">
+            <tr className="border-b border-mist-100">
               <th className="text-left px-4 py-2 text-xs font-semibold text-ink-600 uppercase tracking-wider">{th("planet")}</th>
               <th className="text-left px-4 py-2 text-xs font-semibold text-ink-600 uppercase tracking-wider">{th("sign")}</th>
               <th className="text-left px-4 py-2 text-xs font-semibold text-ink-600 uppercase tracking-wider">{th("degree")}</th>
@@ -76,19 +79,22 @@ export function PlanetTable({
           </tbody>
         </table>
       </div>
-    </div>
+    </CollapsibleCard>
   );
 }
 
-export function ArabicPartsTable({ parts }: { parts: NatalChartResult["arabic_parts"] }) {
+export function ArabicPartsTable({
+  parts,
+  defaultOpen = false,
+}: {
+  parts: NatalChartResult["arabic_parts"];
+  defaultOpen?: boolean;
+}) {
   const th = useTranslations("charts.table");
   const astro = useAstroTranslator();
   if (!parts?.length) return null;
   return (
-    <div className="bg-white rounded-xl border border-mist-200 overflow-hidden">
-      <div className="px-4 py-3 border-b border-mist-100 bg-mist-50">
-        <h3 className="text-xs font-semibold text-ink-600 uppercase tracking-wider">{th("arabicParts")}</h3>
-      </div>
+    <CollapsibleCard title={th("arabicParts")} defaultOpen={defaultOpen}>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
@@ -110,7 +116,7 @@ export function ArabicPartsTable({ parts }: { parts: NatalChartResult["arabic_pa
           </tbody>
         </table>
       </div>
-    </div>
+    </CollapsibleCard>
   );
 }
 
@@ -120,18 +126,24 @@ const ASPECT_LABELS: Record<string, string> = {
   quincunx: "⚻", quintile: "Q", biquintile: "bQ",
 };
 
-export function AspectTable({ aspects }: { aspects: NatalChartResult["aspects"] }) {
+export function AspectTable({
+  aspects,
+  defaultOpen = false,
+}: {
+  aspects: NatalChartResult["aspects"];
+  defaultOpen?: boolean;
+}) {
   const th = useTranslations("charts.table");
   const ta = useTranslations("astro");
   const astro = useAstroTranslator();
   if (!aspects.length) return null;
 
   return (
-    <div className="bg-white rounded-xl border border-mist-200 overflow-hidden">
+    <CollapsibleCard title={th("aspects")} defaultOpen={defaultOpen}>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-mist-100 bg-mist-50">
+            <tr className="border-b border-mist-100">
               <th className="text-left px-4 py-2 text-xs font-semibold text-ink-600 uppercase tracking-wider">{th("planet1")}</th>
               <th className="text-center px-4 py-2 text-xs font-semibold text-ink-600 uppercase tracking-wider">{th("aspect")}</th>
               <th className="text-left px-4 py-2 text-xs font-semibold text-ink-600 uppercase tracking-wider">{th("planet2")}</th>
@@ -156,6 +168,6 @@ export function AspectTable({ aspects }: { aspects: NatalChartResult["aspects"] 
           </tbody>
         </table>
       </div>
-    </div>
+    </CollapsibleCard>
   );
 }

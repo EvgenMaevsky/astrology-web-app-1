@@ -12,6 +12,7 @@ import {
 import { NatalChartResult } from "@/app/actions/charts";
 import { ChartWheel } from "@/app/_components/chart-wheel/ChartWheel";
 import { PlanetTable, AspectTable, ArabicPartsTable } from "./ResultTables";
+import { Interpretation } from "@/app/_components/Interpretation";
 
 export function SavedChartsTab() {
   const [charts, setCharts] = useState<SavedChartSummary[]>([]);
@@ -123,6 +124,8 @@ export function SavedChartsTab() {
             <PlanetTable planets={result.planets} />
             <AspectTable aspects={result.aspects} />
             <ArabicPartsTable parts={result.arabic_parts} />
+            {/* Natal texts would misread a solar return chart. */}
+            {selected.chart_type === "natal" && <Interpretation chart={result} />}
           </div>
         );
       })()}

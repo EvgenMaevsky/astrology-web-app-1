@@ -234,7 +234,9 @@
       "appSep": "App/Sep",
       "natal": "Natal",
       "transit": "Transit",
-      "arabicParts": "Arabic Parts"
+      "arabicParts": "Arabic Parts",
+      "planets": "Planets",
+      "aspects": "Aspects"
     },
     "saved": {
       "title": "Title",
@@ -293,6 +295,19 @@
       "ctaContinue": "Continue without an account",
       "waiting": "You can continue without an account in {seconds}s",
       "close": "Close"
+    },
+    "interpretation": {
+      "title": "Interpretation",
+      "disclaimer": "Astrology is a symbolic language for self-reflection, not a forecast or a diagnosis. No single placement is read apart from the whole chart.",
+      "sections": {
+        "angles": "Chart angles",
+        "signs": "Planets in signs",
+        "houses": "Planets in houses",
+        "retrograde": "Retrograde planets",
+        "cusps": "Signs on house cusps",
+        "aspects": "Aspects",
+        "synthesis": "The overall picture"
+      }
     }
   },
   "astro": {
