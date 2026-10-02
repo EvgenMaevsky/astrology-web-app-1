@@ -13,6 +13,7 @@ import { UpgradePrompt } from "@/app/_components/UpgradePrompt";
 import { HOUSE_SYSTEMS } from "@/app/lib/house-systems";
 import { useAstroTranslator } from "@/app/lib/astro-i18n";
 import { CollapsibleCard } from "@/app/_components/ui/CollapsibleCard";
+import { PlanetGlyph } from "@/app/_components/ui/PlanetGlyph";
 
 const CoordMap = dynamic(() => import("@/app/_components/CoordMap").then(m => m.CoordMap), {
   ssr: false,
@@ -242,7 +243,7 @@ function TransitResultPanel({ data }: { data: TransitResult }) {
               {Object.entries(data.transit).map(([name, p]) => (
                 <tr key={name} className="border-b border-mist-100 hover:bg-mist-50">
                   <td className="px-4 py-2 font-medium text-ink-900">
-                    {astro("planets", name)}{p.retrograde && <span className="ml-1 text-red-500 text-xs" title={ta("retrograde")}>℞</span>}
+                    <PlanetGlyph name={name} />{astro("planets", name)}{p.retrograde && <span className="ml-1 text-red-500 text-xs" title={ta("retrograde")}>℞</span>}
                   </td>
                   <td className="px-4 py-2 text-ink-600">{astro("signs", p.sign)}</td>
                   <td className="px-4 py-2 text-ink-600 font-mono text-xs">{fmtDeg(p.sign_degree)}</td>
@@ -271,11 +272,11 @@ function TransitResultPanel({ data }: { data: TransitResult }) {
               <tbody>
                 {data.aspects.map((a, i) => (
                   <tr key={i} className="border-b border-mist-100 hover:bg-mist-50">
-                    <td className="px-4 py-1.5 text-ink-700">{astro("planets", a.transit)}</td>
+                    <td className="px-4 py-1.5 text-ink-700"><PlanetGlyph name={a.transit} />{astro("planets", a.transit)}</td>
                     <td className="px-4 py-1.5 text-center text-ink-600">
                       <span title={astro("aspects", a.aspect)}>{ASPECT_LABELS[a.aspect] ?? a.aspect}</span>
                     </td>
-                    <td className="px-4 py-1.5 text-ink-700">{astro("planets", a.natal)}</td>
+                    <td className="px-4 py-1.5 text-ink-700"><PlanetGlyph name={a.natal} />{astro("planets", a.natal)}</td>
                     <td className="px-4 py-1.5 text-right text-ink-600 font-mono text-xs">{a.orb.toFixed(2)}°</td>
                     <td className="px-4 py-1.5 text-center text-xs text-ink-600" title={a.applying ? ta("applying") : ta("separating")}>{a.applying ? "▲" : "▽"}</td>
                   </tr>

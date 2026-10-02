@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { NatalChartResult } from "@/app/actions/charts";
 import { useAstroTranslator } from "@/app/lib/astro-i18n";
 import { CollapsibleCard } from "@/app/_components/ui/CollapsibleCard";
+import { PlanetGlyph } from "@/app/_components/ui/PlanetGlyph";
 
 export function fmtDeg(sign_degree: number): string {
   const d = Math.floor(sign_degree);
@@ -41,6 +42,7 @@ export function PlanetTable({
   const astro = useAstroTranslator();
 
   const rows = Object.entries(planets).map(([name, p]) => ({
+    id: name,
     name: astro("planets", name),
     sign: astro("signs", p.sign),
     degree: fmtDeg(p.sign_degree),
@@ -67,7 +69,8 @@ export function PlanetTable({
           <tbody>
             {rows.map((r) => (
               <tr key={r.name} className="border-b border-mist-100 hover:bg-mist-50">
-                <td className="px-4 py-2 font-medium text-ink-900">
+                <td className="px-4 py-2 font-medium text-ink-900 whitespace-nowrap">
+                  <PlanetGlyph name={r.id} />
                   {r.name}{r.retrograde && <span className="ml-1 text-red-500 text-xs" title={ta("retrograde")}>℞</span>}
                 </td>
                 <td className="px-4 py-2 text-ink-600">{r.sign}</td>
@@ -154,11 +157,11 @@ export function AspectTable({
           <tbody>
             {aspects.map((a, i) => (
               <tr key={i} className="border-b border-mist-100 hover:bg-mist-50">
-                <td className="px-4 py-1.5 text-ink-700">{astro("planets", a.planet1)}</td>
+                <td className="px-4 py-1.5 text-ink-700"><PlanetGlyph name={a.planet1} />{astro("planets", a.planet1)}</td>
                 <td className="px-4 py-1.5 text-center text-ink-600">
                   <span title={astro("aspects", a.aspect)}>{ASPECT_LABELS[a.aspect] ?? a.aspect}</span>
                 </td>
-                <td className="px-4 py-1.5 text-ink-700">{astro("planets", a.planet2)}</td>
+                <td className="px-4 py-1.5 text-ink-700"><PlanetGlyph name={a.planet2} />{astro("planets", a.planet2)}</td>
                 <td className="px-4 py-1.5 text-right text-ink-600 font-mono text-xs">{a.orb.toFixed(2)}°</td>
                 <td className="px-4 py-1.5 text-center text-xs text-ink-600" title={a.applying ? ta("applying") : ta("separating")}>
                   {a.applying ? "▲" : "▽"}
