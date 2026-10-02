@@ -26,7 +26,6 @@ def test_every_key_in_the_data_is_one_the_app_can_ask_for():
     assert set(TEXTS) <= EXPECTED, sorted(set(TEXTS) - EXPECTED)[:20]
 
 
-@pytest.mark.xfail(reason="E10: texts are being written section by section", strict=False)
 def test_every_key_the_app_can_ask_for_has_a_text():
     missing = sorted(EXPECTED - set(TEXTS))
     assert not missing, f"{len(missing)} missing, e.g. {missing[:10]}"
