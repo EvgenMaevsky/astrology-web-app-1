@@ -44,6 +44,15 @@ ELEMENTS = ("fire", "earth", "air", "water")
 MODALITIES = ("cardinal", "fixed", "mutable")
 
 
+# Mercury never strays more than ~28° from the Sun and Venus ~48°, so these
+# pairs can only form the listed aspects; texts for the rest would never show.
+POSSIBLE_ONLY: dict[tuple[str, str], tuple[str, ...]] = {
+    ("sun", "mercury"): ("conjunction",),
+    ("sun", "venus"): ("conjunction",),
+    ("mercury", "venus"): ("conjunction", "sextile"),
+}
+
+
 def expected_keys() -> list[str]:
     keys: list[str] = []
     keys += [f"angle.{a}.sign.{s}" for a in ANGLES for s in SIGNS]
@@ -53,7 +62,11 @@ def expected_keys() -> list[str]:
     keys += [f"retrograde.{b}" for b in RETROGRADE_BODIES]
     for i, a in enumerate(BODIES):
         for b in BODIES[i + 1:]:
-            keys += [f"aspect.{a}.{t}.{b}" for t in ASPECT_TYPES]
+            types = POSSIBLE_ONLY.get((a, b), ASPECT_TYPES)
+            # Opposite the north node is read as on the south node (below).
+            if b == "north_node":
+                types = tuple(t for t in types if t != "opposition")
+            keys += [f"aspect.{a}.{t}.{b}" for t in types]
     # A body on the south node is read in its own right; every other aspect
     # to the south node mirrors one to the north node, which is shown instead.
     keys += [f"aspect.{b}.conjunction.south_node" for b in BODIES if b != "north_node"]
