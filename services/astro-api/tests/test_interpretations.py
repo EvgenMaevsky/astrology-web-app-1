@@ -66,6 +66,28 @@ def test_no_long_sentence_appears_in_two_entries():
     assert not clashes, clashes[:5]
 
 
+def _five_grams(text: str) -> set[str]:
+    words = text.lower().split()
+    return {" ".join(words[i : i + 5]) for i in range(len(words) - 4)}
+
+
+def test_planet_on_an_angle_is_not_a_reworded_house_text():
+    # A planet conjunct an angle reads close to the same planet in the
+    # matching house; the first drafts copied sentences across. Allow a
+    # couple of shared phrases, not a paraphrase.
+    house_of = {"asc": 1, "ic": 4, "dsc": 7, "mc": 10}
+    clashes = []
+    for key, entry in TEXTS.items():
+        parts = key.split(".")
+        if parts[0] == "aspect" and parts[2] == "conjunction" and parts[3] in house_of:
+            house = f"planet.{parts[1]}.house.{house_of[parts[3]]}"
+            if house in TEXTS:
+                shared = _five_grams(entry["text"]) & _five_grams(TEXTS[house]["text"])
+                if len(shared) >= 3:
+                    clashes.append((key, house, len(shared)))
+    assert not clashes, clashes
+
+
 SIGN_NOMINATIVE = "Овен|Телець|Близнюки|Рак|Лев|Діва|Терези|Скорпіон|Стрілець|Козеріг|Водолій|Риби"
 LANGUAGE_REGRESSIONS = {
     # The base's errors, found in the 2026-10-02 audit.
