@@ -41,7 +41,9 @@ def test_entries_are_well_formed():
         assert all(not p.lstrip().startswith(("-", "*", "•")) for p in paragraphs), key
         assert all(p.strip() == p and p for p in paragraphs), key
         words = len(entry["text"].split())
-        assert 35 <= words <= 320, f"{key}: {words} words"
+        # Floor raised as sections were finished: short texts read as filler
+        # next to the competitor's, which the owner set as the bar.
+        assert 40 <= words <= 320, f"{key}: {words} words"
 
 
 def test_no_paragraph_appears_twice():
@@ -70,7 +72,7 @@ LANGUAGE_REGRESSIONS = {
     "Козоріг instead of Козеріг": r"Козоріг",
     "sign left in the nominative after в/у": rf"\b[уВв] ({SIGN_NOMINATIVE})\b(?! —)",
     "angle not in the instrumental after з": r"\bз (Асцендент|Десцендент)\b",
-    "retrograde gender": r"Ретроградний (Венера|Хірон)\b",
+    "retrograde gender": r"Ретроградний Венера",
     "planet name in lower case": r"\b(тему|якості|на рівні) (сонце|місяць|меркурій|венера|марс|юпітер|сатурн|уран|нептун|плутон)\b",
     # Editorial principles of the base itself.
     "fatalistic wording": r"(приречен|обов’язково станеться|обов'язково станеться|точно буде розлучення)",
